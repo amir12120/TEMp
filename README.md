@@ -1,63 +1,75 @@
-# TEMp — 3x-ui Custom Theme Pages
+# TEMp — قالب‌های اختصاصی پنل سنایی (3x-ui)
 
-Custom user-subscription theme pages for the **3x-ui** panel, with a one-line installer
-that deploys any page as the panel theme at:
+این پروژه برای **پنل سنایی** طراحی شده است؛ یعنی همان پنل 3x-ui که سرویس اشتراک VPN شما روی آن اجرا می‌شود. با نصاب یک‌خطی این ریپو، صفحه اشتراک کاربر (همان صفحه‌ای که کاربر بعد از خرید از پنل می‌بیند) به‌راحتی با طراحی‌های مدرن این پروژه جایگزین می‌شود.
 
-```
-/etc/3x-ui/templates/my-theme/index.html
-```
+## ⚙️ نکته مهم — تنظیم پنل سنایی (بعد از نصب الزامی است)
 
-## Quick install (on the VPS)
+بعد از اجرای اسکریپت نصب، برای اینکه پنل قالب جدید را بشناسد باید در خود پنل سنایی مسیر قالب را معرفی کنید:
 
-Interactive — shows the list of available pages and lets you pick one:
+1. وارد پنل سنایی شوید.
+2. به قسمت **تنظیمات پنل** بروید.
+3. تب **سابسکریپشن** را باز کنید.
+4. بخش **پروفایل** را پیدا کنید.
+5. در قسمت **«پوشه قالب صفحه اشتراک»** عبارت زیر را وارد کنید:
+
+   ```
+   /etc/3x-ui/templates/my-theme/
+   ```
+
+6. **ذخیره** کنید.
+
+از این پس صفحه اشتراک کاربران از قالب نصب‌شده در این مسیر خوانده می‌شود.
+
+## نصب سریع (روی سرور)
+
+نصب تعاملی — لیست صفحه‌های موجود را نشان می‌دهد و انتخاب می‌کنید:
 
 ```bash
 bash <(curl -sL https://raw.githubusercontent.com/amir12120/TEMp/main/install.sh)
 ```
 
-Direct install of a specific page (e.g. `modern`):
+نصب مستقیم یک صفحه خاص (مثلاً `modern`):
 
 ```bash
 bash <(curl -sL https://raw.githubusercontent.com/amir12120/TEMp/main/install.sh) modern
 ```
 
-List available pages only:
+فقط مشاهده لیست صفحه‌ها:
 
 ```bash
 bash <(curl -sL https://raw.githubusercontent.com/amir12120/TEMp/main/install.sh) list
 ```
 
-## What the installer does
+## نصاب چه کاری انجام می‌دهد؟
 
-1. Fetches the chosen page from `pages/<name>/index.html` in this repo.
-2. Creates `/etc/3x-ui/templates/my-theme/` if it does not exist.
-3. **Backs up** any existing `index.html` (timestamped `.bak` file) — the previous
-   theme is never lost, so switching back is as easy as re-running the installer
-   with the old page's name.
-4. Atomically replaces `index.html` with the new page.
-5. Restarts the 3x-ui panel so the new theme goes live.
+1. صفحه انتخاب‌شده را از `pages/<name>/index.html` در همین ریپو می‌خواند.
+2. مسیر `/etc/3x-ui/templates/my-theme/` را در صورت عدم وجود می‌سازد.
+3. اگر از قبل `index.html` وجود داشته باشد، از آن **بکاپ زمان‌دار** می‌گیرد (فایل `.bak`) — پس برگشت به قالب قبلی همیشه ممکن است.
+4. فایل جدید را به‌صورت اتمی جایگزین `index.html` می‌کند.
+5. پنل 3x-ui را ری‌استارت می‌کند تا قالب جدید اعمال شود.
 
-## Available pages
+> فراموش نکنید: بعد از نصب، طبق بخش «نکته مهم» بالا، مسیر قالب را در تنظیمات پنل سنایی وارد و ذخیره کنید.
 
-| Page    | Description                                    |
-|---------|------------------------------------------------|
-| `modern`| Modern dark/light subscription & usage panel — bilingual (fa/en), per-config QR codes, real ping test, online/offline presence, Tehran clock, app download section |
+## صفحه‌های موجود
 
-## Adding a new page later
+| صفحه     | توضیح |
+|----------|-------|
+| `modern` | صفحه اشتراک مدرن — دو زبانه (فارسی/انگلیسی)، حالت شب و روز، QR کد برای تک‌تک کانفیگ‌ها، تست پینگ واقعی، نشانگر آنلاین/آفلاین، ساعت تهران با رویدادهای تقویم ایرانی، بخش دانلود اپلیکیشن (۸ برنامه با لینک آخرین نسخه پایدار) |
 
-1. Create a new folder: `pages/<name>/index.html` (name: letters, digits, `-`, `_`).
-2. Add the name on its own line in `pages.txt`.
-3. Commit & push. The installer menu picks it up automatically — the script itself
-   never needs changing.
-4. On the server, run the installer again and choose the new page.
+## افزودن صفحه جدید در آینده
 
-## Repo layout
+1. پوشه جدید بسازید: `pages/<name>/index.html` (نام فقط حروف، عدد، `-` و `_`).
+2. نام آن را یک خط به `pages.txt` اضافه کنید.
+3. کامیت و پوش کنید — منوی نصاب به‌صورت خودکار آن را نشان می‌دهد و نیازی به تغییر اسکریپت نیست.
+4. روی سرور دوباره نصاب را اجرا کنید و صفحه جدید را انتخاب کنید.
+
+## ساختار ریپو
 
 ```
 TEMp/
-├── install.sh          # the installer/switcher script
-├── pages.txt           # list of available page names (one per line)
+├── install.sh          # اسکریپت نصب و تعویض قالب
+├── pages.txt           # لیست صفحه‌های موجود (هر نام یک خط)
 └── pages/
     └── modern/
-        └── index.html  # the page installed as my-theme/index.html
+        └── index.html  # صفحه‌ای که به‌عنوان my-theme/index.html نصب می‌شود
 ```
