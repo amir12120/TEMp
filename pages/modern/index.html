@@ -1,0 +1,3402 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اشتراک</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       1. Design tokens
+       ============================================================ */
+    :root {
+      --bg: #080b12;
+      --card: rgba(17, 23, 36, 0.76);
+      --card-strong: rgba(24, 31, 47, 0.94);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #edf2ff;
+      --muted: #9aa9c0;
+      --blue: #5b8cff;
+      --green: #37d7a1;
+      --yellow: #f6c85f;
+      --red: #fb7185;
+      --purple: #aa7cff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 1.5rem;
+      overflow-x: hidden;
+      color: var(--text);
+      font-family: "Vazirmatn", "Inter", sans-serif;
+      line-height: 1.6;
+      background:
+        radial-gradient(circle at 15% 5%, rgba(91, 140, 255, 0.14), transparent 28%),
+        radial-gradient(circle at 85% 8%, rgba(170, 124, 255, 0.11), transparent 26%),
+        radial-gradient(circle at 52% 100%, rgba(55, 215, 161, 0.08), transparent 32%),
+        var(--bg);
+    }
+
+    body.lang-en {
+      font-family: "Inter", "Vazirmatn", sans-serif;
+    }
+
+    /* ============================================================
+       2. Animated background
+       ============================================================ */
+    .background-effects {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .background-effects::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.22;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: radial-gradient(circle at center, #000 10%, transparent 78%);
+      -webkit-mask-image: radial-gradient(circle at center, #000 10%, transparent 78%);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.42;
+      filter: blur(2px);
+      animation: float-orb 16s ease-in-out infinite alternate;
+    }
+
+    .orb-one {
+      width: 360px;
+      height: 360px;
+      top: -150px;
+      right: -100px;
+      background: radial-gradient(circle, rgba(91, 140, 255, 0.35), transparent 68%);
+    }
+
+    .orb-two {
+      width: 300px;
+      height: 300px;
+      bottom: -140px;
+      left: -90px;
+      background: radial-gradient(circle, rgba(55, 215, 161, 0.25), transparent 68%);
+      animation-delay: -6s;
+      animation-duration: 19s;
+    }
+
+    .orb-three {
+      width: 230px;
+      height: 230px;
+      top: 42%;
+      left: 58%;
+      background: radial-gradient(circle, rgba(170, 124, 255, 0.2), transparent 70%);
+      animation-delay: -10s;
+      animation-duration: 22s;
+    }
+
+    .particle {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(148, 211, 255, 0.72);
+      box-shadow: 0 0 14px rgba(91, 140, 255, 0.8);
+      animation: particle-float 13s linear infinite;
+    }
+
+    .particle:nth-child(4) {
+      top: 18%;
+      right: 15%;
+      animation-delay: -2s;
+    }
+
+    .particle:nth-child(5) {
+      top: 68%;
+      right: 8%;
+      width: 4px;
+      height: 4px;
+      animation-delay: -7s;
+      animation-duration: 18s;
+    }
+
+    .particle:nth-child(6) {
+      top: 32%;
+      left: 10%;
+      width: 3px;
+      height: 3px;
+      animation-delay: -4s;
+      animation-duration: 16s;
+    }
+
+    .particle:nth-child(7) {
+      bottom: 12%;
+      left: 22%;
+      animation-delay: -11s;
+      animation-duration: 20s;
+    }
+
+    @keyframes float-orb {
+      from {
+        transform: translate3d(-18px, -12px, 0) scale(0.96);
+      }
+
+      to {
+        transform: translate3d(25px, 22px, 0) scale(1.08);
+      }
+    }
+
+    @keyframes particle-float {
+      0%, 100% {
+        opacity: 0.18;
+        transform: translate3d(0, 0, 0);
+      }
+
+      50% {
+        opacity: 0.8;
+        transform: translate3d(-30px, -55px, 0);
+      }
+    }
+
+    @keyframes remained-blink {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.35;
+        transform: scale(0.94);
+      }
+    }
+
+    /* ============================================================
+       3. Layout: container / header / top controls
+       ============================================================ */
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 0.15rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.72rem 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      color: #f8fbff;
+      font-size: 1.15rem;
+      font-weight: 900;
+      background: rgba(15, 20, 32, 0.7);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.27);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .brand-icon {
+      font-size: 1.2rem;
+      filter: drop-shadow(0 0 8px rgba(91, 140, 255, 0.65));
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.32rem 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      color: var(--text);
+      font-family: "Vazirmatn", sans-serif;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: 0.25s ease;
+    }
+
+    .toggle-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(91, 140, 255, 0.6);
+      background: rgba(91, 140, 255, 0.14);
+      box-shadow: 0 6px 18px rgba(91, 140, 255, 0.25);
+    }
+
+    .toggle-btn.active-glow {
+      border-color: rgba(246, 200, 95, 0.75);
+      background: rgba(246, 200, 95, 0.14);
+      box-shadow: 0 0 16px rgba(246, 200, 95, 0.35);
+    }
+
+    .toggle-icon {
+      font-size: 0.85rem;
+    }
+
+    /* لوگوی سکه‌ای چرخان — در فارسی بالا-راست و در انگلیسی بالا-چپ */
+    /* لوگو جدا از دکمه‌ها، در گوشه‌ی بیرونی — همیشه کنارِ «flex-end» ردیف */
+    .coin-logo {
+      position: absolute;
+      inset-inline-start: 0;
+      top: 50%;
+      translate: 0 -50%;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      perspective: 160px;
+      transform: rotateY(0deg);
+      will-change: transform;
+      animation: coin-spin 8s linear infinite;
+      border: 3px solid rgba(91, 140, 255, 0.45);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 8px 22px rgba(0, 0, 0, 0.4),
+        0 0 28px rgba(91, 140, 255, 0.3);
+      transition: border-color 0.6s ease, box-shadow 0.6s ease;
+    }
+
+    .coin-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    /* درخشش ثابت نور روی سکه (نمی‌چرخد تا حس نورپردازی بماند) */
+    .coin-logo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.30), transparent 42%, transparent 62%, rgba(255, 255, 255, 0.10));
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes coin-spin {
+      from { transform: rotateY(0deg); }
+      to   { transform: rotateY(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .coin-logo {
+        animation: none;
+      }
+    }
+
+    /* ============================================================
+       4. Cards & alerts
+       ============================================================ */
+    .card {
+      position: relative;
+      overflow: hidden;
+      padding: 1.55rem;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: transform 0.22s ease, border-color 0.22s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(148, 183, 255, 0.18);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      left: -70px;
+      bottom: -80px;
+      border-radius: 50%;
+      background: rgba(91, 140, 255, 0.07);
+      filter: blur(22px);
+      pointer-events: none;
+    }
+
+    .alert {
+      display: none;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.6rem 0.9rem;
+      border: 1px solid rgba(251, 113, 133, 0.2);
+      border-inline-start: 4px solid #fb7185;
+      border-radius: 16px;
+      color: #ff9aaa;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      font-weight: 600;
+      background: rgba(251, 113, 133, 0.09);
+    }
+
+    .alert.show {
+      display: flex;
+    }
+
+    /* متن اخطار همیشه تکخطی؛ اگر جا نشد فونت در JS ریزتر میشود */
+    .alert .alert-text {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .alert > span:first-child {
+      flex-shrink: 0;
+    }
+
+    /* اخطار زمان: رنگ کهربایی متمایز از اخطار حجم */
+    #alertTime {
+      border-color: rgba(246, 200, 95, 0.22);
+      border-inline-start-color: #f6c85f;
+      color: #f3d489;
+      background: rgba(246, 200, 95, 0.08);
+    }
+
+    /* وقتی هر دو اخطار همزمان نمایش داده میشوند، دو بنر خوانا و مجزا زیر هم میآیند */
+    #alertTime.show + #alertVol.show {
+      margin-top: -0.55rem;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+    }
+
+    #alertTime.show + #alertVol.show::after {
+      content: "";
+      position: absolute;
+    }
+
+    /* تاریخ و ساعت به وقت تهران — فقط وقتی هیچ اخطاری نمایش داده نمیشود */
+    .tehran-now {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+      padding: 0.5rem 0.9rem;
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .tehran-now.show {
+      display: flex;
+    }
+
+    .tehran-clock-line {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    /* رویداد تقویم ایرانی — زیر ساعت، ریز */
+    .tehran-event {
+      font-size: 0.66rem;
+      font-weight: 500;
+      color: var(--muted);
+      opacity: 0.92;
+    }
+
+    /* ============================================================
+       5. Status & countdown timer
+       ============================================================ */
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .data-label {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.28rem 0.92rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .badge-active {
+      border: 1px solid rgba(55, 215, 161, 0.22);
+      color: var(--green);
+      background: rgba(55, 215, 161, 0.12);
+    }
+
+    .badge-inactive {
+      border: 1px solid rgba(251, 113, 133, 0.22);
+      color: var(--red);
+      background: rgba(251, 113, 133, 0.12);
+    }
+
+    /* ---------- نشانگر آنلاین / آفلاین بودن کاربر ---------- */
+    .status-side {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex: none;
+    }
+
+    .presence {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      opacity: 0.95;
+      white-space: nowrap;
+    }
+
+    .presence-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex: none;
+    }
+
+    .presence.online {
+      color: var(--green);
+    }
+
+    .presence.online .presence-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(55, 215, 161, 0.15), 0 0 8px rgba(55, 215, 161, 0.55);
+      animation: presence-pulse 2.2s ease-in-out infinite;
+    }
+
+    .presence.offline {
+      color: var(--red);
+      opacity: 0.85;
+    }
+
+    .presence.offline .presence-dot {
+      background: var(--red);
+      box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.12), 0 0 6px rgba(251, 113, 133, 0.4);
+    }
+
+    @keyframes presence-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.78); opacity: 0.75; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .presence.online .presence-dot { animation: none; }
+    }
+
+    .timer-section {
+      padding: 1.2rem 0 0.1rem;
+      text-align: center;
+    }
+
+    .user-email {
+      overflow-wrap: anywhere;
+      font-family: "Inter", "Vazirmatn", sans-serif;
+      font-size: clamp(1.35rem, 5vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #f7faff, #9eb5d8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .timer-label {
+      margin-top: 0.55rem;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .timer-grid {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0.65rem 0 0.35rem;
+      direction: ltr;
+    }
+
+    .timer-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 58px;
+    }
+
+    .timer-number {
+      color: #f4f7ff;
+      font-family: "Inter", "Vazirmatn", sans-serif;
+      font-size: 2.05rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+    }
+
+    .timer-unit {
+      margin-top: 2px;
+      color: #71819b;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    .timer-divider {
+      align-self: center;
+      padding-bottom: 7px;
+      color: rgba(255, 255, 255, 0.16);
+      font-size: 1.55rem;
+      font-weight: 300;
+    }
+
+    .expire-date {
+      margin-top: 0.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .expire-date strong {
+      color: #dce6f7;
+      font-weight: 800;
+    }
+
+    /* ============================================================
+       6. Usage stats & donut chart
+       ============================================================ */
+    .usage-card {
+      padding: 0;
+      background:
+        radial-gradient(circle at 10% 82%, rgba(91, 140, 255, 0.14), transparent 35%),
+        radial-gradient(circle at 92% 8%, rgba(170, 124, 255, 0.1), transparent 30%),
+        var(--card);
+    }
+
+    .usage-layout {
+      display: flex;
+      align-items: stretch;
+      min-height: 255px;
+    }
+
+    .usage-details-side {
+      width: 50%;
+      padding: 1.65rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .usage-chart-side {
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .usage-title,
+    .section-title {
+      color: #dce6f7;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .usage-title {
+      margin-bottom: 0.95rem;
+      font-size: 0.92rem;
+    }
+
+    .usage-stat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      padding: 0.62rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .usage-stat:last-of-type {
+      border-bottom: none;
+    }
+
+    .usage-stat-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .usage-stat-value {
+      direction: ltr;
+      color: #e7edf7;
+      font-family: "Inter", "Vazirmatn", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      text-align: left;
+    }
+
+    .total-stat .usage-stat-value {
+      color: var(--green);
+      font-size: 1.23rem;
+      text-shadow: 0 0 16px rgba(55, 215, 161, 0.25);
+    }
+
+    .remained-stat .usage-stat-value {
+      color: var(--red);
+      font-size: 1.23rem;
+      text-shadow: 0 0 16px rgba(251, 113, 133, 0.24);
+      animation: remained-blink 1.25s ease-in-out infinite;
+    }
+
+    .usage-sub-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem 0.85rem;
+      margin-top: 0.75rem;
+      color: #8ea0bb;
+      font-size: 0.72rem;
+    }
+
+    .usage-sub-stats b {
+      direction: ltr;
+      display: inline-block;
+      color: #dce6f7;
+      font-family: "Inter", "Vazirmatn", sans-serif;
+    }
+
+    .donut-chart {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: conic-gradient(var(--blue) 0deg, var(--blue) 0deg, rgba(255, 255, 255, 0.08) 0deg, rgba(255, 255, 255, 0.08) 360deg);
+      box-shadow: 0 0 30px rgba(91, 140, 255, 0.22), inset 0 0 20px rgba(0, 0, 0, 0.32);
+      transition: background 0.7s ease;
+    }
+
+    .donut-chart::before {
+      content: "";
+      position: absolute;
+      width: 137px;
+      height: 137px;
+      border-radius: 50%;
+      background: var(--card-strong);
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .donut-center {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 126px;
+      text-align: center;
+    }
+
+    .donut-percent {
+      direction: ltr;
+      color: #f6f9ff;
+      font-family: "Inter", "Vazirmatn", sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .donut-remained {
+      direction: ltr;
+      min-height: 20px;
+      margin-top: 0.25rem;
+      color: var(--red);
+      font-family: "Inter", "Vazirmatn", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 900;
+      line-height: 1.1;
+      text-shadow: 0 0 12px rgba(251, 113, 133, 0.7);
+      white-space: nowrap;
+      animation: remained-blink 1.25s ease-in-out infinite;
+    }
+
+    .donut-caption {
+      margin-top: 0.16rem;
+      color: var(--muted);
+      font-size: 0.63rem;
+      font-weight: 700;
+    }
+
+    .section-title {
+      margin-bottom: 0.75rem;
+    }
+
+    /* ============================================================
+       7. Subscription link & configs
+       ============================================================ */
+    .sub-link-wrapper,
+    .config-item {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .sub-link-box {
+      padding: 0.7rem 0.85rem;
+      border: 1px solid rgba(91, 140, 255, 0.16);
+      border-radius: 14px;
+      background: rgba(91, 140, 255, 0.05);
+    }
+
+    .config-item {
+      margin-bottom: 0.55rem;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .sub-link-text,
+    .config-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      direction: ltr;
+      color: #cbd8ed;
+      font-family: "Inter", monospace;
+      font-size: 0.77rem;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-group,
+    .badge-group {
+      display: flex;
+      flex: 0 0 auto;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .config-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 1rem 0 0.65rem;
+    }
+
+    .soft-hr {
+      border: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      margin: 1rem 0;
+    }
+
+    .badge {
+      padding: 2px 7px;
+      border-radius: 6px;
+      color: #07111b;
+      font-family: "Inter", sans-serif;
+      font-size: 0.54rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       8. Buttons
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      gap: 0.3rem;
+      padding: 0.42rem 0.82rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #dbe6f7;
+      font-family: "Vazirmatn", sans-serif;
+      font-size: 0.77rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.025);
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(91, 140, 255, 0.55);
+      color: #fff;
+      background: rgba(91, 140, 255, 0.12);
+    }
+
+    .btn-primary {
+      border-color: rgba(91, 140, 255, 0.65);
+      color: #91b2ff;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: wait;
+      transform: none !important;
+    }
+
+    /* ---------- دکمه پینگ و نتیجه تاخیر هر کانفیگ ---------- */
+    .ping-result {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      padding: 0.2rem 0.45rem;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      font-family: "Inter", monospace;
+      font-size: 0.66rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .ping-result[hidden] {
+      display: none;
+    }
+
+    .ping-result.testing {
+      border-color: rgba(91, 140, 255, 0.35);
+      color: #91b2ff;
+      animation: ping-blink 1s ease-in-out infinite;
+    }
+
+    .ping-result.good {
+      border-color: rgba(55, 215, 161, 0.35);
+      color: var(--green);
+      background: rgba(55, 215, 161, 0.08);
+    }
+
+    .ping-result.mid {
+      border-color: rgba(246, 200, 95, 0.35);
+      color: #f6c85f;
+      background: rgba(246, 200, 95, 0.08);
+    }
+
+    .ping-result.bad {
+      border-color: rgba(251, 113, 133, 0.35);
+      color: var(--red);
+      background: rgba(251, 113, 133, 0.08);
+    }
+
+    @keyframes ping-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ping-result.testing { animation: none; }
+    }
+
+    .btn-success {
+      border-color: var(--green);
+      color: #06251c;
+      background: var(--green);
+    }
+
+    /* ============================================================
+       9. Install & setup section
+       ============================================================ */
+    .download-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+      text-align: center;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: stretch;
+      gap: 0.6rem;
+      width: 100%;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      padding: 0.72rem 1.5rem;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      box-shadow: 0 8px 24px rgba(91, 140, 255, 0.3);
+      transition: 0.25s ease;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(91, 140, 255, 0.44);
+    }
+
+    .btn-video {
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      box-shadow: 0 8px 24px rgba(55, 215, 161, 0.3);
+    }
+
+    .btn-video:hover {
+      box-shadow: 0 12px 30px rgba(55, 215, 161, 0.44);
+    }
+
+    /* equal fixed-width buttons: every label fits fully and stays readable */
+    .btn-row .btn-download {
+      flex: 0 0 auto;
+      width: 190px;
+      padding: 0.7rem 0.7rem;
+      font-size: 0.88rem;
+      gap: 0.35rem;
+      border-radius: 12px;
+      line-height: 1.35;
+    }
+
+    .download-note {
+      color: #8190a8;
+      font-size: 0.73rem;
+    }
+
+    /* app download cards (grid) */
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.7rem;
+      width: 100%;
+    }
+
+    .app-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.95rem 0.7rem 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.18);
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .app-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(91, 140, 255, 0.45);
+    }
+
+    .app-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 13px;
+      object-fit: cover;
+      background: #fff;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .app-name {
+      color: #dce6f7;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .platform-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.25rem;
+      min-height: 1.2rem;
+    }
+
+    .platform-chip {
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 0.56rem;
+      font-weight: 800;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    .platform-chip.android {
+      color: #37d7a1;
+      border: 1px solid rgba(55, 215, 161, 0.3);
+      background: rgba(55, 215, 161, 0.12);
+    }
+
+    .platform-chip.ios {
+      color: #8fb3ff;
+      border: 1px solid rgba(91, 140, 255, 0.35);
+      background: rgba(91, 140, 255, 0.12);
+    }
+
+    .platform-chip.windows {
+      color: #c9a8ff;
+      border: 1px solid rgba(170, 124, 255, 0.35);
+      background: rgba(170, 124, 255, 0.12);
+    }
+
+    .platform-chip.macos {
+      color: #f6c85f;
+      border: 1px solid rgba(246, 200, 95, 0.35);
+      background: rgba(246, 200, 95, 0.12);
+    }
+
+    .platform-chip.linux {
+      color: #b6c2d4;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(148, 163, 184, 0.14);
+    }
+
+    .app-download-btn {
+      width: 100%;
+      margin-top: auto;
+      padding: 0.5rem 0.4rem;
+      border: 1px solid rgba(91, 140, 255, 0.55);
+      border-radius: 11px;
+      color: #a9c3ff;
+      font-family: "Vazirmatn", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: rgba(91, 140, 255, 0.10);
+      transition: 0.2s ease;
+    }
+
+    .app-download-btn:hover {
+      transform: translateY(-1px);
+      color: #fff;
+      background: rgba(91, 140, 255, 0.22);
+      box-shadow: 0 6px 18px rgba(91, 140, 255, 0.3);
+    }
+
+    /* generic import config row */
+    .install-sub {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+      width: 100%;
+    }
+
+    .import-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .import-select {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: "Vazirmatn", sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .import-select option {
+      color: #111827;
+      background: #fff;
+    }
+
+    .btn-download.btn-import {
+      flex: 1 1 auto;
+      max-width: 250px;
+      border: none;
+      cursor: pointer;
+      font-family: "Vazirmatn", sans-serif;
+    }
+
+    /* ============================================================
+       10. Modals: QR & video & platform picker
+       ============================================================ */
+    .qr-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(2, 5, 10, 0.76);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .qr-overlay.open {
+      display: flex;
+    }
+
+    .qr-box {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      padding: 2rem 1.6rem 1.4rem;
+      border-radius: 25px;
+      text-align: center;
+      background: #f8fafc;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+    }
+
+    .qr-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      border: none;
+      color: #243047;
+      font-size: 1.7rem;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .qr-label {
+      margin-bottom: 0.6rem;
+      color: #172033;
+      font-weight: 800;
+    }
+
+    .qr-box img {
+      width: 100%;
+      max-width: 230px;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .qr-url {
+      margin-top: 0.7rem;
+      overflow-wrap: anywhere;
+      direction: ltr;
+      color: #64748b;
+      font-family: "Inter", sans-serif;
+      font-size: 0.67rem;
+    }
+
+    /* --- per-config QR thumbnail button & modal --- */
+    .btn-qr {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      padding: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .btn-qr img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .btn-qr:hover {
+      border-color: rgba(91, 140, 255, 0.75);
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 6px 18px rgba(91, 140, 255, 0.35);
+    }
+
+    .btn-qr:active {
+      transform: scale(0.95);
+    }
+
+    .config-qr-box img {
+      max-width: 250px;
+    }
+
+    .config-qr-box .qr-url {
+      max-width: 260px;
+      margin-inline: auto;
+      color: #334155;
+      font-size: 0.62rem;
+    }
+
+    body.day-mode .btn-qr {
+      border-color: rgba(15, 23, 42, 0.16);
+    }
+
+    body.day-mode .config-qr-box .qr-url {
+      color: #475569;
+    }
+
+    .video-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(2, 5, 10, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .video-overlay.open {
+      display: flex;
+    }
+
+    .video-box {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      background: #000;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+    }
+
+    .video-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 78vh;
+      background: #000;
+    }
+
+    .video-frame video,
+    .video-frame iframe {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .video-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      color: #9aa9c0;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .video-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.55);
+      transition: 0.2s ease;
+    }
+
+    .video-close:hover {
+      background: rgba(251, 113, 133, 0.85);
+    }
+
+    .platform-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(2, 5, 10, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .platform-overlay.open {
+      display: flex;
+    }
+
+    .platform-box {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      padding: 1.7rem 1.4rem 1.4rem;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      text-align: center;
+      background: var(--card-strong);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+    }
+
+    .platform-box .app-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+    }
+
+    .platform-title {
+      margin-top: 0.6rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .platform-ask {
+      margin: 0.35rem 0 0.8rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .platform-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.55rem;
+    }
+
+    .platform-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      min-width: 106px;
+      padding: 0.75rem 0.6rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      color: #dce6f7;
+      font-family: "Vazirmatn", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.04);
+      transition: 0.2s ease;
+    }
+
+    .platform-option:hover {
+      transform: translateY(-2px);
+      border-color: rgba(91, 140, 255, 0.6);
+      background: rgba(91, 140, 255, 0.12);
+    }
+
+    .platform-option.suggested {
+      border-color: rgba(246, 200, 95, 0.7);
+      background: rgba(246, 200, 95, 0.10);
+      box-shadow: 0 0 16px rgba(246, 200, 95, 0.22);
+    }
+
+    .platform-option .p-emoji {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .platform-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .platform-cancel {
+      padding: 0.7rem 1.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      color: var(--muted);
+      font-family: "Vazirmatn", sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.04);
+      transition: 0.2s ease;
+    }
+
+    .platform-cancel:hover {
+      color: var(--text);
+      border-color: rgba(251, 113, 133, 0.5);
+    }
+
+    .platform-note {
+      margin-top: 0.55rem;
+      color: var(--muted);
+      font-size: 0.68rem;
+    }
+
+    /* ============================================================
+       11. Day mode (light theme) overrides
+       ============================================================ */
+    html.day-mode {
+      background: #f4f7fc;
+    }
+
+    body.day-mode {
+      --bg: #f4f7fc;
+      --card: rgba(255, 255, 255, 0.82);
+      --card-strong: #ffffff;
+      --border: rgba(15, 23, 42, 0.12);
+      --text: #1e293b;
+      --muted: #5b6b82;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 5%, rgba(91, 140, 255, 0.12), transparent 28%),
+        radial-gradient(circle at 85% 8%, rgba(170, 124, 255, 0.09), transparent 26%),
+        radial-gradient(circle at 52% 100%, rgba(55, 215, 161, 0.10), transparent 32%),
+        var(--bg);
+      transition: background 0.6s ease, color 0.6s ease;
+    }
+
+    body.day-mode .brand {
+      color: #16223a;
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(15, 23, 42, 0.12);
+      box-shadow: 0 12px 36px rgba(30, 41, 59, 0.10);
+    }
+
+    body.day-mode .toggle-btn {
+      border-color: rgba(15, 23, 42, 0.15);
+      background: rgba(255, 255, 255, 0.7);
+      color: #1e293b;
+    }
+
+    body.day-mode .toggle-btn.active-glow {
+      border-color: rgba(217, 119, 6, 0.6);
+      background: rgba(254, 215, 170, 0.5);
+      box-shadow: 0 0 14px rgba(217, 119, 6, 0.25);
+    }
+
+    body.day-mode .coin-logo {
+      border-color: rgba(15, 23, 42, 0.25);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.5),
+        0 6px 18px rgba(30, 41, 59, 0.18);
+    }
+
+    body.day-mode .card {
+      background: var(--card);
+      box-shadow: 0 16px 50px rgba(30, 41, 59, 0.10);
+      border-color: var(--border);
+      transition: transform 0.22s ease, border-color 0.22s ease, background 0.6s ease, box-shadow 0.6s ease;
+    }
+
+    body.day-mode .card:hover {
+      border-color: rgba(91, 140, 255, 0.35);
+    }
+
+    body.day-mode .status-row {
+      border-color: rgba(15, 23, 42, 0.10);
+    }
+
+    body.day-mode .presence.online {
+      color: #0f9d76;
+    }
+
+    body.day-mode .presence.online .presence-dot {
+      background: #0f9d76;
+      box-shadow: 0 0 0 3px rgba(15, 157, 118, 0.14), 0 0 6px rgba(15, 157, 118, 0.35);
+    }
+
+    body.day-mode .presence.offline {
+      color: #dc2626;
+    }
+
+    body.day-mode .presence.offline .presence-dot {
+      background: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10), 0 0 6px rgba(220, 38, 38, 0.28);
+    }
+
+    body.day-mode .user-email {
+      background: linear-gradient(135deg, #1e293b, #46608f);
+      -webkit-background-clip: text;
+    }
+
+    body.day-mode .timer-number,
+    body.day-mode .donut-percent,
+    body.day-mode .expire-date strong,
+    body.day-mode .usage-stat-value,
+    body.day-mode .usage-sub-stats b,
+    body.day-mode .usage-title,
+    body.day-mode .section-title {
+      color: #1e293b;
+    }
+
+    body.day-mode .timer-unit {
+      color: #64748b;
+    }
+
+    body.day-mode .timer-divider {
+      color: rgba(15, 23, 42, 0.2);
+    }
+
+    body.day-mode .usage-stat {
+      border-color: rgba(15, 23, 42, 0.10);
+    }
+
+    body.day-mode .usage-card {
+      background:
+        radial-gradient(circle at 10% 82%, rgba(91, 140, 255, 0.12), transparent 35%),
+        radial-gradient(circle at 92% 8%, rgba(170, 124, 255, 0.08), transparent 30%),
+        var(--card);
+    }
+
+    body.day-mode .donut-chart {
+      box-shadow: 0 0 30px rgba(91, 140, 255, 0.18), inset 0 0 20px rgba(30, 41, 59, 0.08);
+    }
+
+    body.day-mode .donut-chart::before {
+      background: var(--card-strong);
+      box-shadow: inset 0 0 18px rgba(30, 41, 59, 0.06);
+    }
+
+    body.day-mode .donut-remained {
+      text-shadow: 0 0 10px rgba(228, 64, 95, 0.35);
+    }
+
+    body.day-mode .config-item {
+      border-color: rgba(15, 23, 42, 0.10);
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    body.day-mode .config-text,
+    body.day-mode .sub-link-text {
+      color: #334155;
+    }
+
+    body.day-mode .sub-link-box {
+      border-color: rgba(91, 140, 255, 0.30);
+      background: rgba(91, 140, 255, 0.07);
+    }
+
+    body.day-mode .btn {
+      border-color: rgba(15, 23, 42, 0.15);
+      color: #1e293b;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    body.day-mode .btn:hover {
+      border-color: rgba(91, 140, 255, 0.6);
+      color: #1d4ed8;
+      background: rgba(91, 140, 255, 0.12);
+    }
+
+    body.day-mode .btn-primary {
+      border-color: rgba(91, 140, 255, 0.7);
+      color: #1d4ed8;
+    }
+
+    body.day-mode .btn-success {
+      color: #06251c;
+      background: var(--green);
+    }
+
+    body.day-mode .alert {
+      color: #b91c3c;
+      border-color: rgba(251, 113, 133, 0.35);
+      background: rgba(251, 113, 133, 0.10);
+    }
+
+    body.day-mode #alertTime {
+      border-color: rgba(180, 130, 20, 0.30);
+      color: #8a6410;
+      background: rgba(246, 200, 95, 0.14);
+    }
+
+    body.day-mode .tehran-now {
+      border-color: rgba(15, 23, 42, 0.18);
+      color: #475569;
+    }
+
+    body.day-mode .soft-hr {
+      border-top-color: rgba(15, 23, 42, 0.10);
+    }
+
+    body.day-mode .orb,
+    body.day-mode .particle {
+      opacity: 0.20;
+    }
+
+    body.day-mode .background-effects::before {
+      opacity: 0.10;
+    }
+
+    body.day-mode .video-overlay,
+    body.day-mode .qr-overlay,
+    body.day-mode .platform-overlay {
+      background: rgba(241, 245, 249, 0.80);
+    }
+
+    body.day-mode .app-card {
+      border-color: rgba(15, 23, 42, 0.10);
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    body.day-mode .app-name {
+      color: #1e293b;
+    }
+
+    body.day-mode .app-download-btn {
+      color: #1d4ed8;
+      border-color: rgba(91, 140, 255, 0.6);
+      background: rgba(91, 140, 255, 0.08);
+    }
+
+    body.day-mode .import-select {
+      border-color: rgba(15, 23, 42, 0.15);
+      color: #1e293b;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    body.day-mode .platform-box {
+      border-color: rgba(15, 23, 42, 0.12);
+      background: #ffffff;
+    }
+
+    body.day-mode .platform-option {
+      border-color: rgba(15, 23, 42, 0.15);
+      color: #1e293b;
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    body.day-mode .platform-option.suggested {
+      border-color: rgba(217, 119, 6, 0.6);
+      background: rgba(254, 215, 170, 0.4);
+    }
+
+    body.day-mode .platform-cancel {
+      color: #475569;
+    }
+
+    body.day-mode .video-box {
+      background: #0f172a;
+      border-color: rgba(15, 23, 42, 0.20);
+    }
+
+    /* ============================================================
+       12. Mobile
+       ============================================================ */
+    @media (max-width: 600px) {
+      body {
+        padding: 0.9rem;
+      }
+
+      .top-controls {
+        justify-content: center;
+      }
+
+      .coin-logo {
+        width: 48px;
+        height: 48px;
+      }
+
+      .card {
+        padding: 1.2rem;
+        border-radius: 20px;
+      }
+
+      .usage-layout {
+        min-height: unset;
+      }
+
+      .usage-details-side {
+        padding: 1.2rem;
+      }
+
+      .usage-chart-side {
+        padding: 1rem 0.65rem;
+      }
+
+      .donut-chart {
+        width: 135px;
+        height: 135px;
+      }
+
+      .donut-chart::before {
+        width: 102px;
+        height: 102px;
+      }
+
+      .donut-center {
+        width: 96px;
+      }
+
+      .donut-percent {
+        font-size: 1.24rem;
+      }
+
+      .donut-remained {
+        min-height: 16px;
+        margin-top: 0.18rem;
+        font-size: 0.61rem;
+      }
+
+      .donut-caption {
+        font-size: 0.56rem;
+      }
+
+      .usage-stat-value {
+        font-size: 0.82rem;
+      }
+
+      .total-stat .usage-stat-value,
+      .remained-stat .usage-stat-value {
+        font-size: 1rem;
+      }
+
+      .timer-number {
+        font-size: 1.55rem;
+      }
+
+      .timer-item {
+        min-width: 40px;
+      }
+
+      .timer-divider {
+        font-size: 1.2rem;
+      }
+
+      .sub-link-wrapper,
+      .config-item {
+        gap: 0.35rem;
+      }
+
+      .sub-link-text,
+      .config-text {
+        font-size: 0.65rem;
+      }
+
+      .btn {
+        padding: 0.36rem 0.55rem;
+        font-size: 0.68rem;
+      }
+
+      .btn-qr {
+        width: 40px;
+        height: 40px;
+      }
+
+      .ping-result {
+        min-width: 40px;
+        font-size: 0.6rem;
+      }
+
+      .badge-group {
+        display: none;
+      }
+
+      .alert {
+        font-size: 0.72rem;
+        padding: 0.55rem 0.75rem;
+      }
+
+      .status-side {
+        gap: 0.4rem;
+      }
+
+      .tehran-now {
+        font-size: 0.7rem;
+        padding: 0.45rem 0.7rem;
+      }
+
+      .tehran-event {
+        font-size: 0.6rem;
+      }
+
+      .btn-row .btn-download {
+        width: 100%;
+        max-width: 300px;
+        padding: 0.65rem 0.8rem;
+        font-size: 0.85rem;
+      }
+
+      .apps-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.55rem;
+      }
+
+      .app-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+      }
+
+      .app-card {
+        padding: 0.8rem 0.5rem 0.7rem;
+      }
+
+      .app-name {
+        font-size: 0.78rem;
+      }
+
+      .app-download-btn {
+        font-size: 0.7rem;
+      }
+
+      .import-controls {
+        max-width: 100%;
+      }
+
+      .import-select {
+        font-size: 0.75rem;
+      }
+
+      .platform-option {
+        min-width: 96px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="background-effects" aria-hidden="true">
+    <span class="orb orb-one"></span>
+    <span class="orb orb-two"></span>
+    <span class="orb orb-three"></span>
+    <span class="particle"></span>
+    <span class="particle"></span>
+    <span class="particle"></span>
+    <span class="particle"></span>
+  </div>
+
+  <main class="container">
+    <div class="top-controls">
+      <button id="langToggle" class="toggle-btn" type="button" onclick="toggleLang()" aria-label="Toggle language">
+        <span class="toggle-icon">🌐</span>
+        <span id="langLabel">EN</span>
+      </button>
+      <button id="themeToggle" class="toggle-btn" type="button" onclick="toggleTheme()" aria-label="Toggle day mode">
+        <span class="toggle-icon" id="themeIcon">☀️</span>
+        <span data-i18n="dayMode">روز</span>
+      </button>
+      <span class="coin-logo" aria-hidden="true">
+        <img src="https://s33.picofile.com/file/8483706450/jalaliiiii.jpg" alt="" draggable="false">
+      </span>
+    </div>
+
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon">✨</span>
+        <span data-i18n="brandTitle">پنل مشخصات و کنترل حجم</span>
+      </div>
+    </header>
+
+    <div id="alertTime" class="alert">
+      <span>⏳</span>
+      <span class="alert-text" data-i18n="timeAlert">کمتر از یک روز تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید</span>
+    </div>
+
+    <div id="alertVol" class="alert">
+      <span>⚠️</span>
+      <span class="alert-text" data-i18n="alertVol">کمتر از یک گیگ تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید</span>
+    </div>
+
+    <div id="tehranNow" class="tehran-now">
+      <div class="tehran-clock-line">
+        <span>🕐</span>
+        <span id="tehranNowText">—</span>
+      </div>
+      <div class="tehran-event" id="tehranEvent" hidden></div>
+    </div>
+
+    <section class="card">
+      <div class="status-row">
+        <span class="data-label" data-i18n="serviceStatus">وضعیت سرویس</span>
+        <div class="status-side">
+          <span id="statusBadge" class="status-badge badge-active">🟢 فعال</span>
+          <span id="presence" class="presence offline"><i class="presence-dot" aria-hidden="true"></i><span id="presenceText">آفلاین</span></span>
+        </div>
+      </div>
+
+      <div class="timer-section">
+        <div class="user-email">{{ index .emails 0 }}</div>
+
+        <div class="timer-label" data-i18n="timeRemaining">⏱️ زمان باقی‌مانده</div>
+        <div class="timer-grid" id="timerGrid"></div>
+
+        <div class="expire-date">
+          <span data-i18n="expireDate">تاریخ انقضا:</span> <strong id="expireDateText">—</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="card usage-card">
+      <div class="usage-layout">
+        <div class="usage-details-side">
+          <div class="usage-title" data-i18n="usageTitle">📊 جزئیات مصرف اینترنت</div>
+
+          <div class="usage-stat total-stat">
+            <span class="usage-stat-label" data-i18n="totalQuota">حجم کل</span>
+            <strong class="usage-stat-value" id="valTotal">—</strong>
+          </div>
+
+          <div class="usage-stat">
+            <span class="usage-stat-label" data-i18n="used">حجم مصرف‌شده</span>
+            <strong class="usage-stat-value" id="valUsed">—</strong>
+          </div>
+
+          <div class="usage-stat remained-stat">
+            <span class="usage-stat-label" data-i18n="remained">حجم باقی‌مانده</span>
+            <strong class="usage-stat-value" id="valRemained">—</strong>
+          </div>
+
+          <div class="usage-sub-stats">
+            <span><span data-i18n="downloadLbl">📥 دانلود:</span> <b id="valDown">—</b></span>
+            <span><span data-i18n="uploadLbl">📤 آپلود:</span> <b id="valUp">—</b></span>
+          </div>
+        </div>
+
+        <div class="usage-chart-side">
+          <div class="donut-chart" id="donutChart" aria-label="درصد حجم مصرف‌شده">
+            <div class="donut-center">
+              <strong class="donut-percent" id="usagePercent">۰٪</strong>
+              <strong class="donut-remained" id="donutRemained">—</strong>
+              <span class="donut-caption" data-i18n="donutCaption">حجم باقی‌مانده</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title" data-i18n="subLinkTitle">🔗 لینک سابسکریپشن</div>
+
+      <div class="sub-link-box">
+        <div class="sub-link-wrapper">
+          <div class="sub-link-text" id="subLinkDisplay">{{ .subUrl }}</div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary" type="button" data-copy="{{ .subUrl }}" onclick="copyFromButton(this)">
+              <span data-i18n="copy">📋 کپی</span>
+            </button>
+
+        <button class="btn" type="button" onclick="toggleQR()">
+          ▦ QR
+        </button>
+
+            <button class="btn" type="button" id="pingBtn" onclick="runPingTest(this)">
+              <span data-i18n="pingBtn">📶 پینگ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <hr class="soft-hr">
+
+      <div class="config-header">
+        <span class="section-title" style="margin:0;" data-i18n="configsTitle">⚙️ کانفیگ‌ها</span>
+        <button class="btn btn-primary" type="button" onclick="copyAllConfigs(this)">
+          <span data-i18n="copyAll">📋 کپی همه</span>
+        </button>
+      </div>
+
+      <div id="configList">
+        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="QR"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&ecc=M&data={{ $link | urlquery }}" alt="QR" loading="lazy"></button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button><img class="config-qr-img" hidden src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data={{ $link | urlquery }}" alt=""></div>{{ end }}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="download-section">
+        <span class="section-title" style="margin:0;" data-i18n="installTitle">📱 نصب و راه‌اندازی</span>
+
+        <span class="section-title" style="margin:0.1rem 0 0;" data-i18n="downloadAppsTitle">⬇️ دانلود اپلیکیشن</span>
+        <div class="apps-grid" id="appsGrid"></div>
+        <span class="download-note" data-i18n="downloadNote">برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.</span>
+
+        <hr class="soft-hr">
+
+        <div class="install-sub">
+          <span class="section-title" style="margin:0;" data-i18n="importConfigTitle">📥 وارد کردن کانفیگ به نرم افزار</span>
+          <div class="import-controls">
+            <select id="importAppSelect" class="import-select" aria-label="VPN app"></select>
+            <button type="button" class="btn-download btn-import" onclick="importConfigToApp()">
+              📥 <span data-i18n="importBtn">وارد کردن کانفیگ</span>
+            </button>
+          </div>
+        </div>
+
+        <hr class="soft-hr">
+
+        <button type="button" class="btn-download btn-video" onclick="toggleVideo()">
+          🎬 <span data-i18n="videoGuide">ویدیو آموزشی نصب</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <div class="qr-overlay" id="qrModal">
+    <div class="qr-box">
+      <button class="qr-close" type="button" onclick="toggleQR()" aria-label="بستن">×</button>
+      <div class="qr-label" data-i18n="qrLabel">📱 QR کد اشتراک</div>
+      <img
+        src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&ecc=M&data={{ .subUrl | urlquery }}"
+        alt="QR Code"
+      >
+      <div class="qr-url">{{ .subUrl }}</div>
+    </div>
+  </div>
+
+  <div class="qr-overlay" id="configQRModal" onclick="if(event.target===this) closeConfigQR()">
+    <div class="qr-box config-qr-box">
+      <button class="qr-close" type="button" onclick="closeConfigQR()" aria-label="بستن">×</button>
+      <div class="qr-label" data-i18n="configQrLabel">📱 QR کد کانفیگ</div>
+      <img id="configQRImg" src="" alt="QR Code">
+      <div class="qr-url" id="configQRUrl"></div>
+    </div>
+  </div>
+
+  <div class="video-overlay" id="videoModal" onclick="if(event.target===this) toggleVideo()">
+    <div class="video-box">
+      <button class="video-close" type="button" onclick="toggleVideo()" aria-label="بستن">×</button>
+      <div class="video-frame" id="videoPlayer"></div>
+    </div>
+  </div>
+
+  <div class="platform-overlay" id="platformModal" onclick="if(event.target===this) closePlatformModal()">
+    <div class="platform-box">
+      <button class="video-close" type="button" onclick="closePlatformModal()" aria-label="بستن">×</button>
+      <div id="platformContent"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       1. i18n dictionary
+       ============================================================ */
+    const I18N = {
+      fa: {
+        title: "اشتراک",
+        dir: "rtl", locale: "fa-IR",
+        brandTitle: "پنل مشخصات و کنترل حجم",
+        serviceStatus: "وضعیت سرویس",
+        active: "🟢 فعال", inactive: "🔴 غیرفعال",
+        online: "آنلاین", offline: "آفلاین",
+        timeRemaining: "⏱️ زمان باقی‌مانده",
+        expireDate: "تاریخ انقضا:",
+        usageTitle: "📊 جزئیات مصرف اینترنت",
+        totalQuota: "حجم کل", used: "حجم مصرف‌شده", remained: "حجم باقی‌مانده",
+        downloadLbl: "📥 دانلود:", uploadLbl: "📤 آپلود:",
+        donutCaption: "حجم باقی‌مانده",
+        subLinkTitle: "🔗 لینک سابسکریپشن",
+        copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
+        pingBtn: "📶 پینگ", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
+        configsTitle: "⚙️ کانفیگ‌ها",
+        installTitle: "📱 نصب و راه‌اندازی",
+        downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
+        downloadNote: "برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.",
+        importConfigTitle: "📥 وارد کردن کانفیگ به نرم افزار",
+        importBtn: "وارد کردن کانفیگ",
+        videoGuide: "ویدیو آموزشی نصب",
+        downloadBtn: "⬇️ دانلود",
+        platformAsk: "برای کدام سیستمعامل دانلود شود؟",
+        willDownload: "نسخهٔ {platform} این برنامه دانلود خواهد شد.",
+        suggestedBadge: "پیشنهادی",
+        confirmDownload: "شروع دانلود",
+        cancel: "انصراف",
+        androidName: "اندروید", iosName: "آیفون", windowsName: "ویندوز", macosName: "مک", linuxName: "لینوکس",
+        qrLabel: "📱 QR کد اشتراک",
+        configQrLabel: "📱 QR کد کانفیگ",
+        dayMode: "روز", nightMode: "شب",
+        unlimited: "نامحدود", pct: "٪",
+        unitDays: "روز", unitHours: "ساعت", unitMinutes: "دقیقه", unitSeconds: "ثانیه",
+        timeAlert: "کمتر از یک روز تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید",
+        alertVol: "کمتر از یک گیگ تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید",
+        tehranTime: "به وقت تهران",
+        noSubLink: "❌ لینک اشتراک یافت نشد",
+        copiedHelp: "✅ لینک اشتراک کپی شد!\n\nاگر برنامه {app} به‌صورت خودکار باز نشد:\n1. برنامه {app} را باز کنید\n2. به بخش «اشتراک / پروفایل» بروید\n3. روی + بزنید و لینک را Paste کنید\n4. ذخیره کنید و با آیکون ↻ به‌روزرسانی کنید",
+        copyFailed: "❌ خطا در کپی:"
+      },
+      en: {
+        title: "Subscription",
+        dir: "ltr", locale: "en-GB",
+        brandTitle: "Account & Usage Panel",
+        serviceStatus: "Service status",
+        active: "🟢 Active", inactive: "🔴 Inactive",
+        online: "Online", offline: "Offline",
+        timeRemaining: "⏱️ Time remaining",
+        expireDate: "Expires:",
+        usageTitle: "📊 Data usage details",
+        totalQuota: "Total quota", used: "Used", remained: "Remaining",
+        downloadLbl: "📥 Download:", uploadLbl: "📤 Upload:",
+        donutCaption: "Remaining",
+        subLinkTitle: "🔗 Subscription link",
+        copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
+        pingBtn: "📶 Ping", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
+        configsTitle: "⚙️ Configs",
+        installTitle: "📱 Install & setup",
+        downloadAppsTitle: "⬇️ Download app",
+        downloadNote: "For each app, the download page of the latest version for your OS will open.",
+        importConfigTitle: "📥 Import config into an app",
+        importBtn: "Import config",
+        videoGuide: "Install video guide",
+        downloadBtn: "⬇️ Download",
+        platformAsk: "Which platform do you want to download for?",
+        willDownload: "The {platform} version of this app will be downloaded.",
+        suggestedBadge: "Suggested",
+        confirmDownload: "Start download",
+        cancel: "Cancel",
+        androidName: "Android", iosName: "iOS", windowsName: "Windows", macosName: "macOS", linuxName: "Linux",
+        qrLabel: "📱 Subscription QR code",
+        configQrLabel: "📱 Config QR code",
+        dayMode: "Day", nightMode: "Night",
+        unlimited: "Unlimited", pct: "%",
+        unitDays: "days", unitHours: "hrs", unitMinutes: "min", unitSeconds: "sec",
+        timeAlert: "Less than one day remains until your subscription ends. Please renew.",
+        alertVol: "Less than 1 GB remains until your subscription ends. Please renew.",
+        tehranTime: "Tehran time",
+        noSubLink: "❌ Subscription link not found",
+        copiedHelp: "✅ Subscription link copied!\n\nIf {app} didn't open automatically:\n1. Open {app}\n2. Go to the Subscription / Profiles tab\n3. Tap + and paste the link\n4. Save it, then tap the ↻ update icon",
+        copyFailed: "❌ Copy failed:"
+      }
+    };
+
+    /* ============================================================
+       2. Language (FA / EN)
+       ============================================================ */
+    let lang = "fa"; // همیشه با فارسی شروع می‌شود
+
+    function t(key) {
+      return (I18N[lang] && I18N[lang][key]) || I18N.fa[key] || key;
+    }
+
+    function applyLang() {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = t("dir");
+      document.title = t("title");
+      document.body.classList.toggle("lang-en", lang === "en");
+      document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+      const langLabel = document.getElementById("langLabel");
+      if (langLabel) langLabel.textContent = lang === "fa" ? "EN" : "فا";
+      const langBtn = document.getElementById("langToggle");
+      if (langBtn) langBtn.classList.toggle("active-glow", lang === "en");
+      renderApps();
+      updateAll();
+      updateThemeBtn();
+      fitAllAlerts();
+    }
+
+    function toggleLang() {
+      lang = lang === "fa" ? "en" : "fa";
+      applyLang();
+    }
+
+    /* ============================================================
+       3. Day / night theme
+       ============================================================ */
+    function donutTrack() {
+      return document.documentElement.classList.contains("day-mode")
+        ? "rgba(15,23,42,0.10)"
+        : "rgba(255,255,255,0.08)";
+    }
+
+    function updateThemeBtn() {
+      const isDay = document.documentElement.classList.contains("day-mode");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.textContent = isDay ? "🌙" : "☀️";
+      const label = document.querySelector("#themeToggle [data-i18n]");
+      // برچسب مقصد را نشان می‌دهد: در حالت شب «روز» و در حالت روز «شب»
+      if (label) label.textContent = t(isDay ? "nightMode" : "dayMode");
+    }
+
+    function applyTheme(day) {
+      document.documentElement.classList.toggle("day-mode", day);
+      document.body.classList.toggle("day-mode", day);
+      updateThemeBtn();
+      const themeBtn = document.getElementById("themeToggle");
+      if (themeBtn) themeBtn.classList.toggle("active-glow", day);
+      renderUsage();
+    }
+
+    function toggleTheme() {
+      applyTheme(!document.documentElement.classList.contains("day-mode"));
+    }
+
+    /* ============================================================
+       4. Panel data (injected by the Go template)
+       ============================================================ */
+    const sub = {
+      enabled: {{ .enabled }},
+      expireSec: {{ .expire }},
+      totalByte: {{ .totalByte }},
+      dlByte: {{ .downloadByte }},
+      upByte: {{ .uploadByte }},
+      total: "{{ .total }}",
+      used: "{{ .used }}",
+      remained: "{{ .remained }}",
+      download: "{{ .download }}",
+      upload: "{{ .upload }}"
+    };
+
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const ONE_GB_BYTES = 1024 * 1024 * 1024;
+
+    let countdownInterval = null;
+    let isExpiredOrZero = false;
+
+    /* ============================================================
+       5. Renderers
+       ============================================================ */
+    function toLocalizedDate(date) {
+      return new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fa-IR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Tehran"
+      }).format(date);
+    }
+
+    function isUsageZero() {
+      const downloadBytes = Number(sub.dlByte) || 0;
+      const uploadBytes = Number(sub.upByte) || 0;
+      return (downloadBytes + uploadBytes) <= 0;
+    }
+
+    function renderStatus() {
+      const badge = document.getElementById("statusBadge");
+      const zeroUsage = isUsageZero();
+
+      if (!sub.enabled || zeroUsage) {
+        badge.textContent = t("inactive");
+        badge.className = "status-badge badge-inactive";
+        isExpiredOrZero = true;
+      } else {
+        badge.textContent = t("active");
+        badge.className = "status-badge badge-active";
+        isExpiredOrZero = false;
+      }
+
+      // نشانگر آنلاین/آفلاین: کاربر در حال استفاده از اکانت (فعال + مصرف غیرصفر) = آنلاین
+      const presence = document.getElementById("presence");
+      const presenceText = document.getElementById("presenceText");
+
+      if (presence && presenceText) {
+        const online = Boolean(sub.enabled) && !zeroUsage;
+        presence.classList.toggle("online", online);
+        presence.classList.toggle("offline", !online);
+        presenceText.textContent = t(online ? "online" : "offline");
+      }
+    }
+
+    function renderExpireDate() {
+      const expireDate = document.getElementById("expireDateText");
+
+      if (isExpiredOrZero || !sub.expireSec || Number(sub.expireSec) === 0) {
+        expireDate.textContent = "-";
+        return;
+      }
+
+      expireDate.textContent = toLocalizedDate(new Date(Number(sub.expireSec) * 1000));
+    }
+
+    /* ---------- تاریخ و ساعت به وقت تهران + رویداد تقویم ایرانی ----------
+       فارسی: تقویم شمسی، انگلیسی: میلادی — فقط وقتی هیچ اخطاری نمایش داده نمیشود.
+       رویدادهای رسمی تقویم ایران (ثابت شمسی) — key: ماه/روز شمسی */
+    const JALALI_EVENTS = {
+      "1/1": "آغاز نوروز", "1/2": "عیدنوروز", "1/3": "عیدنوروز", "1/4": "عیدنوروز",
+      "1/12": "روز جمهوری اسلامی", "1/13": "روز طبیعت",
+      "3/14": "رحلت امام خمینی", "3/15": "قیام ۱۵ خرداد",
+      "11/22": "پیروزی انقلاب اسلامی", "12/29": "ملی شدن صنعت نفت",
+      "7/20": "سید و شهیدان (اربعین)", "7/28": "رحلت رسول اکرم و شهادت امام حسن",
+      "7/30": "شهادت امام رضا",
+      "9/4": "تولد حضرت فاطمه معصومه و روز دختران",
+      "6/31": "روز گفتوگوی تمدن‌ها",
+      "2/28": "روز صنعت و معدن",
+      "5/25": "روز بهرهوری",
+      "10/5": "روز ملی ایمنی", "10/16": "روز دانشجو",
+      "4/18": "روز ادبیات کودک", "8/24": "روز کتاب و کتابخوانی"
+    };
+
+    // تبدیل میلادی به شمسی (الگوریتم jalaali)
+    function toJalali(gy, gm, gd) {
+      const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+      let jy = gy <= 1600 ? 0 : 979;
+      gy -= gy <= 1600 ? 621 : 1600;
+      const gy2 = gm > 2 ? gy + 1 : gy;
+      let days = 365 * gy + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) +
+                 Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm - 1];
+      jy += 33 * Math.floor(days / 12053);
+      days %= 12053;
+      jy += 4 * Math.floor(days / 1461);
+      days %= 1461;
+      jy += Math.floor((days - 1) / 365);
+      days = (days - 1) % 365;
+      const jm = days < 186 ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+      const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
+      return [jy, jm, jd];
+    }
+
+    function jalaliEventOf(date) {
+      const [jy, jm, jd] = toJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      return JALALI_EVENTS[jm + "/" + jd] || null;
+    }
+
+    /* متن تکخطی اخطار: اگر در عرض جا نشد، فونت پله‌پله ریزتر میشود */
+    function fitAlertText(alertEl) {
+      const span = alertEl.querySelector(".alert-text");
+
+      if (!span) return;
+
+      const icon = alertEl.querySelector("span:first-child");
+      const box = alertEl;
+      const cs = getComputedStyle(box);
+      const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+                    (icon ? icon.offsetWidth + 10 : 0);
+
+      if (avail <= 0) return;
+
+      span.style.fontSize = "";
+      let size = parseFloat(cs.fontSize);
+
+      span.style.fontSize = size + "px";
+      // کف خوانایی ۹ پیکسل: تا اینجا ریز میشود؛ بعد از آن ellipsis میگذارد
+      while (span.scrollWidth > avail && size > 9.5) {
+        size = Math.max(9, size - 0.5);
+        span.style.fontSize = size + "px";
+      }
+    }
+
+    function updateTehranNow() {
+      const box = document.getElementById("tehranNow");
+      const text = document.getElementById("tehranNowText");
+      const evEl = document.getElementById("tehranEvent");
+
+      if (!box || !text) return;
+
+      const anyAlert = document.getElementById("alertTime").classList.contains("show") ||
+                       document.getElementById("alertVol").classList.contains("show");
+
+      if (anyAlert) {
+        box.classList.remove("show");
+        return;
+      }
+
+      const now = new Date();
+      const locale = lang === "en" ? "en-GB" : "fa-IR";
+      const weekdayFmt = new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "Asia/Tehran" });
+      const dateFmt = new Intl.DateTimeFormat(locale, {
+        year: "numeric", month: "long", day: "numeric",
+        timeZone: "Asia/Tehran"
+      });
+      const timeFmt = new Intl.DateTimeFormat(locale, {
+        hour: "2-digit", minute: "2-digit", hour12: false,
+        timeZone: "Asia/Tehran"
+      });
+
+      // ترتیب طبیعی: «سه‌شنبه ۲۴ شهریور ۱۴۰۵» در فارسی و «Tuesday, 24 September 2026» در انگلیسی
+      const sep = lang === "en" ? ", " : " ";
+      text.textContent = `📅 ${weekdayFmt.format(now)}${sep}${dateFmt.format(now)} — 🕐 ${timeFmt.format(now)} (${t("tehranTime")})`;
+
+      // رویداد امروز در تقویم ایران (همیشه بر اساس تقویم شمسی)
+      if (evEl) {
+        const ev = jalaliEventOf(now);
+
+        if (ev) {
+          evEl.textContent = (lang === "en" ? "Iranian calendar: " : "مناسبت امروز: ") + ev;
+          evEl.hidden = false;
+        } else {
+          evEl.hidden = true;
+        }
+      }
+
+      box.classList.add("show");
+    }
+
+    let tehranInterval = null;
+
+    function startTehranClock() {
+      updateTehranNow();
+
+      if (tehranInterval) clearInterval(tehranInterval);
+      tehranInterval = setInterval(updateTehranNow, 30000); // هر ۳۰ ثانیه بهروزرسانی
+    }
+
+    // تغییر عرض صفحه: اخطارها دوباره تکخطی میشوند
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitAllAlerts, 150);
+    });
+
+    function renderZeroTimer() {
+      document.getElementById("timerGrid").innerHTML = `
+        <div class="timer-item"><span class="timer-number" style="color:#fb7185;">00</span><span class="timer-unit">${t("unitDays")}</span></div>
+        <div class="timer-divider">:</div>
+        <div class="timer-item"><span class="timer-number" style="color:#fb7185;">00</span><span class="timer-unit">${t("unitHours")}</span></div>
+        <div class="timer-divider">:</div>
+        <div class="timer-item"><span class="timer-number" style="color:#fb7185;">00</span><span class="timer-unit">${t("unitMinutes")}</span></div>
+        <div class="timer-divider">:</div>
+        <div class="timer-item"><span class="timer-number" style="color:#fb7185;">00</span><span class="timer-unit">${t("unitSeconds")}</span></div>
+      `;
+    }
+
+    function renderTimer() {
+      const timerGrid = document.getElementById("timerGrid");
+      const alertTime = document.getElementById("alertTime");
+
+      if (isExpiredOrZero || !sub.expireSec || Number(sub.expireSec) === 0) {
+        renderZeroTimer();
+        alertTime.classList.remove("show");
+
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+
+        return;
+      }
+
+      const expireMs = Number(sub.expireSec) * 1000;
+
+      function updateTimer() {
+        const diff = expireMs - Date.now();
+
+        if (diff > 0 && diff < ONE_DAY_MS) {
+          alertTime.classList.add("show");
+        } else {
+          alertTime.classList.remove("show");
+        }
+
+        updateTehranNow(); // ساعت فقط وقتی دیده میشود که اخطاری نباشد
+
+        if (diff <= 0) {
+          renderZeroTimer();
+          alertTime.classList.remove("show");
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        timerGrid.innerHTML = `
+          <div class="timer-item"><span class="timer-number">${String(days).padStart(2, "0")}</span><span class="timer-unit">${t("unitDays")}</span></div>
+          <div class="timer-divider">:</div>
+          <div class="timer-item"><span class="timer-number">${String(hours).padStart(2, "0")}</span><span class="timer-unit">${t("unitHours")}</span></div>
+          <div class="timer-divider">:</div>
+          <div class="timer-item"><span class="timer-number">${String(minutes).padStart(2, "0")}</span><span class="timer-unit">${t("unitMinutes")}</span></div>
+          <div class="timer-divider">:</div>
+          <div class="timer-item"><span class="timer-number">${String(seconds).padStart(2, "0")}</span><span class="timer-unit">${t("unitSeconds")}</span></div>
+        `;
+      }
+
+      updateTimer();
+
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+
+      countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    function renderUsage() {
+      const total = Number(sub.totalByte) || 0;
+      const used = (Number(sub.dlByte) || 0) + (Number(sub.upByte) || 0);
+      const remained = Math.max(total - used, 0);
+
+      const totalText = total === 0 ? t("unlimited") : (sub.total || "0.00B");
+      const remainedText = total === 0 ? t("unlimited") : (sub.remained || "0.00B");
+
+      document.getElementById("valTotal").textContent = totalText;
+      document.getElementById("valUsed").textContent = sub.used || "0.00B";
+      document.getElementById("valRemained").textContent = remainedText;
+      document.getElementById("valDown").textContent = sub.download || "0.00B";
+      document.getElementById("valUp").textContent = sub.upload || "0.00B";
+
+      let percent = 0;
+
+      if (total > 0) {
+        percent = Math.min((used / total) * 100, 100);
+      }
+
+      const degree = Math.round(percent * 3.6);
+      const donutChart = document.getElementById("donutChart");
+      const usagePercent = document.getElementById("usagePercent");
+      const donutRemained = document.getElementById("donutRemained");
+
+      let color = "#5b8cff";
+
+      if (percent >= 85) {
+        color = "#fb7185";
+      } else if (percent >= 60) {
+        color = "#f6c85f";
+      } else if (percent > 0) {
+        color = "#37d7a1";
+      }
+
+      donutChart.style.background = `
+        conic-gradient(
+          ${color} 0deg,
+          ${color} ${degree}deg,
+          ${donutTrack()} ${degree}deg,
+          ${donutTrack()} 360deg
+        )
+      `;
+
+      usagePercent.textContent = `${Math.round(percent)}${t("pct")}`;
+      donutRemained.textContent = remainedText;
+
+      const alertVol = document.getElementById("alertVol");
+
+      if (total > 0 && remained < ONE_GB_BYTES) {
+        alertVol.classList.add("show");
+      } else {
+        alertVol.classList.remove("show");
+      }
+
+      updateTehranNow();
+    }
+
+    function updateAll() {
+      renderStatus();
+      renderExpireDate();
+      renderTimer();
+      renderUsage();
+      updateTehranNow();
+      fitAllAlerts();
+    }
+
+    // بعد از هر رندر/تغییر زبان، تکخطی ماندن اخطارها تضمین میشود
+    function fitAllAlerts() {
+      ["alertTime", "alertVol"].forEach(id => {
+        const el = document.getElementById(id);
+
+        if (el && el.classList.contains("show")) fitAlertText(el);
+      });
+    }
+
+    /* ============================================================
+       6. Clipboard helpers
+       ============================================================ */
+    async function copyText(text, button) {
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+
+      if (!button) return;
+
+      const originalText = button.textContent;
+      button.textContent = t("copied");
+      button.classList.add("btn-success");
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove("btn-success");
+      }, 1600);
+    }
+
+    function copyFromButton(button) {
+      copyText(button.dataset.copy || "", button);
+    }
+
+    function copyAllConfigs(button) {
+      const configs = [...document.querySelectorAll(".config-item[data-link]")]
+        .map(item => item.dataset.link)
+        .filter(Boolean)
+        .join("\n");
+
+      copyText(configs, button);
+    }
+
+    async function copyToClipboardSilent(text) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (error) {}
+
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        return ok;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    /* ============================================================
+       7. Apps: download cards, platform picker & one-click import
+       ============================================================ */
+    const PLATFORM_EMOJI = { android: "🤖", ios: "🍎", windows: "🪟", macos: "🍏", linux: "🐧" };
+    const PLATFORM_ORDER = ["android", "ios", "windows", "macos", "linux"];
+
+    // هر برنامه: آیکون رسمی، لینک دانلود هر سیستمعامل
+    // و deep-link مخصوص وارد کردن سابسکریپشن (اگر اپلیکیشن از آن پشتیبانی کند)
+    // برای برنامههای GitHub نسخهٔ آخرین رلیز پایدار در زمان اجرا پیدا و فایل APK مستقیماً دانلود میشود
+    const APPS = [
+      {
+        id: "v2rayng",
+        name: "v2rayNG",
+        icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png",
+        platforms: {
+          android: "https://github.com/2dust/v2rayNG/releases/latest"
+        },
+        directApk: {
+          repo: "2dust/v2rayNG",
+          arch: true, // نسخهٔ universal ندارد؛ معماری مناسب بهطور خودکار انتخاب میشود
+          fileName: (ver, arch) => `v2rayNG_${ver}_${arch}.apk`
+        },
+        deeplink(subLink) {
+          return "v2rayng://install-sub?url=" + encodeURIComponent(subLink);
+        }
+      },
+      {
+        id: "pattng",
+        name: "PattNG",
+        icon: "https://raw.githubusercontent.com/patterniha/PattNG/my-releases/fastlane/metadata/android/en-US/images/icon.png",
+        platforms: {
+          android: "https://github.com/patterniha/PattNG/releases/latest"
+        },
+        directApk: {
+          repo: "patterniha/PattNG",
+          arch: false, // فایل universal دارد؛ روی همهٔ گوشیها نصب میشود
+          fileName: (ver) => `PattNG_${ver}_universal.apk`
+        },
+        deeplink(subLink) {
+          return "v2rayng://install-sub?url=" + encodeURIComponent(subLink);
+        }
+      },
+      {
+        id: "v2box",
+        name: "v2Box",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fe/03/f8/fe03f855-940a-a28c-ceb8-4b8e61b720d8/V2BoxIcon-0-0-1x_U007epad-0-1-P3-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box",
+          ios: "https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690"
+        },
+        deeplink(subLink) {
+          return "v2box://install-sub?url=" + encodeURIComponent(subLink);
+        }
+      },
+      {
+        id: "streisand",
+        name: "Streisand",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fb/fd/e7/fbfde74a-55a9-6dc5-e0dc-38b927b0f46f/AppIcon-0-0-1x_U007epad-0-0-0-1-0-85-220.png/512x512bb.jpg",
+        platforms: {
+          ios: "https://apps.apple.com/us/app/streisand/id6450534064"
+        },
+        deeplink(subLink) {
+          return "streisand://import/" + encodeURIComponent(subLink);
+        }
+      },
+      {
+        id: "npvtunnel",
+        name: "NPV Tunnel",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c5/1a/b9/c51ab906-a25c-35c6-1f6d-8261ead56e82/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv",
+          ios: "https://apps.apple.com/us/app/npv-tunnel/id1629465476"
+        },
+        deeplink: null
+      },
+      {
+        id: "hiddify",
+        name: "Hiddify",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/70/5e/2f/705e2fce-cacd-28c0-05bb-946667dbc03a/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=app.hiddify.com",
+          ios: "https://apps.apple.com/us/app/hiddify-proxy-vpn/id6596777532",
+          // دسکتاپ: فایل نصبی مستقیم آخرین نسخهٔ پایدار (بدون صفحهٔ انتخاب فایل)
+          windows: { directAsset: () => "Hiddify-Windows-Setup-x64.exe" },
+          macos: { directAsset: () => "Hiddify-MacOS.dmg" },
+          linux: { directAsset: () => "Hiddify-Linux-x64-AppImage.AppImage" }
+        },
+        directApk: {
+          repo: "hiddify/hiddify-app",
+          arch: false, // فایل universal دارد؛ روی همهٔ گوشیها نصب میشود
+          fileName: (ver) => `Hiddify-Android-universal.apk`,
+          tagPrefix: "v" // تگهای رلیز این ریپو پیشوند v دارند (مثل v4.1.1)
+        },
+        deeplink(subLink) {
+          // رسمی: فیلتر intent در AndroidManifest برنامه (scheme hiddify + host install-sub)
+          return "hiddify://install-sub?url=" + encodeURIComponent(subLink);
+        }
+      },
+      {
+        id: "shadowrocket",
+        name: "Shadowrocket",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/64/24/2d/64242de2-a763-914f-c686-8777445b83a3/AppIcon-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg",
+        platforms: {
+          ios: "https://apps.apple.com/us/app/shadowrocket/id932747118"
+        },
+        deeplink(subLink) {
+          // رسمی: shadowrocket://add/sub://BASE64(لینک اشتراک) — مستند 3X-UI
+          return "shadowrocket://add/sub://" + btoa(unescape(encodeURIComponent(subLink)));
+        }
+      },
+      {
+        id: "happ",
+        name: "Happ",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e0/11/af/e011af74-2151-a47d-d4a2-86eea7854f2a/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.happproxy",
+          ios: "https://apps.apple.com/us/app/happ-proxy-utility/id6504287215",
+          windows: "https://www.happ.su/main",
+          macos: "https://www.happ.su/main",
+          linux: "https://www.happ.su/main"
+        },
+        deeplink(subLink) {
+          return "happ://add/" + subLink;
+        }
+      }
+    ];
+
+    function getSubLink() {
+      const subLinkEl = document.getElementById("subLinkDisplay");
+      return subLinkEl ? subLinkEl.textContent.trim() : "";
+    }
+
+    /* ============================================================
+       7b. تست تاخیر واقعی کانفیگ‌ها (پینگ)
+       هر کانفیگ با یک دست‌دادن TCP واقعی به سرور/پورت خودش زمان‌سنجی میشود؛
+       اگر شبکه آن را مسدود کند، به یک آدرس عمومی روی همان پورت سقوط میکند
+       تا «قابلیت رسیدن پورت» همچنان سنجیده شود.
+       ============================================================ */
+    function decodeConfigPart(part) {
+      try {
+        const norm = part.replace(/-/g, "+").replace(/_/g, "/");
+        const padded = norm + "=".repeat((4 - (norm.length % 4)) % 4);
+        return decodeURIComponent(escape(atob(padded)));
+      } catch (error) {
+        return null;
+      }
+    }
+
+    // استخراج آدرس و پورت واقعی سرور از URI کانفیگ (vmess/vless/trojan/ss/hy2)
+    function extractHostPort(link) {
+      try {
+        if (!link || link.indexOf("://") === -1) return null;
+
+        const scheme = link.split("://")[0].toLowerCase();
+
+        if (scheme === "vmess") {
+          const json = JSON.parse(decodeConfigPart(link.slice(8)) || "null");
+          if (!json || !json.add || !json.port) return null;
+          return { host: String(json.add), port: Number(json.port) };
+        }
+
+        const rest = link.slice(link.indexOf("://") + 3).split(/[/?#]/)[0];
+        const hostPart = rest.lastIndexOf("@") !== -1 ? rest.slice(rest.lastIndexOf("@") + 1) : rest;
+        const host = hostPart.replace(/\]$/, "").replace(/^\[/, "");
+        const m = host.match(/^(.+):(\d+)$/);
+
+        if (!m) return null;
+
+        return { host: m[1], port: Number(m[2]) };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    // تاخیر واقعی: زمان کامل شدن یک درخواست HTTPS به خود سرور و پورت کانفیگ.
+    // پاسخ opaque (ok) = اتصال TCP/TLS برقرار و سرویس پاسخ داد → زنده با تاخیر اندازهگیری شده.
+    // خطا (TypeError) = پورت بسته/ناموجود/فیلتر شده → مرده (نسخههای قدیمی مرورگر بدون AbortSignal
+    // با setTimeout داخلی قطع میشوند).
+    function tcpPing(host, port, timeoutMs) {
+      return new Promise(resolve => {
+        const t0 = performance.now();
+        let done = false;
+        const finish = ok => {
+          if (!done) {
+            done = true;
+            resolve(ok ? Math.round(performance.now() - t0) : -1);
+          }
+        };
+        const timer = setTimeout(() => finish(false), timeoutMs);
+        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout
+          ? AbortSignal.timeout(timeoutMs)
+          : undefined;
+
+        fetch("https://" + host + ":" + port + "/", {
+          mode: "no-cors",
+          cache: "no-store",
+          signal: signal
+        }).then(() => finish(true)).catch(() => finish(false)).finally(() => clearTimeout(timer));
+      });
+    }
+
+    let pingAbort = false;
+
+    async function runPingTest(btn) {
+      const items = [...document.querySelectorAll(".config-item[data-link]")];
+      if (!items.length) return;
+
+      pingAbort = false;
+      btn.disabled = true;
+
+      const results = [];
+
+      for (const item of items) {
+        if (pingAbort) break;
+
+        const chip = item.querySelector(".ping-result");
+        const hp = extractHostPort(item.dataset.link);
+
+        if (!hp) {
+          if (chip) {
+            chip.hidden = false;
+            chip.className = "ping-result bad";
+            chip.textContent = t("pingFail");
+          }
+          results.push(-1);
+          continue;
+        }
+
+        if (chip) {
+          chip.hidden = false;
+          chip.className = "ping-result testing";
+          chip.textContent = t("pingTesting");
+        }
+
+        let ms = await tcpPing(hp.host, hp.port, 3500);
+
+        // یک تلاش مجدد کوتاه برای خطاهای گذرا (شبکههای ناپایدار)
+        if (ms < 0) ms = await tcpPing(hp.host, hp.port, 3500);
+
+        if (chip) {
+          chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+          chip.textContent = ms < 0 ? t("pingFail") : ms + " " + t("pingUnit");
+        }
+
+        results.push(ms);
+      }
+
+      btn.disabled = false;
+    }
+
+    // تشخیص سیستمعامل دستگاه (اندروید / آیفون / ویندوز / مک / لینوکس)
+    function detectOS() {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      if (/android/i.test(ua)) return "android";
+      if (/iphone|ipad|ipod/i.test(ua)) return "ios";
+      if (/windows/i.test(ua)) return "windows";
+      if (/mac os x|macintosh/i.test(ua)) return "macos";
+      if (/linux/i.test(ua)) return "linux";
+      return "android";
+    }
+
+    function platformName(p) {
+      return t(p + "Name") || p;
+    }
+
+    function platformChips(app) {
+      return PLATFORM_ORDER
+        .filter(p => app.platforms[p])
+        .map(p => `<span class="platform-chip ${p}">${PLATFORM_EMOJI[p]} ${platformName(p)}</span>`)
+        .join("");
+    }
+
+    // کارت‌های دانلود — با هر بار تغییر زبان دوباره رندر می‌شوند تا نام سیستمعامل‌ها ترجمه بماند
+    function renderApps() {
+      const grid = document.getElementById("appsGrid");
+      if (!grid) return;
+
+      grid.innerHTML = APPS.map(app => `
+        <div class="app-card">
+          <img class="app-icon" src="${app.icon}" alt="${app.name}" loading="lazy" draggable="false">
+          <span class="app-name">${app.name}</span>
+          <span class="platform-chips">${platformChips(app)}</span>
+          <button type="button" class="app-download-btn" onclick="askDownload('${app.id}')">${t("downloadBtn")}</button>
+        </div>
+      `).join("");
+    }
+
+    function buildImportSelect() {
+      const sel = document.getElementById("importAppSelect");
+      if (!sel) return;
+      sel.innerHTML = APPS.map(app => `<option value="${app.id}">${app.name}</option>`).join("");
+    }
+
+    // مودال انتخاب سیستمعامل: اگر برنامه فقط یک نسخه دارد، قبل از دانلود همان را نشان می‌دهد
+    function openPlatformModal(app) {
+      const modal = document.getElementById("platformModal");
+      const box = document.getElementById("platformContent");
+      const suggested = detectOS();
+      const available = PLATFORM_ORDER.filter(p => app.platforms[p]);
+
+      if (available.length === 1) {
+        const p = available[0];
+        box.innerHTML = `
+          <img class="app-icon" src="${app.icon}" alt="${app.name}">
+          <div class="platform-title">${app.name}</div>
+          <div class="platform-ask">${t("willDownload").replace("{platform}", `${PLATFORM_EMOJI[p]} ${platformName(p)}`)}</div>
+          <div class="platform-actions">
+            <button type="button" class="btn-download" onclick="startDownload('${app.id}','${p}')">${t("confirmDownload")}</button>
+            <button type="button" class="platform-cancel" onclick="closePlatformModal()">${t("cancel")}</button>
+          </div>
+        `;
+      } else {
+        const options = available.map(p => {
+          const isSuggested = p === suggested;
+          const badge = isSuggested ? `<div class="platform-note">⭐ ${t("suggestedBadge")}</div>` : "";
+          return `
+            <button type="button" class="platform-option${isSuggested ? " suggested" : ""}" onclick="startDownload('${app.id}','${p}')">
+              <span class="p-emoji">${PLATFORM_EMOJI[p]}</span>
+              <span>${platformName(p)}</span>
+              ${badge}
+            </button>
+          `;
+        }).join("");
+
+        box.innerHTML = `
+          <img class="app-icon" src="${app.icon}" alt="${app.name}">
+          <div class="platform-title">${app.name}</div>
+          <div class="platform-ask">${t("platformAsk")}</div>
+          <div class="platform-options">${options}</div>
+          <div class="platform-actions">
+            <button type="button" class="platform-cancel" onclick="closePlatformModal()">${t("cancel")}</button>
+          </div>
+        `;
+      }
+
+      modal.classList.add("open");
+    }
+
+    /* ---------- دانلود مستقیم APK آخرین نسخهٔ پایدار (برنامههای GitHub) ----------
+       نسخهٔ پایدار در زمان اجرا از shields.io (رایگان، CORSباز) گرفته میشود؛
+       کاربر بدون دانستن معماری گوشی، فایل درست را مستقیم دانلود میکند.
+       برنامههایی که فایل universal دارند (مثل PattNG) همان را میدهند؛
+       بقیه (مثل v2rayNG) نسخهٔ سازگار با گوشی را خودکار انتخاب میکنند. */
+    const directApkFallback = (repo) => `https://github.com/${repo}/releases/latest`;
+    const directApkCache = {};   // appId -> URL مستقیم فایل نصبی بعد از حلِ نسخه
+    const directApkPromises = {};
+    const versionCache = {};     // repo -> { ver, at }
+    const VERSION_CACHE_TTL = 10 * 60 * 1000; // اعتبار کش نسخه: ۱۰ دقیقه
+
+    function stripV(version) {
+      return String(version || "").replace(/^v/i, "").replace(/^([0-9][0-9A-Za-z.\-]*)[\s\S]*$/, "$1").trim();
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("http " + res.status);
+      return res.json();
+    }
+
+    // آخرین نسخهٔ پایدار هر ریپازیتوری گیت‌هاب (منبع اول shields.io، منبع دوم API گیت‌هاب)
+    async function resolveLatestVersion(repo) {
+      const cached = versionCache[repo];
+      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.ver;
+
+      const sources = [
+        () => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`).then(j => stripV(j.value)),
+        () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`).then(j => stripV(j.tag_name))
+      ];
+      for (const src of sources) {
+        try {
+          const v = await src();
+          if (/^[0-9]/.test(v) && !/\s|\//.test(v)) {
+            versionCache[repo] = { ver: v, at: Date.now() };
+            return v; // تگ عددی/نسخهای معتبر
+          }
+        } catch (e) { /* منبع بعدی */ }
+      }
+      return null;
+    }
+
+    // معماری مناسب: همهٔ گوشیهای واقعی arm64 هستند؛ فقط دستگاههای x86 صریح (ایمولاتور/Android-x86) x86_64 میگیرند
+    // (UA ویندوز دسکتاپ «Win64» دارد ولی آن کاربر دارد برای گوشی دانلود میکند → arm64)
+    function preferredApkArch() {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      if (/\bx86\b|x86_64|i[3-6]86/.test(ua) && !/arm/.test(ua)) return "x86_64";
+      return "arm64-v8a";
+    }
+
+    async function getDirectApkUrl(app, fileOf) {
+      const cfg = app.directApk;
+      if (!cfg) return null;
+      const cacheKey = fileOf ? app.id + ":" + fileOf("", "") : app.id;
+      if (directApkCache[cacheKey]) return directApkCache[cacheKey];
+      if (directApkPromises[cacheKey]) return directApkPromises[cacheKey];
+
+      directApkPromises[cacheKey] = (async () => {
+        const ver = await resolveLatestVersion(cfg.repo);
+
+        // نامگذاری فایلها در رلیزها ثابت است: {نام}_{نسخه}[_{معماری}].apk
+        if (ver) {
+          const arch = cfg.arch ? preferredApkArch() : null;
+          const file = fileOf ? fileOf(ver, arch) : cfg.fileName(ver, arch);
+          const tag = (cfg.tagPrefix || "") + ver; // برخی ریپوها تگ با پیشوند v دارند
+          return `https://github.com/${cfg.repo}/releases/download/${tag}/${file}`;
+        }
+
+        return directApkFallback(cfg.repo); // بدون اینترنت/منبع: صفحهٔ رلیزها (همیشه درست)
+      })();
+
+      const result = await directApkPromises[cacheKey];
+      // فقط URL حلشده کش میشود؛ حالت fallback در تلاش بعدی دوباره نسخه را میگیرد
+      if (result.includes("/releases/download/")) directApkCache[cacheKey] = result;
+      delete directApkPromises[cacheKey];
+      return result;
+    }
+
+    function openDirectApk(app, fileOf) {
+      getDirectApkUrl(app, fileOf)
+        .then(url => window.open(url, "_blank", "noopener"))
+        .catch(() => window.open(directApkFallback(app.directApk.repo), "_blank", "noopener"));
+    }
+
+    // پیشبارگیری نسخه در پسزمینه تا کلیک کاربر بدون تأخیر باشد
+    setTimeout(() => {
+      APPS.filter(a => a.directApk).forEach(a => getDirectApkUrl(a).catch(() => {}));
+    }, 1500);
+
+    function askDownload(appId) {
+      const app = APPS.find(a => a.id === appId);
+      if (!app) return;
+
+      // برنامههای تکپلتفرم GitHub اندروید: مستقیماً APK آخرین نسخهٔ پایدار (بدون صفحهٔ رلیز)
+      if (app.directApk && detectOS() === "android") {
+        openDirectApk(app);
+        return;
+      }
+
+      openPlatformModal(app);
+    }
+
+    function startDownload(appId, platform) {
+      const app = APPS.find(a => a.id === appId);
+      closePlatformModal();
+      if (!app) return;
+
+      if (app.directApk && platform === "android") {
+        openDirectApk(app); // APK مستقیم آخرین نسخهٔ پایدار
+        return;
+      }
+
+      const target = app.platforms[platform];
+
+      // دسکتاپ هیدیفای: فایل نصبی مستقیم آخرین نسخهٔ پایدار از همان ریپو
+      if (target && typeof target === "object" && app.directApk) {
+        openDirectApk(app, target.directAsset);
+        return;
+      }
+
+      if (typeof target === "string" && target) window.open(target, "_blank", "noopener");
+    }
+
+    function closePlatformModal() {
+      document.getElementById("platformModal").classList.remove("open");
+    }
+
+    // وارد کردن کانفیگ به هر نرم افزار: ابتدا deep-link برنامه (اگر دارد)، سپس کپی کلیپ‌بورد
+    // و در پایان اگر برنامه باز نشد، راهنمای دستی مخصوص همان برنامه نشان داده می‌شود
+    function importConfigToApp() {
+      const sel = document.getElementById("importAppSelect");
+      const app = APPS.find(a => a.id === (sel ? sel.value : "")) || APPS[0];
+      const subLink = getSubLink();
+
+      if (!subLink) {
+        alert(t("noSubLink"));
+        return;
+      }
+
+      const deep = app.deeplink ? app.deeplink(subLink) : null;
+
+      // باز کردن برنامه در همان لحظه‌ی کلیک (تا gesture مرورگر معتبر بماند)
+      if (deep) {
+        try {
+          window.location.href = deep;
+        } catch (error) {}
+      }
+
+      // کپی لینک در کلیپ‌بورد برای روش دستی
+      copyToClipboardSilent(subLink);
+
+      // اگر برنامه ظرف ۲ ثانیه صفحه را نگرفت، راهنمای دستی نشان بده
+      setTimeout(() => {
+        if (!document.hidden) {
+          alert(t("copiedHelp").replace("{app}", app.name));
+        }
+      }, 2000);
+    }
+
+    /* ============================================================
+       8. Modals: QR & install video
+       ============================================================ */
+    function toggleQR() {
+      document.getElementById("qrModal").classList.toggle("open");
+    }
+
+    // QR کد تک‌تک کانفیگ‌ها: هر آیتم تصویر ۳۰۰x300 خودش را از تمپلیت دارد؛
+    // کافیست یک سینگلتون در مودال جایگزین شود (کانفیگهای طولانی QR را بزرگ میکنند)
+    function toggleConfigQR(btn) {
+      const modal = document.getElementById("configQRModal");
+      const img = document.getElementById("configQRImg");
+      const urlBox = document.getElementById("configQRUrl");
+
+      if (!modal || !img || !urlBox) return;
+
+      const item = btn.closest(".config-item");
+      const link = (item && item.dataset.link) || "";
+
+      if (!link) {
+        alert(t("noSubLink"));
+        return;
+      }
+
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data=" + encodeURIComponent(link);
+      urlBox.textContent = link;
+      modal.classList.add("open");
+    }
+
+    function closeConfigQR() {
+      const modal = document.getElementById("configQRModal");
+      if (modal) modal.classList.remove("open");
+    }
+
+    // شبکهٔ ایمنی: اگر به هر دلیلی تصویر بندانگشتی از تمپلیت رندر نشده باشد،
+    // از روی data-link همان آیتم ساخته می‌شود (در حالت عادی کاری نمیکند)
+    function addConfigQRThumbnails() {
+      document.querySelectorAll(".config-item[data-link]").forEach(item => {
+        const btn = item.querySelector(".btn-qr");
+
+        if (!btn) return;
+
+        let img = btn.querySelector("img");
+
+        if (!img) {
+          img = document.createElement("img");
+          img.alt = "QR";
+          btn.appendChild(img);
+        }
+
+        if (!img.getAttribute("src")) {
+          img.src = "https://api.qrserver.com/v1/create-qr-code/?size=120x120&ecc=M&data=" + encodeURIComponent(item.dataset.link);
+        }
+      });
+    }
+
+    // لینک ویدیوی آموزش: یا لینک مستقیم فایل (پایانش .mp4 باشد) یا لینک embed (نماشا/آپارات)
+    const INSTALL_VIDEO_URL = "https://www.namasha.com/videos/dl/7592617418-1080p/amm-1080p.mp4";
+
+    function buildPlayer() {
+      const wrap = document.getElementById("videoPlayer");
+
+      if (!INSTALL_VIDEO_URL) {
+        wrap.innerHTML = `<div class="video-empty">لینک ویدیو تنظیم نشده است.<br>متغیر INSTALL_VIDEO_URL را در کد صفحه تکمیل کنید.</div>`;
+        return;
+      }
+
+      const isDirectFile = /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(INSTALL_VIDEO_URL);
+
+      wrap.innerHTML = isDirectFile
+        ? `<video controls playsinline preload="metadata" src="${INSTALL_VIDEO_URL}"></video>`
+        : `<iframe src="${INSTALL_VIDEO_URL}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+    }
+
+    // باید داخل همان رویداد کلیک کاربر اجرا شود وگرنه مرورگر اجازه فول‌اسکرین نمی‌دهد
+    function startFullscreen() {
+      const media = document.querySelector("#videoPlayer video") || document.querySelector("#videoPlayer iframe");
+      if (!media) return;
+
+      if (media.tagName === "VIDEO") {
+        media.play().catch(() => {});
+      }
+
+      const request = media.requestFullscreen || media.webkitRequestFullscreen || media.msRequestFullscreen;
+
+      if (request) {
+        const result = request.call(media);
+        if (result && result.catch) result.catch(() => {});
+      } else if (media.webkitEnterFullscreen) {
+        media.webkitEnterFullscreen();
+      }
+    }
+
+    function stopPlayer() {
+      const video = document.querySelector("#videoPlayer video");
+      const iframe = document.querySelector("#videoPlayer iframe");
+
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+
+      if (video) {
+        video.pause();
+      } else if (iframe) {
+        iframe.src = INSTALL_VIDEO_URL;
+      }
+    }
+
+    function toggleVideo() {
+      const modal = document.getElementById("videoModal");
+      const isOpen = modal.classList.toggle("open");
+
+      if (isOpen) {
+        buildPlayer();
+        startFullscreen();
+      } else {
+        stopPlayer();
+      }
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        const videoModal = document.getElementById("videoModal");
+
+        if (videoModal.classList.contains("open")) {
+          toggleVideo();
+        }
+
+        const platformModal = document.getElementById("platformModal");
+
+        if (platformModal.classList.contains("open")) {
+          closePlatformModal();
+        }
+
+        const configQRModal = document.getElementById("configQRModal");
+
+        if (configQRModal && configQRModal.classList.contains("open")) {
+          closeConfigQR();
+        }
+      }
+    });
+
+    /* ============================================================
+       9. Protocol badges on config items
+       ============================================================ */
+    function addBadges() {
+      document.querySelectorAll(".config-item[data-link]").forEach(item => {
+        const link = item.dataset.link || "";
+        const group = item.querySelector(".badge-group");
+
+        if (!group || !link) return;
+
+        try {
+          const protocol = link.split("://")[0].toUpperCase();
+          const badge = document.createElement("span");
+
+          badge.className = "badge";
+          badge.textContent = protocol || "CONFIG";
+
+          const colors = {
+            VLESS: "#77d4ff",
+            VMESS: "#aa7cff",
+            TROJAN: "#f6c85f",
+            SS: "#37d7a1",
+            SSR: "#fb7185",
+            HYSTERIA: "#56d5bb",
+            HY2: "#56d5bb"
+          };
+
+          badge.style.background = colors[protocol] || "#94a3b8";
+          group.appendChild(badge);
+        } catch (error) {}
+      });
+    }
+
+    /* ============================================================
+       10. Init: always open in Persian + dark (night) mode
+       ============================================================ */
+    applyTheme(false);
+    buildImportSelect();
+    applyLang();
+    renderApps();
+    addBadges();
+    addConfigQRThumbnails();
+    startTehranClock();
+  </script>
+</body>
+</html>
