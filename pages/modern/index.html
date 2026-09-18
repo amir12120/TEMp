@@ -902,6 +902,16 @@
     }
 
     /* ---------- دکمه پینگ و نتیجه تاخیر هر کانفیگ ---------- */
+    .ping-bar {
+      display: flex;
+      justify-content: center;
+      padding-top: 0.35rem;
+    }
+
+    .ping-btn {
+      min-width: 200px;
+    }
+
     .ping-result {
       display: inline-flex;
       flex: 0 0 auto;
@@ -2052,10 +2062,6 @@
         <button class="btn" type="button" onclick="toggleQR()">
           ▦ QR
         </button>
-
-            <button class="btn" type="button" id="pingBtn" onclick="runPingTest(this)">
-              <span data-i18n="pingBtn">📶 پینگ</span>
-            </button>
           </div>
         </div>
       </div>
@@ -2071,6 +2077,12 @@
 
       <div id="configList">
         {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="QR"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&ecc=M&data={{ $link | urlquery }}" alt="QR" loading="lazy"></button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button><img class="config-qr-img" hidden src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data={{ $link | urlquery }}" alt=""></div>{{ end }}
+      </div>
+
+      <div class="ping-bar">
+        <button class="btn btn-primary ping-btn" type="button" id="pingBtn" onclick="runPingTest(this)">
+          <span data-i18n="pingBtn">📶 تست پینگ کانفیگها</span>
+        </button>
       </div>
     </section>
 
@@ -2158,7 +2170,7 @@
         donutCaption: "حجم باقی‌مانده",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
-        pingBtn: "📶 پینگ", pingTesting: "…", pingFail: "✗", pingUnit: "ms", pingUdp: "UDP·سنجش ناپذیر",
+        pingBtn: "📶 تست پینگ کانفیگها", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
         configsTitle: "⚙️ کانفیگ‌ها",
         installTitle: "📱 نصب و راه‌اندازی",
         downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
@@ -2200,7 +2212,7 @@
         donutCaption: "Remaining",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
-        pingBtn: "📶 Ping", pingTesting: "…", pingFail: "✗", pingUnit: "ms", pingUdp: "UDP·n/a",
+        pingBtn: "📶 Test config ping", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
         configsTitle: "⚙️ Configs",
         installTitle: "📱 Install & setup",
         downloadAppsTitle: "⬇️ Download app",
@@ -2391,6 +2403,11 @@
     };
 
     // تبدیل میلادی به شمسی (الگوریتم jalaali)
+    // تبدیل ارقام لاتین به فارسی (برای نمایش تاخیر پینگ در زبان فارسی)
+    function toPersianDigits(n) {
+      return String(n).replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+    }
+
     function toJalali(gy, gm, gd) {
       const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
       let jy = gy <= 1600 ? 0 : 979;
@@ -2897,17 +2914,25 @@
 
         if (!link.includes("://")) return null;
 
-        // shadowsocks (و ssr): کل بدنه بعد از ss:// یک base64 است که خودش
-        // «method:password@host:port» یا SIP002 را در بر دارد — اول رمزگشایی شود
+        // shadowsocks (و ssr): سه فرمت رایج دارد —
+        // ۱) کل بدنه base64 است که «method:password@host:port» در آن است
+        // ۲) SIP002 با userinfoی base64: ss://YmFzZTY0@host:port
+        // ۳) SIP002 با userinfoی رمزشده (مثل SS2022): ss://method:pass@host:port
+        //    (بدنه base64 نیست؛ host:port مستقیماً بعد از @) آخرین @ ملاک است
         if (scheme === "ss" || scheme === "ssr") {
           const body = link.slice(scheme.length + 3).split(/[?#]/)[0].replace(/\//g, "");
+
+          // تلاش ۱: بدنه کامل base64
           let inner = decodeConfigPart(body);
 
-          if (!inner) {
-            // SIP002: userinfo(base64)@host:port — نیمه اول را جداگانه رمزگشایی کن
-            const at = body.lastIndexOf("@");
-            if (at === -1) return null;
-            inner = decodeConfigPart(body.slice(0, at)) + "@" + body.slice(at + 1);
+          // تلاش ۲ و ۳: فرمت @دار — آخرین @ جداکننده است (رمز عبور SS2022 میتواند
+          // خودش @ داشته باشد؛ بنابراین سمت راستِ آخرین @ همیشه host:port است)
+          const at = body.lastIndexOf("@");
+
+          if (at !== -1) {
+            const hostPart = body.slice(at + 1);
+            const m = hostPart.match(/^\[?([^\]]+?)\]?:(\d+)$/);
+            if (m) return { host: m[1], port: Number(m[2]) };
           }
 
           if (!inner) return null;
@@ -2932,34 +2957,51 @@
     }
 
     /* تاخیر واقعی: زمان رسیدن به سرور و پورت خودِ کانفیگ.
-       هم https:// و هم http:// به همان host:port پروب میشوند — هرکدام که اتصال
-       برقرار کند زمان واقعی همان است (no-cors بدنه را نمیخواند، پس به HTTP پاسخ
-       دادن سرور نیازی نیست؛ حتی سرور TLS به http:// جواب opaque میدهد).
-       - «ok» = پورت TCP باز و پاسخگو → زنده با تاخیر واقعی.
-       - خطای فوری هر دو = RST → پورت TCP بسته.
-       - timeout کامل هر دو = مقصد از دسترس خارج.
-       برای پروتکلهای UDP-only (hysteria2/tuic) پورت TCP طبیعتاً بسته است حتی
-       وقتی سرویس سالم است؛ caller با knowsUdpPort این حالت را مدیریت میکند. */
+       هم https:// و هم http:// به همان host:port پروب میشوند (no-cors بدنه را
+       نمیخواند؛ هر سروری که TCP را بپذیرد جواب opaque میدهد). سرورهایی مثل
+       shadowsocks/wireguard اتصال را بعد از دست دادن قطع میکنند (RST) — این
+       خودش شاهد زنده بودن پورت است چون فقط یک پورت بسته همیشه بلافاصله RST
+       میدهد (کمتر از ~۱ ثانیه) ولی پورتِ بازِ سرویسِ دیگرپروتکل، بعد از چند
+       رفت‌وبرگشت واقعی قطع میکند. قاعده نهایی:
+       ۱) هر ok = زنده با همان زمان
+       ۲) دو خطای زیر ~۱٫۶ ثانیه = پورت باز، سرویس غیرHTTP → زنده (RTT واقعی)
+       ۳) فقط timeout/خطاهای دیر = پورت بسته یا مسیر قطع → مرده
+       دو دور پروب برای پایداری روی شبکههای ناپایدار تکرار میشود. */
     function probeOnce(base, host, port, timeoutMs) {
       return new Promise(resolve => {
         const t0 = performance.now();
         let done = false;
-        const finish = k => { if (!done) { done = true; resolve(k === "ok" ? Math.round(performance.now() - t0) : -1); } };
+        const finish = k => { if (!done) { done = true; resolve({ k: k, ms: Math.round(performance.now() - t0) }); } };
         const timer = setTimeout(() => finish("timeout"), timeoutMs);
         const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
         fetch(base + host + ":" + port + "/", { mode: "no-cors", cache: "no-store", signal })
           .then(() => finish("ok"))
-          .catch(() => finish("err"))
+          .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
           .finally(() => clearTimeout(timer));
       });
     }
 
     async function tcpPing(host, port, timeoutMs) {
-      // هر دو پروب موازی: اولین ok برنده است؛ اگر هیچکدام ok نشد بدترین حالت ثبت میشود
-      const https = probeOnce("https://", host, port, timeoutMs);
-      const http = probeOnce("http://", host, port, timeoutMs);
-      const [a, b] = await Promise.all([https, http]);
-      if (a >= 0 || b >= 0) return Math.min(a >= 0 ? a : Infinity, b >= 0 ? b : Infinity);
+      const probes = [];
+      const round = async () => {
+        probes.push(await probeOnce("https://", host, port, timeoutMs));
+        probes.push(await probeOnce("http://", host, port, timeoutMs));
+      };
+
+      await round();
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const oks = probes.filter(x => x.k === "ok").map(x => x.ms);
+        if (oks.length) return Math.min(...oks);
+
+        // RST سریع (زیر ~۱ ثانیه) = پورت باز و سرویس غیرHTTP؛ دو خطای سریع
+        // کافی است (پورت بسته/فیلترشده خطای خودش را دیرتر میدهد)
+        const errs = probes.filter(x => x.k === "err").map(x => x.ms).sort((a, b) => a - b);
+        if (errs.length >= 2 && errs[1] < 2500 && errs[0] < 1000) return errs[0];
+
+        if (attempt < 2) await round();
+      }
+
       return -1;
     }
 
@@ -2996,24 +3038,15 @@
           chip.textContent = t("pingTesting");
         }
 
-        // پینگ TCP واقعی به host:port کانفیگ + یک تلاش مجدد برای خطاهای گذرا
-        const scheme = (item.dataset.link.split("://")[0] || "").toLowerCase();
-        const udpOnly = scheme === "hy2" || scheme === "hysteria2" || scheme === "hysteria" || scheme === "tuic";
-
+        // پینگ TCP واقعی به host:port کانفیگ (با دو دور پروب داخل tcpPing)
         let ms = await tcpPing(hp.host, hp.port, 3500);
 
-        if (ms < 0) ms = await tcpPing(hp.host, hp.port, 3500);
-
         if (chip) {
-          if (ms < 0 && udpOnly) {
-            // پورت UDP از داخل مرورگر قابل سنجش نیست؛ بهجای خطای نادرست
-            // برچسب پروتکل نشان داده میشود (سرویس میتواند کاملاً سالم باشد)
-            chip.className = "ping-result mid";
-            chip.textContent = t("pingUdp");
-          } else {
-            chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
-            chip.textContent = ms < 0 ? t("pingFail") : ms + " " + t("pingUnit");
-          }
+          chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+          /* واحد ms قبل از عدد (سبک فارسی): «ms ۲۳۴» — در انگلیسی «234 ms» */
+          chip.textContent = ms < 0 ? t("pingFail")
+            : (lang === "fa" ? t("pingUnit") + " " + toPersianDigits(ms)
+                             : ms + " " + t("pingUnit"));
         }
 
         results.push(ms);
