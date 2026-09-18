@@ -3043,10 +3043,9 @@
 
         if (chip) {
           chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
-          /* واحد ms قبل از عدد (سبک فارسی): «ms ۲۳۴» — در انگلیسی «234 ms» */
-          chip.textContent = ms < 0 ? t("pingFail")
-            : (lang === "fa" ? t("pingUnit") + " " + toPersianDigits(ms)
-                             : ms + " " + t("pingUnit"));
+          /* واحد بعد از عدد: «۲۳۴ ms» (فارسی) / «234 ms» (انگلیسی) */
+          const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
+          chip.textContent = ms < 0 ? t("pingFail") : num + " " + t("pingUnit");
         }
 
         results.push(ms);
