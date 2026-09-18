@@ -2158,7 +2158,7 @@
         donutCaption: "حجم باقی‌مانده",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
-        pingBtn: "📶 پینگ", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
+        pingBtn: "📶 پینگ", pingTesting: "…", pingFail: "✗", pingUnit: "ms", pingUdp: "UDP·سنجش ناپذیر",
         configsTitle: "⚙️ کانفیگ‌ها",
         installTitle: "📱 نصب و راه‌اندازی",
         downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
@@ -2200,7 +2200,7 @@
         donutCaption: "Remaining",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
-        pingBtn: "📶 Ping", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
+        pingBtn: "📶 Ping", pingTesting: "…", pingFail: "✗", pingUnit: "ms", pingUdp: "UDP·n/a",
         configsTitle: "⚙️ Configs",
         installTitle: "📱 Install & setup",
         downloadAppsTitle: "⬇️ Download app",
@@ -2295,6 +2295,8 @@
        ============================================================ */
     const sub = {
       enabled: {{ .enabled }},
+      isOnline: {{ .isOnline }},
+      lastOnlineMs: {{ .lastOnline }},
       expireSec: {{ .expire }},
       totalByte: {{ .totalByte }},
       dlByte: {{ .downloadByte }},
@@ -2346,12 +2348,13 @@
         isExpiredOrZero = false;
       }
 
-      // نشانگر آنلاین/آفلاین: کاربر در حال استفاده از اکانت (فعال + مصرف غیرصفر) = آنلاین
+      // نشانگر آنلاین/آفلاین: فقط اتصال زنده‌ی واقعی کاربر ملاک است — فیلد isOnline
+      // را خود پنل سنایی از ردیابی کلاینت‌های Xray محاسبه و در رندر تزریق میکند.
       const presence = document.getElementById("presence");
       const presenceText = document.getElementById("presenceText");
 
       if (presence && presenceText) {
-        const online = Boolean(sub.enabled) && !zeroUsage;
+        const online = Boolean(sub.enabled) && Boolean(sub.isOnline);
         presence.classList.toggle("online", online);
         presence.classList.toggle("offline", !online);
         presenceText.textContent = t(online ? "online" : "offline");
@@ -2639,6 +2642,21 @@
       fitAllAlerts();
     }
 
+    /* ---------- وضعیت زندهٔ آنلاین/آفلاین ----------
+       پنل سنایی روی ?format=info همان داده‌های قالب را JSON میدهد؛
+       هر ۱۰ ثانیه isOnline تازه میشود تا نشانگر بدون رفرش صفحه بهروز بماند. */
+    async function refreshPresence() {
+      try {
+        const res = await fetch(window.location.pathname + "?format=info", { cache: "no-store" });
+        if (!res.ok) return;
+        const info = await res.json();
+        if (typeof info.isOnline === "boolean") sub.isOnline = info.isOnline;
+        if (typeof info.lastOnline === "number") sub.lastOnlineMs = info.lastOnline;
+        renderStatus();
+      } catch (error) { /* صفحه به‌صورت فایل باز شده یا شبکه قطع است — بی‌صدا */ }
+    }
+    setInterval(refreshPresence, 10000);
+
     // بعد از هر رندر/تغییر زبان، تکخطی ماندن اخطارها تضمین میشود
     function fitAllAlerts() {
       ["alertTime", "alertVol"].forEach(id => {
@@ -2863,17 +2881,41 @@
       }
     }
 
-    // استخراج آدرس و پورت واقعی سرور از URI کانفیگ (vmess/vless/trojan/ss/hy2)
+    // استخراج آدرس و پورت واقعی سرور از URI کانفیگ
+    // (vmess/vless/trojan/ss/ssr/hy/hy2/tuic/kcp/socking...)
     function extractHostPort(link) {
       try {
-        if (!link || link.indexOf("://") === -1) return null;
+        if (!link) return null;
 
-        const scheme = link.split("://")[0].toLowerCase();
+        const scheme = (link.split("://")[0] || "").toLowerCase();
 
         if (scheme === "vmess") {
           const json = JSON.parse(decodeConfigPart(link.slice(8)) || "null");
           if (!json || !json.add || !json.port) return null;
           return { host: String(json.add), port: Number(json.port) };
+        }
+
+        if (!link.includes("://")) return null;
+
+        // shadowsocks (و ssr): کل بدنه بعد از ss:// یک base64 است که خودش
+        // «method:password@host:port» یا SIP002 را در بر دارد — اول رمزگشایی شود
+        if (scheme === "ss" || scheme === "ssr") {
+          const body = link.slice(scheme.length + 3).split(/[?#]/)[0].replace(/\//g, "");
+          let inner = decodeConfigPart(body);
+
+          if (!inner) {
+            // SIP002: userinfo(base64)@host:port — نیمه اول را جداگانه رمزگشایی کن
+            const at = body.lastIndexOf("@");
+            if (at === -1) return null;
+            inner = decodeConfigPart(body.slice(0, at)) + "@" + body.slice(at + 1);
+          }
+
+          if (!inner) return null;
+
+          const hostPart = inner.slice(inner.lastIndexOf("@") + 1);
+          const m = hostPart.match(/^\[?([^\]]+?)\]?:(\d+)$/);
+
+          return m ? { host: m[1], port: Number(m[2]) } : null;
         }
 
         const rest = link.slice(link.indexOf("://") + 3).split(/[/?#]/)[0];
@@ -2889,31 +2931,36 @@
       }
     }
 
-    // تاخیر واقعی: زمان کامل شدن یک درخواست HTTPS به خود سرور و پورت کانفیگ.
-    // پاسخ opaque (ok) = اتصال TCP/TLS برقرار و سرویس پاسخ داد → زنده با تاخیر اندازهگیری شده.
-    // خطا (TypeError) = پورت بسته/ناموجود/فیلتر شده → مرده (نسخههای قدیمی مرورگر بدون AbortSignal
-    // با setTimeout داخلی قطع میشوند).
-    function tcpPing(host, port, timeoutMs) {
+    /* تاخیر واقعی: زمان رسیدن به سرور و پورت خودِ کانفیگ.
+       هم https:// و هم http:// به همان host:port پروب میشوند — هرکدام که اتصال
+       برقرار کند زمان واقعی همان است (no-cors بدنه را نمیخواند، پس به HTTP پاسخ
+       دادن سرور نیازی نیست؛ حتی سرور TLS به http:// جواب opaque میدهد).
+       - «ok» = پورت TCP باز و پاسخگو → زنده با تاخیر واقعی.
+       - خطای فوری هر دو = RST → پورت TCP بسته.
+       - timeout کامل هر دو = مقصد از دسترس خارج.
+       برای پروتکلهای UDP-only (hysteria2/tuic) پورت TCP طبیعتاً بسته است حتی
+       وقتی سرویس سالم است؛ caller با knowsUdpPort این حالت را مدیریت میکند. */
+    function probeOnce(base, host, port, timeoutMs) {
       return new Promise(resolve => {
         const t0 = performance.now();
         let done = false;
-        const finish = ok => {
-          if (!done) {
-            done = true;
-            resolve(ok ? Math.round(performance.now() - t0) : -1);
-          }
-        };
-        const timer = setTimeout(() => finish(false), timeoutMs);
-        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout
-          ? AbortSignal.timeout(timeoutMs)
-          : undefined;
-
-        fetch("https://" + host + ":" + port + "/", {
-          mode: "no-cors",
-          cache: "no-store",
-          signal: signal
-        }).then(() => finish(true)).catch(() => finish(false)).finally(() => clearTimeout(timer));
+        const finish = k => { if (!done) { done = true; resolve(k === "ok" ? Math.round(performance.now() - t0) : -1); } };
+        const timer = setTimeout(() => finish("timeout"), timeoutMs);
+        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
+        fetch(base + host + ":" + port + "/", { mode: "no-cors", cache: "no-store", signal })
+          .then(() => finish("ok"))
+          .catch(() => finish("err"))
+          .finally(() => clearTimeout(timer));
       });
+    }
+
+    async function tcpPing(host, port, timeoutMs) {
+      // هر دو پروب موازی: اولین ok برنده است؛ اگر هیچکدام ok نشد بدترین حالت ثبت میشود
+      const https = probeOnce("https://", host, port, timeoutMs);
+      const http = probeOnce("http://", host, port, timeoutMs);
+      const [a, b] = await Promise.all([https, http]);
+      if (a >= 0 || b >= 0) return Math.min(a >= 0 ? a : Infinity, b >= 0 ? b : Infinity);
+      return -1;
     }
 
     let pingAbort = false;
@@ -2949,14 +2996,24 @@
           chip.textContent = t("pingTesting");
         }
 
+        // پینگ TCP واقعی به host:port کانفیگ + یک تلاش مجدد برای خطاهای گذرا
+        const scheme = (item.dataset.link.split("://")[0] || "").toLowerCase();
+        const udpOnly = scheme === "hy2" || scheme === "hysteria2" || scheme === "hysteria" || scheme === "tuic";
+
         let ms = await tcpPing(hp.host, hp.port, 3500);
 
-        // یک تلاش مجدد کوتاه برای خطاهای گذرا (شبکههای ناپایدار)
         if (ms < 0) ms = await tcpPing(hp.host, hp.port, 3500);
 
         if (chip) {
-          chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
-          chip.textContent = ms < 0 ? t("pingFail") : ms + " " + t("pingUnit");
+          if (ms < 0 && udpOnly) {
+            // پورت UDP از داخل مرورگر قابل سنجش نیست؛ بهجای خطای نادرست
+            // برچسب پروتکل نشان داده میشود (سرویس میتواند کاملاً سالم باشد)
+            chip.className = "ping-result mid";
+            chip.textContent = t("pingUdp");
+          } else {
+            chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+            chip.textContent = ms < 0 ? t("pingFail") : ms + " " + t("pingUnit");
+          }
         }
 
         results.push(ms);
