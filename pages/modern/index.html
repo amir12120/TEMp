@@ -2177,7 +2177,7 @@
         donutCaption: "حجم باقی‌مانده",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
-        pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingUnavailable: "—", pingUnit: "ms",
+        pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnavailable: "—", pingUnit: "ms",
         configsTitle: "⚙️ کانفیگ‌ها",
         installTitle: "📱 نصب و راه‌اندازی",
         downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
@@ -2219,7 +2219,7 @@
         donutCaption: "Remaining",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
-        pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingUnavailable: "—", pingUnit: "ms",
+        pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnavailable: "—", pingUnit: "ms",
         configsTitle: "⚙️ Configs",
         installTitle: "📱 Install & setup",
         downloadAppsTitle: "⬇️ Download app",
@@ -2973,6 +2973,37 @@
       });
     }
 
+    function probePortOnce(base, host, port, timeoutMs) {
+      return new Promise(resolve => {
+        const t0 = performance.now();
+        let done = false;
+        const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
+        const timer = setTimeout(() => finish("timeout"), timeoutMs);
+        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
+        fetch(base + host + ":" + port + "/", { mode: "no-cors", cache: "no-store", signal })
+          .then(() => finish("ok"))
+          .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
+          .finally(() => clearTimeout(timer));
+      });
+    }
+
+    // بررسی قدیمی در دسترس بودن پورت؛ فقط برای سه کانفیگ پایانی استفاده می‌شود.
+    async function legacyPortCheck(endpoint, timeoutMs) {
+      const probes = [];
+      const round = async () => {
+        probes.push(await probePortOnce("https://", endpoint.host, endpoint.port, timeoutMs));
+        probes.push(await probePortOnce("http://", endpoint.host, endpoint.port, timeoutMs));
+      };
+      await round();
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (probes.some(x => x.k === "ok")) return true;
+        const errs = probes.filter(x => x.k === "err").map(x => x.ms).sort((a, b) => a - b);
+        if (errs.length >= 2 && errs[1] < 2500 && errs[0] < 1000) return true;
+        if (attempt < 2) await round();
+      }
+      return false;
+    }
+
     async function measureLatency(endpoint, timeoutMs) {
       if (!endpoint || !endpoint.http) return null;
       const samples = [await probeHttp(endpoint, timeoutMs), await probeHttp(endpoint, timeoutMs)];
@@ -2986,11 +3017,27 @@
 
       btn.disabled = true;
 
-      for (const item of items) {
+      for (const [index, item] of items.entries()) {
         const chip = item.querySelector(".ping-result");
         const endpoint = extractEndpoint(item.dataset.link);
 
         if (!endpoint) continue;
+
+        // سه کانفیگ پایانی فقط باید زنده‌بودنشان بررسی و OK نمایش داده شود.
+        const statusOnly = index >= Math.max(0, items.length - 3);
+        if (statusOnly) {
+          if (chip) {
+            chip.hidden = false;
+            chip.className = "ping-result testing";
+            chip.textContent = t("pingTesting");
+          }
+          const live = await legacyPortCheck(endpoint, 3500);
+          if (chip) {
+            chip.className = "ping-result " + (live ? "good" : "bad");
+            chip.textContent = live ? t("pingOk") : t("pingFail");
+          }
+          continue;
+        }
 
         // پروتکل‌های غیر HTTP عمداً دست‌نخورده می‌مانند؛ مرورگر نباید آن‌ها را probe کند.
         if (!endpoint.http) continue;
