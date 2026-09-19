@@ -2205,6 +2205,7 @@
         tehranTime: "به وقت تهران",
         noSubLink: "❌ لینک اشتراک یافت نشد",
         copiedHelp: "✅ لینک اشتراک کپی شد!\n\nاگر برنامه {app} به‌صورت خودکار باز نشد:\n1. برنامه {app} را باز کنید\n2. به بخش «اشتراک / پروفایل» بروید\n3. روی + بزنید و لینک را Paste کنید\n4. ذخیره کنید و با آیکون ↻ به‌روزرسانی کنید",
+        copyOnlyHelp: "✅ لینک اشتراک کپی شد!\n\nلطفاً برنامه {app} را باز کنید و لینک را از کلیپ‌بورد در بخش افزودن اشتراک Paste کنید.",
         copyFailed: "❌ خطا در کپی:"
       },
       en: {
@@ -2247,6 +2248,7 @@
         tehranTime: "Tehran time",
         noSubLink: "❌ Subscription link not found",
         copiedHelp: "✅ Subscription link copied!\n\nIf {app} didn't open automatically:\n1. Open {app}\n2. Go to the Subscription / Profiles tab\n3. Tap + and paste the link\n4. Save it, then tap the ↻ update icon",
+        copyOnlyHelp: "✅ Subscription link copied!\n\nOpen {app} and paste the link from the clipboard in its Add Subscription section.",
         copyFailed: "❌ Copy failed:"
       }
     };
@@ -2811,7 +2813,7 @@
           ios: "https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690"
         },
         deeplink(subLink) {
-          return "v2box://install-sub?url=" + encodeURIComponent(subLink);
+          return "v2box://install-sub?url=" + encodeURIComponent(subLink) + "&name=Subscription";
         }
       },
       {
@@ -2821,9 +2823,7 @@
         platforms: {
           ios: "https://apps.apple.com/us/app/streisand/id6450534064"
         },
-        deeplink(subLink) {
-          return "streisand://import/" + encodeURIComponent(subLink);
-        }
+        deeplink: null
       },
       {
         id: "npvtunnel",
@@ -2854,8 +2854,8 @@
           tagPrefix: "v" // تگهای رلیز این ریپو پیشوند v دارند (مثل v4.1.1)
         },
         deeplink(subLink) {
-          // رسمی: فیلتر intent در AndroidManifest برنامه (scheme hiddify + host install-sub)
-          return "hiddify://install-sub?url=" + encodeURIComponent(subLink);
+          // فرمت فعلی مستند Hiddify؛ install-sub قدیمی و deprecated است.
+          return "hiddify://import/" + subLink + "#Subscription";
         }
       },
       {
@@ -2865,10 +2865,7 @@
         platforms: {
           ios: "https://apps.apple.com/us/app/shadowrocket/id932747118"
         },
-        deeplink(subLink) {
-          // رسمی: shadowrocket://add/sub://BASE64(لینک اشتراک) — مستند 3X-UI
-          return "shadowrocket://add/sub://" + btoa(unescape(encodeURIComponent(subLink)));
-        }
+        deeplink: null
       },
       {
         id: "happ",
@@ -2881,9 +2878,7 @@
           macos: "https://www.happ.su/main",
           linux: "https://www.happ.su/main"
         },
-        deeplink(subLink) {
-          return "happ://add/" + subLink;
-        }
+        deeplink: null
       }
     ];
 
@@ -3311,10 +3306,12 @@
       // کپی لینک در کلیپ‌بورد برای روش دستی
       copyToClipboardSilent(subLink);
 
-      // اگر برنامه ظرف ۲ ثانیه صفحه را نگرفت، راهنمای دستی نشان بده
+      // اگر deep-link رسمی وجود ندارد، از ابتدا راهنمای کپی دستی نشان بده؛
+      // در غیر این صورت اگر برنامه ظرف ۲ ثانیه صفحه را نگرفت، راهنمای عمومی بده.
       setTimeout(() => {
         if (!document.hidden) {
-          alert(t("copiedHelp").replace("{app}", app.name));
+          const helpKey = deep ? "copiedHelp" : "copyOnlyHelp";
+          alert(t(helpKey).replace("{app}", app.name));
         }
       }, 2000);
     }
