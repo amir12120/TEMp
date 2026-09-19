@@ -2962,20 +2962,13 @@
       return ok.length ? { status: "ok", ms: Math.min(...ok) } : { status: "fail", ms: -1 };
     }
 
-    let pingAbort = false;
-
     async function runPingTest(btn) {
       const items = [...document.querySelectorAll(".config-item[data-link]")];
       if (!items.length) return;
 
-      pingAbort = false;
       btn.disabled = true;
 
-      const results = [];
-
       for (const item of items) {
-        if (pingAbort) break;
-
         const chip = item.querySelector(".ping-result");
         const endpoint = extractEndpoint(item.dataset.link);
 
@@ -3002,7 +2995,6 @@
             : (lang === "fa" ? t("pingUnit") + " " + num : num + " " + t("pingUnit"));
         }
 
-        results.push(ms);
       }
 
       btn.disabled = false;

@@ -32,12 +32,17 @@ need_root() {
   [[ "${FAKE_ROOT:-0}" == "1" ]] || [ "$(id -u)" -eq 0 ] || die "Run as root (sudo bash ...). Target: ${TARGET_FILE}"
 }
 
-fetch() {  # fetch <repo-relative-path> -> stdout ; dies on HTTP error
+fetch() {  # fetch <repo-relative-path> -> stdout ; returns nonzero on HTTP error
   local path="$1" tmp
   tmp="$(mktemp)" || die "mktemp failed"
-  local code
-  code="$(curl -fsSL -o "$tmp" -w '%{http_code}' "${BASE_RAW}/${path}" 2>/dev/null || echo 000)"
-  if [ "$code" != "200" ]; then rm -f "$tmp"; die "GET ${path} failed (HTTP ${code})"; fi
+  local code curl_status=0
+  code="$(curl -fsSL -o "$tmp" -w '%{http_code}' "${BASE_RAW}/${path}" 2>/dev/null)" || curl_status=$?
+  if [ "$curl_status" -ne 0 ] || [ "$code" != "200" ]; then
+    rm -f "$tmp"
+    [ -n "$code" ] || code="000"
+    printf 'GET %s failed (HTTP %s)\n' "$path" "$code" >&2
+    return 1
+  fi
   printf '%s' "$tmp"
 }
 
@@ -51,6 +56,7 @@ list_pages() {
     rm -f "$tmp"
     return 0
   fi
+  rm -f "${tmp:-}"
   warn "pages.txt not found; discovering pages via GitHub API..."
   local api="https://api.github.com/repos/${REPO}/contents/pages"
   curl -fsSL "$api" 2>/dev/null | grep -o '"name": *"[^"]*"' | sed 's/.*"name": *"\(.*\)"/\1/'
@@ -62,7 +68,7 @@ install_page() {
   [[ "$page" =~ ^[A-Za-z0-9_-]+$ ]] || die "Invalid page name: ${page}"
 
   say "Fetching page '${page}' from ${REPO}..."
-  tmp="$(fetch "pages/${page}/index.html")"
+  tmp="$(fetch "pages/${page}/index.html")" || die "Could not download page '${page}'."
 
   need_root
   mkdir -p "$TARGET_DIR"

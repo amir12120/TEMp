@@ -60,7 +60,7 @@ Select theme number [1-1]:
 
 | صفحه     | توضیح |
 |----------|-------|
-| `modern` | صفحه اشتراک مدرن — دو زبانه (فارسی/انگلیسی)، حالت شب و روز، QR کد برای تک‌تک کانفیگ‌ها، تست پینگ واقعی با تاخیر واقعی (حتی shadowsocks و hysteria2)، نشانگر آنلاین/آفلاین زنده، ساعت تهران با رویدادهای تقویم ایرانی، بخش دانلود اپلیکیشن (۸ برنامه با لینک آخرین نسخه پایدار) |
+| `modern` | صفحه اشتراک مدرن — دو زبانه (فارسی/انگلیسی)، حالت شب و روز، QR کد برای تک‌تک کانفیگ‌ها، اندازه‌گیری تأخیر ترنسپورت‌های HTTP از مرورگر، نشانگر آنلاین/آفلاین زنده، ساعت تهران با رویدادهای تقویم ایرانی، بخش دانلود اپلیکیشن (۸ برنامه با لینک آخرین نسخه پایدار) |
 
 ## افزودن تم جدید در آینده
 
@@ -116,7 +116,7 @@ and **Save**. The subscription page now renders from this folder.
 
 | Theme    | Description |
 |----------|-------------|
-| `modern` | Modern bilingual (fa/en) subscription & usage panel — dark/light modes, per-config QR codes, real-delay ping test (incl. shadowsocks & hysteria2), live online/offline presence, Tehran clock with Iranian-calendar events, app download section (8 apps, always latest stable) |
+| `modern` | Modern bilingual (fa/en) subscription & usage panel — dark/light modes, per-config QR codes, browser latency measurement for HTTP transports, live online/offline presence, Tehran clock with Iranian-calendar events, app download section (8 apps, always latest stable) |
 
 ### Adding a new theme
 
