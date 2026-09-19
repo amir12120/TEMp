@@ -2927,7 +2927,7 @@
         const rest = link.slice(link.indexOf("://") + 3);
         const authority = rest.split(/[/?#]/)[0];
         const hostPart = authority.lastIndexOf("@") !== -1 ? authority.slice(authority.lastIndexOf("@") + 1) : authority;
-        const m = hostPart.match(/^\[?([^\]]+?)\]:(\d+)$/);
+        const m = hostPart.match(/^(?:\[([^\]]+)\]|([^:]+)):(\d+)$/);
         if (!m) return null;
         const query = new URL(link).searchParams;
         const type = (query.get("type") || query.get("net") || "tcp").toLowerCase();
@@ -2936,7 +2936,7 @@
         const http = ["ws", "http", "h2", "xhttp", "grpc"].includes(type);
         const tls = query.get("security") === "tls" || query.get("security") === "reality" || query.get("tls") === "1";
         const rawPath = query.get("path") || "/";
-        return { host: m[1], port: Number(m[2]), http, tls, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
+        return { host: m[1] || m[2], port: Number(m[3]), http, tls, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
       } catch (error) {
         return null;
       }
