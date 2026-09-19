@@ -955,6 +955,13 @@
       background: rgba(251, 113, 133, 0.08);
     }
 
+    .ping-result.unsupported {
+      border-color: rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+      background: rgba(148, 163, 184, 0.08);
+      cursor: help;
+    }
+
     @keyframes ping-blink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.35; }
@@ -2170,7 +2177,7 @@
         donutCaption: "حجم باقی‌مانده",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
-        pingBtn: "📶 تست پینگ کانفیگها", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
+        pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingUnavailable: "—", pingUnit: "ms",
         configsTitle: "⚙️ کانفیگ‌ها",
         installTitle: "📱 نصب و راه‌اندازی",
         downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
@@ -2212,7 +2219,7 @@
         donutCaption: "Remaining",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
-        pingBtn: "📶 Test config ping", pingTesting: "…", pingFail: "✗", pingUnit: "ms",
+        pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingUnavailable: "—", pingUnit: "ms",
         configsTitle: "⚙️ Configs",
         installTitle: "📱 Install & setup",
         downloadAppsTitle: "⬇️ Download app",
@@ -2883,10 +2890,11 @@
     }
 
     /* ============================================================
-       7b. تست تاخیر واقعی کانفیگ‌ها (پینگ)
-       هر کانفیگ با یک دست‌دادن TCP واقعی به سرور/پورت خودش زمان‌سنجی میشود؛
-       اگر شبکه آن را مسدود کند، به یک آدرس عمومی روی همان پورت سقوط میکند
-       تا «قابلیت رسیدن پورت» همچنان سنجیده شود.
+       7b. اندازه‌گیری تأخیر کانفیگ‌ها
+       مرورگر اجازهٔ TCP/UDP خام نمی‌دهد؛ بنابراین fetch به یک پورت دلخواه
+       «پینگ واقعی» نیست و برای VLESS/SS/WireGuard/هیسـتریا نتیجهٔ کاذب می‌دهد.
+       فقط ترنسپورت‌های HTTP قابل تست هستند. بقیه با توضیح شفاف به کاربر
+       واگذار می‌شوند تا خود برنامهٔ VPN آن‌ها را تست کند.
        ============================================================ */
     function decodeConfigPart(part) {
       try {
@@ -2898,9 +2906,8 @@
       }
     }
 
-    // استخراج آدرس و پورت واقعی سرور از URI کانفیگ
-    // (vmess/vless/trojan/ss/ssr/hy/hy2/tuic/kcp/socking...)
-    function extractHostPort(link) {
+    // استخراج اطلاعات لازم از URI کانفیگ بدون افشای credentialها
+    function extractEndpoint(link) {
       try {
         if (!link) return null;
 
@@ -2909,100 +2916,50 @@
         if (scheme === "vmess") {
           const json = JSON.parse(decodeConfigPart(link.slice(8)) || "null");
           if (!json || !json.add || !json.port) return null;
-          return { host: String(json.add), port: Number(json.port) };
+          const net = String(json.net || "tcp").toLowerCase();
+          return { host: String(json.add), port: Number(json.port),
+            http: net === "ws" || net === "http" || net === "h2",
+            tls: String(json.tls || "").toLowerCase() === "tls",
+            path: json.path || "/" };
         }
 
         if (!link.includes("://")) return null;
-
-        // shadowsocks (و ssr): سه فرمت رایج دارد —
-        // ۱) کل بدنه base64 است که «method:password@host:port» در آن است
-        // ۲) SIP002 با userinfoی base64: ss://YmFzZTY0@host:port
-        // ۳) SIP002 با userinfoی رمزشده (مثل SS2022): ss://method:pass@host:port
-        //    (بدنه base64 نیست؛ host:port مستقیماً بعد از @) آخرین @ ملاک است
-        if (scheme === "ss" || scheme === "ssr") {
-          const body = link.slice(scheme.length + 3).split(/[?#]/)[0].replace(/\//g, "");
-
-          // تلاش ۱: بدنه کامل base64
-          let inner = decodeConfigPart(body);
-
-          // تلاش ۲ و ۳: فرمت @دار — آخرین @ جداکننده است (رمز عبور SS2022 میتواند
-          // خودش @ داشته باشد؛ بنابراین سمت راستِ آخرین @ همیشه host:port است)
-          const at = body.lastIndexOf("@");
-
-          if (at !== -1) {
-            const hostPart = body.slice(at + 1);
-            const m = hostPart.match(/^\[?([^\]]+?)\]?:(\d+)$/);
-            if (m) return { host: m[1], port: Number(m[2]) };
-          }
-
-          if (!inner) return null;
-
-          const hostPart = inner.slice(inner.lastIndexOf("@") + 1);
-          const m = hostPart.match(/^\[?([^\]]+?)\]?:(\d+)$/);
-
-          return m ? { host: m[1], port: Number(m[2]) } : null;
-        }
-
-        const rest = link.slice(link.indexOf("://") + 3).split(/[/?#]/)[0];
-        const hostPart = rest.lastIndexOf("@") !== -1 ? rest.slice(rest.lastIndexOf("@") + 1) : rest;
-        const host = hostPart.replace(/\]$/, "").replace(/^\[/, "");
-        const m = host.match(/^(.+):(\d+)$/);
-
+        const rest = link.slice(link.indexOf("://") + 3);
+        const authority = rest.split(/[/?#]/)[0];
+        const hostPart = authority.lastIndexOf("@") !== -1 ? authority.slice(authority.lastIndexOf("@") + 1) : authority;
+        const m = hostPart.match(/^\[?([^\]]+?)\]:(\d+)$/);
         if (!m) return null;
-
-        return { host: m[1], port: Number(m[2]) };
+        const query = new URL(link).searchParams;
+        const type = (query.get("type") || query.get("net") || "tcp").toLowerCase();
+        const http = ["ws", "http", "h2", "xhttp"].includes(type);
+        const tls = query.get("security") === "tls" || query.get("security") === "reality" || query.get("tls") === "1";
+        const rawPath = query.get("path") || "/";
+        return { host: m[1], port: Number(m[2]), http, tls, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
       } catch (error) {
         return null;
       }
     }
 
-    /* تاخیر واقعی: زمان رسیدن به سرور و پورت خودِ کانفیگ.
-       هم https:// و هم http:// به همان host:port پروب میشوند (no-cors بدنه را
-       نمیخواند؛ هر سروری که TCP را بپذیرد جواب opaque میدهد). سرورهایی مثل
-       shadowsocks/wireguard اتصال را بعد از دست دادن قطع میکنند (RST) — این
-       خودش شاهد زنده بودن پورت است چون فقط یک پورت بسته همیشه بلافاصله RST
-       میدهد (کمتر از ~۱ ثانیه) ولی پورتِ بازِ سرویسِ دیگرپروتکل، بعد از چند
-       رفت‌وبرگشت واقعی قطع میکند. قاعده نهایی:
-       ۱) هر ok = زنده با همان زمان
-       ۲) دو خطای زیر ~۱٫۶ ثانیه = پورت باز، سرویس غیرHTTP → زنده (RTT واقعی)
-       ۳) فقط timeout/خطاهای دیر = پورت بسته یا مسیر قطع → مرده
-       دو دور پروب برای پایداری روی شبکههای ناپایدار تکرار میشود. */
-    function probeOnce(base, host, port, timeoutMs) {
+    function probeHttp(endpoint, timeoutMs) {
       return new Promise(resolve => {
         const t0 = performance.now();
         let done = false;
-        const finish = k => { if (!done) { done = true; resolve({ k: k, ms: Math.round(performance.now() - t0) }); } };
+        const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
         const timer = setTimeout(() => finish("timeout"), timeoutMs);
         const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
-        fetch(base + host + ":" + port + "/", { mode: "no-cors", cache: "no-store", signal })
+        const base = endpoint.tls ? "https://" : "http://";
+        fetch(base + endpoint.host + ":" + endpoint.port + endpoint.path, { mode: "no-cors", cache: "no-store", signal, redirect: "manual" })
           .then(() => finish("ok"))
           .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
           .finally(() => clearTimeout(timer));
       });
     }
 
-    async function tcpPing(host, port, timeoutMs) {
-      const probes = [];
-      const round = async () => {
-        probes.push(await probeOnce("https://", host, port, timeoutMs));
-        probes.push(await probeOnce("http://", host, port, timeoutMs));
-      };
-
-      await round();
-
-      for (let attempt = 0; attempt < 3; attempt++) {
-        const oks = probes.filter(x => x.k === "ok").map(x => x.ms);
-        if (oks.length) return Math.min(...oks);
-
-        // RST سریع (زیر ~۱ ثانیه) = پورت باز و سرویس غیرHTTP؛ دو خطای سریع
-        // کافی است (پورت بسته/فیلترشده خطای خودش را دیرتر میدهد)
-        const errs = probes.filter(x => x.k === "err").map(x => x.ms).sort((a, b) => a - b);
-        if (errs.length >= 2 && errs[1] < 2500 && errs[0] < 1000) return errs[0];
-
-        if (attempt < 2) await round();
-      }
-
-      return -1;
+    async function measureLatency(endpoint, timeoutMs) {
+      if (!endpoint || !endpoint.http) return { status: "unsupported", ms: -1 };
+      const samples = [await probeHttp(endpoint, timeoutMs), await probeHttp(endpoint, timeoutMs)];
+      const ok = samples.filter(x => x.k === "ok").map(x => x.ms);
+      return ok.length ? { status: "ok", ms: Math.min(...ok) } : { status: "fail", ms: -1 };
     }
 
     let pingAbort = false;
@@ -3020,9 +2977,9 @@
         if (pingAbort) break;
 
         const chip = item.querySelector(".ping-result");
-        const hp = extractHostPort(item.dataset.link);
+        const endpoint = extractEndpoint(item.dataset.link);
 
-        if (!hp) {
+        if (!endpoint) {
           if (chip) {
             chip.hidden = false;
             chip.className = "ping-result bad";
@@ -3038,14 +2995,15 @@
           chip.textContent = t("pingTesting");
         }
 
-        // پینگ TCP واقعی به host:port کانفیگ (با دو دور پروب داخل tcpPing)
-        let ms = await tcpPing(hp.host, hp.port, 3500);
+        const result = await measureLatency(endpoint, 3500);
+        const ms = result.ms;
 
         if (chip) {
-          chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+          chip.className = "ping-result " + (result.status === "unsupported" ? "unsupported" : ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+          chip.title = result.status === "unsupported" ? (lang === "fa" ? "مرورگر نمی‌تواند تأخیر TCP/UDP خام این پروتکل را اندازه‌گیری کند؛ از تست داخل نرم‌افزار VPN استفاده کنید." : "The browser cannot measure raw TCP/UDP latency for this protocol; use the VPN app's test.") : "";
           /* فارسی (RTL): «ms ۲۳۴» — انگلیسی (LTR): «234 ms» */
           const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
-          chip.textContent = ms < 0 ? t("pingFail")
+          chip.textContent = result.status === "unsupported" ? t("pingUnavailable") : ms < 0 ? t("pingFail")
             : (lang === "fa" ? t("pingUnit") + " " + num : num + " " + t("pingUnit"));
         }
 
