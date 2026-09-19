@@ -3189,14 +3189,15 @@
       return res.json();
     }
 
-    // آخرین نسخهٔ پایدار هر ریپازیتوری گیت‌هاب (منبع اول shields.io، منبع دوم API گیت‌هاب)
+    // آخرین نسخهٔ پایدار هر ریپازیتوری گیت‌هاب؛ API رسمی منبع اصلی است و
+    // Shields.io فقط در صورت محدودیت/خطای API به‌عنوان fallback استفاده می‌شود.
     async function resolveLatestVersion(repo) {
       const cached = versionCache[repo];
       if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.ver;
 
       const sources = [
-        () => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`).then(j => stripV(j.value)),
-        () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`).then(j => stripV(j.tag_name))
+        () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`).then(j => stripV(j.tag_name)),
+        () => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`).then(j => stripV(j.value))
       ];
       for (const src of sources) {
         try {
