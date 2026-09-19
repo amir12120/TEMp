@@ -2989,10 +2989,10 @@
         if (chip) {
           chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
           chip.title = "";
-          /* فارسی (RTL): «ms ۲۳۴» — انگلیسی (LTR): «234 ms» */
+          /* فارسی و انگلیسی هر دو: «۲۳۴ ms» / «234 ms» */
           const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
           chip.textContent = ms < 0 ? t("pingFail")
-            : (lang === "fa" ? t("pingUnit") + " " + num : num + " " + t("pingUnit"));
+            : num + " " + t("pingUnit");
         }
 
       }
