@@ -2931,7 +2931,9 @@
         if (!m) return null;
         const query = new URL(link).searchParams;
         const type = (query.get("type") || query.get("net") || "tcp").toLowerCase();
-        const http = ["ws", "http", "h2", "xhttp"].includes(type);
+        // gRPC روی HTTP/2 است؛ درخواست عمومی به endpoint آن ممکن است 4xx/415
+        // برگرداند، اما همان پاسخ هم برای اندازه‌گیری دسترسی و تأخیر کافی است.
+        const http = ["ws", "http", "h2", "xhttp", "grpc"].includes(type);
         const tls = query.get("security") === "tls" || query.get("security") === "reality" || query.get("tls") === "1";
         const rawPath = query.get("path") || "/";
         return { host: m[1], port: Number(m[2]), http, tls, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
