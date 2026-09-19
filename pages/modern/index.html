@@ -282,8 +282,8 @@
       inset-inline-start: 0;
       top: 50%;
       translate: 0 -50%;
-      width: 64px;
-      height: 64px;
+      width: 82px;
+      height: 82px;
       border-radius: 50%;
       perspective: 160px;
       transform: rotateY(0deg);
@@ -291,7 +291,7 @@
       isolation: isolate;
       will-change: transform;
       animation: coin-spin 12s ease-in-out infinite;
-      border: 3px solid #a8323d;
+      border: 1px solid #a8323d;
       box-shadow:
         0 0 0 1px rgba(255, 112, 122, 0.38),
         0 8px 22px rgba(0, 0, 0, 0.4),
@@ -303,7 +303,7 @@
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      border: 3px solid #a8323d;
+      border: 1px solid #a8323d;
       background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
       box-shadow: inset 0 0 10px rgba(255, 112, 122, 0.28), inset 0 -3px 4px rgba(80, 12, 20, 0.4);
       backface-visibility: hidden;
@@ -311,11 +311,11 @@
     }
 
     .coin-face.front {
-      transform: translateZ(5px);
+      transform: translateZ(4px);
     }
 
     .coin-face.back {
-      transform: rotateY(180deg) translateZ(5px);
+      transform: rotateY(180deg) translateZ(4px);
     }
 
     /* درخشش ثابت نور روی سکه (نمی‌چرخد تا حس نورپردازی بماند) */
@@ -1822,8 +1822,8 @@
       }
 
       .coin-logo {
-        width: 48px;
-        height: 48px;
+        width: 62px;
+        height: 62px;
       }
 
       .card {
