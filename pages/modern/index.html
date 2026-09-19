@@ -287,8 +287,9 @@
       border-radius: 50%;
       perspective: 160px;
       transform: rotateY(0deg);
+      transform-style: preserve-3d;
       will-change: transform;
-      animation: coin-spin 8s linear infinite;
+      animation: coin-spin 8s ease-in-out infinite;
       border: 3px solid rgba(91, 140, 255, 0.45);
       box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.08),
@@ -303,6 +304,8 @@
       height: 100%;
       object-fit: cover;
       border-radius: 50%;
+      transform: translateZ(5px);
+      backface-visibility: hidden;
     }
 
     /* درخشش ثابت نور روی سکه (نمی‌چرخد تا حس نورپردازی بماند) */
@@ -311,18 +314,53 @@
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.30), transparent 42%, transparent 62%, rgba(255, 255, 255, 0.10));
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.48), transparent 30%, transparent 58%, rgba(255, 255, 255, 0.08));
+      transform: translateZ(9px);
+      animation: coin-shine 8s ease-in-out infinite;
       pointer-events: none;
       z-index: 1;
     }
 
+    .coin-logo::before {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 1px solid rgba(145, 178, 255, 0.65);
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.28);
+      transform: translateZ(-6px);
+      pointer-events: none;
+    }
+
     @keyframes coin-spin {
-      from { transform: rotateY(0deg); }
-      to   { transform: rotateY(360deg); }
+      0%, 100% {
+        transform: rotateX(0deg) rotateY(0deg) scale(1);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 28px rgba(91, 140, 255, 0.3);
+      }
+      25% {
+        transform: rotateX(8deg) rotateY(90deg) scale(1.035);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 10px 10px 25px rgba(0, 0, 0, 0.42), 0 0 36px rgba(91, 140, 255, 0.42);
+      }
+      50% {
+        transform: rotateX(0deg) rotateY(180deg) scale(1);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 28px rgba(91, 140, 255, 0.3);
+      }
+      75% {
+        transform: rotateX(-8deg) rotateY(270deg) scale(1.035);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), -10px 10px 25px rgba(0, 0, 0, 0.42), 0 0 36px rgba(91, 140, 255, 0.42);
+      }
+    }
+
+    @keyframes coin-shine {
+      0%, 100% { opacity: 0.72; transform: translateZ(9px) rotate(0deg); }
+      50% { opacity: 0.34; transform: translateZ(9px) rotate(18deg); }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .coin-logo {
+        animation: none;
+      }
+      .coin-logo::after {
         animation: none;
       }
     }
