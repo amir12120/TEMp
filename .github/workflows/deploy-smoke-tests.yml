@@ -1,0 +1,82 @@
+name: Deploy smoke tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_url:
+        description: "Optional deployed subscription-page URL to test"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-tests:
+    name: Static and deployed smoke tests
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_URL: ${{ inputs.deploy_url || vars.DEPLOY_URL || secrets.DEPLOY_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate installer syntax
+        shell: bash
+        run: bash -n install.sh
+
+      - name: Validate page JavaScript syntax
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          source = Path("pages/modern/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", source, re.S)
+          if len(scripts) != 1:
+              raise SystemExit(f"expected one inline script, found {len(scripts)}")
+          rendered = re.sub(r"\{\{[^}]*\}\}", "0", scripts[0])
+          Path("/tmp/modern-rendered.js").write_text(rendered, encoding="utf-8")
+          PY
+          node --check /tmp/modern-rendered.js
+
+      - name: Validate required page features
+        shell: bash
+        run: |
+          test -s pages/modern/index.html
+          grep -q 'id="pingBtn"' pages/modern/index.html
+          grep -q 'id="configQRModal"' pages/modern/index.html
+          grep -q 'id="importAppSelect"' pages/modern/index.html
+          grep -q 'function importConfigToApp' pages/modern/index.html
+          grep -q 'function toggleConfigQR' pages/modern/index.html
+          grep -q 'function runPingTest' pages/modern/index.html
+          grep -q 'api.github.com/repos/' pages/modern/index.html
+
+      - name: Run deployed-page smoke tests
+        if: ${{ env.DEPLOY_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="${DEPLOY_URL}"
+          case "$url" in
+            http://*|https://*) ;;
+            *) echo "DEPLOY_URL must start with http:// or https://" >&2; exit 1 ;;
+          esac
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          status="$(curl --fail-with-body --silent --show-error --location \
+            --connect-timeout 10 --max-time 30 \
+            -o "$body" -w '%{http_code}' "$url")"
+          test "$status" = 200
+          grep -q 'id="pingBtn"' "$body"
+          grep -q 'id="configQRModal"' "$body"
+          grep -q 'id="importAppSelect"' "$body"
+          echo "Deployed smoke tests passed with HTTP $status"
+
+      - name: Report skipped deployment check
+        if: ${{ env.DEPLOY_URL == '' }}
+        run: echo "DEPLOY_URL is not configured; static smoke tests passed and deployed check was skipped."
