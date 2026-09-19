@@ -2964,7 +2964,9 @@
         const timer = setTimeout(() => finish("timeout"), timeoutMs);
         const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
         const base = endpoint.tls ? "https://" : "http://";
-        fetch(base + endpoint.host + ":" + endpoint.port + endpoint.path, { mode: "no-cors", cache: "no-store", signal, redirect: "manual" })
+        const separator = endpoint.path.includes("?") ? "&" : "?";
+        const probeUrl = base + endpoint.host + ":" + endpoint.port + endpoint.path + separator + "latency=" + Date.now();
+        fetch(probeUrl, { mode: "no-cors", cache: "no-store", signal, redirect: "manual" })
           .then(() => finish("ok"))
           .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
           .finally(() => clearTimeout(timer));
