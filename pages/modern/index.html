@@ -2936,13 +2936,27 @@
         const http = ["ws", "http", "h2", "xhttp", "grpc"].includes(type);
         const tls = query.get("security") === "tls" || query.get("security") === "reality" || query.get("tls") === "1";
         const rawPath = query.get("path") || "/";
-        return { host: m[1] || m[2], port: Number(m[3]), http, tls, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
+        return { host: m[1] || m[2], port: Number(m[3]), http, tls, kind: type, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
       } catch (error) {
         return null;
       }
     }
 
     function probeHttp(endpoint, timeoutMs) {
+      if (endpoint.kind === "grpc") {
+        return new Promise(resolve => {
+          const t0 = performance.now();
+          let done = false;
+          const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
+          const timer = setTimeout(() => finish("timeout"), timeoutMs);
+          const img = new Image();
+          img.onload = () => { clearTimeout(timer); finish("ok"); };
+          // تصویر نبودن پاسخ gRPC طبیعی است؛ خطای منبع بعد از پاسخ HTTP هم
+          // برای سنجش زمان رسیدن پاسخ کافی است و به CORS وابسته نیست.
+          img.onerror = () => { clearTimeout(timer); finish(performance.now() - t0 > 100 ? "ok" : "err"); };
+          img.src = (endpoint.tls ? "https://" : "http://") + endpoint.host + ":" + endpoint.port + endpoint.path + "?latency=" + Date.now();
+        });
+      }
       return new Promise(resolve => {
         const t0 = performance.now();
         let done = false;
