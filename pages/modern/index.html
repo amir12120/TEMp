@@ -2999,7 +2999,10 @@
           chip.textContent = t("pingTesting");
         }
 
-        const result = await measureLatency(endpoint, 3500);
+        // Reality/xhttp در اولین TLS handshake ممکن است بیش از ۳٫۵ ثانیه زمان ببرد.
+        // timeout فقط برای همین ترنسپورت افزایش می‌یابد؛ سایر تست‌ها همان مقدار قبلی را دارند.
+        const probeTimeout = endpoint.kind === "xhttp" && endpoint.tls ? 8000 : 3500;
+        const result = await measureLatency(endpoint, probeTimeout);
         const ms = result.ms;
 
         if (chip) {
