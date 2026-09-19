@@ -2956,7 +2956,7 @@
     }
 
     async function measureLatency(endpoint, timeoutMs) {
-      if (!endpoint || !endpoint.http) return { status: "unsupported", ms: -1 };
+      if (!endpoint || !endpoint.http) return null;
       const samples = [await probeHttp(endpoint, timeoutMs), await probeHttp(endpoint, timeoutMs)];
       const ok = samples.filter(x => x.k === "ok").map(x => x.ms);
       return ok.length ? { status: "ok", ms: Math.min(...ok) } : { status: "fail", ms: -1 };
@@ -2979,15 +2979,10 @@
         const chip = item.querySelector(".ping-result");
         const endpoint = extractEndpoint(item.dataset.link);
 
-        if (!endpoint) {
-          if (chip) {
-            chip.hidden = false;
-            chip.className = "ping-result bad";
-            chip.textContent = t("pingFail");
-          }
-          results.push(-1);
-          continue;
-        }
+        if (!endpoint) continue;
+
+        // پروتکل‌های غیر HTTP عمداً دست‌نخورده می‌مانند؛ مرورگر نباید آن‌ها را probe کند.
+        if (!endpoint.http) continue;
 
         if (chip) {
           chip.hidden = false;
@@ -2999,11 +2994,11 @@
         const ms = result.ms;
 
         if (chip) {
-          chip.className = "ping-result " + (result.status === "unsupported" ? "unsupported" : ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
-          chip.title = result.status === "unsupported" ? (lang === "fa" ? "مرورگر نمی‌تواند تأخیر TCP/UDP خام این پروتکل را اندازه‌گیری کند؛ از تست داخل نرم‌افزار VPN استفاده کنید." : "The browser cannot measure raw TCP/UDP latency for this protocol; use the VPN app's test.") : "";
+          chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+          chip.title = "";
           /* فارسی (RTL): «ms ۲۳۴» — انگلیسی (LTR): «234 ms» */
           const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
-          chip.textContent = result.status === "unsupported" ? t("pingUnavailable") : ms < 0 ? t("pingFail")
+          chip.textContent = ms < 0 ? t("pingFail")
             : (lang === "fa" ? t("pingUnit") + " " + num : num + " " + t("pingUnit"));
         }
 
