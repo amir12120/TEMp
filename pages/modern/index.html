@@ -1270,6 +1270,7 @@
       flex: 0 0 auto;
       align-items: center;
       justify-content: center;
+      gap: 0.18rem;
       width: 38px;
       height: 38px;
       padding: 3px;
@@ -1278,6 +1279,20 @@
       background: #fff;
       cursor: pointer;
       transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .qr-trigger-icon {
+      color: #172033;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .btn-qr > span:last-child {
+      color: #172033;
+      font-family: "Inter", sans-serif;
+      font-size: 0.58rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
     }
 
     .btn-qr img {
@@ -1298,22 +1313,20 @@
     }
 
     .config-qr-box img {
-      max-width: 250px;
+      width: min(78vw, 620px);
+      max-width: 100%;
+      max-height: 78vh;
+      object-fit: contain;
     }
 
-    .config-qr-box .qr-url {
-      max-width: 260px;
-      margin-inline: auto;
-      color: #334155;
-      font-size: 0.62rem;
+    .config-qr-box {
+      width: min(96vw, 680px);
+      max-width: min(96vw, 680px);
+      padding: 2.8rem 1rem 1rem;
     }
 
     body.day-mode .btn-qr {
       border-color: rgba(15, 23, 42, 0.16);
-    }
-
-    body.day-mode .config-qr-box .qr-url {
-      color: #475569;
     }
 
     .video-overlay {
@@ -2083,7 +2096,7 @@
       </div>
 
       <div id="configList">
-        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="QR"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&ecc=M&data={{ $link | urlquery }}" alt="QR" loading="lazy"></button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button><img class="config-qr-img" hidden src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data={{ $link | urlquery }}" alt=""></div>{{ end }}
+        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="نمایش QR"><span class="qr-trigger-icon" aria-hidden="true">⌗</span><span>QR</span></button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button></div>{{ end }}
       </div>
 
       <div class="ping-bar">
@@ -2139,7 +2152,6 @@
       <button class="qr-close" type="button" onclick="closeConfigQR()" aria-label="بستن">×</button>
       <div class="qr-label" data-i18n="configQrLabel">📱 QR کد کانفیگ</div>
       <img id="configQRImg" src="" alt="QR Code">
-      <div class="qr-url" id="configQRUrl"></div>
     </div>
   </div>
 
@@ -3322,14 +3334,12 @@
       document.getElementById("qrModal").classList.toggle("open");
     }
 
-    // QR کد تک‌تک کانفیگ‌ها: هر آیتم تصویر ۳۰۰x300 خودش را از تمپلیت دارد؛
-    // کافیست یک سینگلتون در مودال جایگزین شود (کانفیگهای طولانی QR را بزرگ میکنند)
+    // QR کد تک‌تک کانفیگ‌ها در مودال بزرگ و مناسب اسکن موبایل نمایش داده می‌شود.
     function toggleConfigQR(btn) {
       const modal = document.getElementById("configQRModal");
       const img = document.getElementById("configQRImg");
-      const urlBox = document.getElementById("configQRUrl");
 
-      if (!modal || !img || !urlBox) return;
+      if (!modal || !img) return;
 
       const item = btn.closest(".config-item");
       const link = (item && item.dataset.link) || "";
@@ -3339,36 +3349,13 @@
         return;
       }
 
-      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data=" + encodeURIComponent(link);
-      urlBox.textContent = link;
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=800x800&ecc=M&data=" + encodeURIComponent(link);
       modal.classList.add("open");
     }
 
     function closeConfigQR() {
       const modal = document.getElementById("configQRModal");
       if (modal) modal.classList.remove("open");
-    }
-
-    // شبکهٔ ایمنی: اگر به هر دلیلی تصویر بندانگشتی از تمپلیت رندر نشده باشد،
-    // از روی data-link همان آیتم ساخته می‌شود (در حالت عادی کاری نمیکند)
-    function addConfigQRThumbnails() {
-      document.querySelectorAll(".config-item[data-link]").forEach(item => {
-        const btn = item.querySelector(".btn-qr");
-
-        if (!btn) return;
-
-        let img = btn.querySelector("img");
-
-        if (!img) {
-          img = document.createElement("img");
-          img.alt = "QR";
-          btn.appendChild(img);
-        }
-
-        if (!img.getAttribute("src")) {
-          img.src = "https://api.qrserver.com/v1/create-qr-code/?size=120x120&ecc=M&data=" + encodeURIComponent(item.dataset.link);
-        }
-      });
     }
 
     // لینک ویدیوی آموزش: یا لینک مستقیم فایل (پایانش .mp4 باشد) یا لینک embed (نماشا/آپارات)
@@ -3498,7 +3485,6 @@
     applyLang();
     renderApps();
     addBadges();
-    addConfigQRThumbnails();
     startTehranClock();
   </script>
 </body>
