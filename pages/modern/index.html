@@ -286,9 +286,9 @@
       height: 64px;
       border-radius: 50%;
       perspective: 160px;
-      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
       transform: rotateY(0deg);
       transform-style: preserve-3d;
+      isolation: isolate;
       will-change: transform;
       animation: coin-spin 8s ease-in-out infinite;
       border: 3px solid rgba(91, 140, 255, 0.45);
@@ -299,14 +299,23 @@
       transition: border-color 0.6s ease, box-shadow 0.6s ease;
     }
 
-    .coin-logo img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .coin-face {
+      position: absolute;
+      inset: 0;
       border-radius: 50%;
+      border: 3px solid rgba(91, 140, 255, 0.45);
+      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.28);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .coin-face.front {
       transform: translateZ(5px);
-      backface-visibility: visible;
+    }
+
+    .coin-face.back {
+      transform: rotateY(180deg) translateZ(5px);
     }
 
     /* درخشش ثابت نور روی سکه (نمی‌چرخد تا حس نورپردازی بماند) */
@@ -320,19 +329,6 @@
       animation: coin-shine 8s ease-in-out infinite;
       pointer-events: none;
       z-index: 1;
-    }
-
-    .coin-logo::before {
-      content: "";
-      position: absolute;
-      inset: -5px;
-      border-radius: 50%;
-      border: 1px solid rgba(145, 178, 255, 0.65);
-      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
-      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.28);
-      transform: rotateY(180deg) translateZ(5px);
-      backface-visibility: visible;
-      pointer-events: none;
     }
 
     @keyframes coin-spin {
@@ -2011,7 +2007,8 @@
         <span data-i18n="dayMode">روز</span>
       </button>
       <span class="coin-logo" aria-hidden="true">
-        <img src="https://s33.picofile.com/file/8483706450/jalaliiiii.jpg" alt="" draggable="false">
+        <span class="coin-face front"></span>
+        <span class="coin-face back"></span>
       </span>
     </div>
 
