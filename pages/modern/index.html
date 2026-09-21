@@ -665,26 +665,28 @@
     }
 
     .usage-layout {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
+      align-items: stretch;
       min-height: 255px;
     }
 
     .usage-details-side {
-      width: 100%;
+      width: 45%;
       padding: 1.65rem;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: center;
     }
 
     .usage-chart-side {
-      width: 100%;
+      width: 55%;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 1.1rem;
+      padding: 1.5rem 1rem;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .usage-title,
@@ -820,86 +822,114 @@
       font-weight: 700;
     }
 
-    .daily-usage-chart {
-      padding: 0 1.65rem 1.55rem;
+    /* نمودار میله‌ای مصرف — زیر نمودار دایره‌ای، داخل ستون چپ */
+    .usage-bars-title {
+      color: #dce6f7;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-align: center;
     }
 
-    .daily-usage-heading {
+    .usage-bars {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin-bottom: 0.85rem;
+      flex-direction: column;
+      gap: 0.55rem;
+      width: 100%;
+      max-width: 330px;
     }
 
-    .daily-usage-note {
+    .usage-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .usage-bar-label {
+      width: 3.6rem;
+      flex: none;
       color: var(--muted);
-      font-size: 0.66rem;
-      font-weight: 600;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .usage-bar-track {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      overflow: hidden;
+    }
+
+    .usage-bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      box-shadow: 0 0 10px rgba(91, 140, 255, 0.35);
+      transition: width 0.7s ease;
+    }
+
+    .usage-bar-fill.warn {
+      background: linear-gradient(90deg, #f6c85f, #fb7185);
+      box-shadow: 0 0 10px rgba(251, 113, 133, 0.3);
+    }
+
+    .usage-bar-value {
+      direction: ltr;
+      width: 3.4rem;
+      flex: none;
+      color: #dce6f7;
+      font-family: "Inter", "Vazirmatn", sans-serif;
+      font-size: 0.7rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
       text-align: left;
     }
 
-    .daily-bars {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      align-items: end;
-      gap: clamp(0.35rem, 2.3vw, 0.85rem);
-      min-height: 155px;
-      padding: 0.85rem 0.25rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      direction: ltr;
-    }
-
-    .daily-bar-item {
+    .usage-traffic-bar {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 0 1.65rem 1.15rem;
+    }
+
+    .usage-traffic-track {
+      position: relative;
+      flex: 1;
       min-width: 0;
-      height: 145px;
-      gap: 0.38rem;
-    }
-
-    .daily-bar-value {
-      max-width: 100%;
-      overflow: hidden;
-      color: #cbd8ef;
-      font-family: "Inter", "Vazirmatn", sans-serif;
-      font-size: 0.58rem;
-      font-weight: 700;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .daily-bar-track {
-      display: flex;
-      align-items: flex-end;
-      width: min(100%, 2.2rem);
-      height: 105px;
-      border-radius: 0.65rem 0.65rem 0.25rem 0.25rem;
-      background: rgba(255, 255, 255, 0.06);
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
       overflow: hidden;
     }
 
-    .daily-bar-fill {
-      width: 100%;
-      min-height: 5px;
-      border-radius: 0.65rem 0.65rem 0.25rem 0.25rem;
-      background: linear-gradient(180deg, #7aa2ff, #4d70d8);
-      box-shadow: 0 0 16px rgba(91, 140, 255, 0.28);
-      transition: height 0.55s ease, background 0.55s ease;
+    .usage-traffic-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--green), var(--blue), var(--red));
+      transition: width 0.7s ease;
     }
 
-    .daily-bar-item.today .daily-bar-fill {
-      background: linear-gradient(180deg, #5ee6bb, #24ad81);
-      box-shadow: 0 0 16px rgba(55, 215, 161, 0.32);
-    }
-
-    .daily-bar-label {
+    .usage-traffic-caption {
       color: var(--muted);
-      font-size: 0.66rem;
+      font-size: 0.7rem;
       font-weight: 700;
       white-space: nowrap;
+    }
+
+    /* حالت حجم نامحدود: میله‌ها و نوار پایین حذف میشوند */
+    .usage-card.usage-unlimited .usage-bars,
+    .usage-card.usage-unlimited .usage-bars-title,
+    .usage-card.usage-unlimited .usage-traffic-bar {
+      display: none;
+    }
+
+    .usage-card.usage-unlimited .usage-details-side,
+    .usage-card.usage-unlimited .usage-chart-side {
+      width: 50%;
     }
 
     .section-title {
@@ -1773,6 +1803,20 @@
       text-shadow: 0 0 10px rgba(228, 64, 95, 0.35);
     }
 
+    body.day-mode .usage-chart-side {
+      border-right-color: rgba(15, 23, 42, 0.10);
+    }
+
+    body.day-mode .usage-bar-track,
+    body.day-mode .usage-traffic-track {
+      background: rgba(15, 23, 42, 0.08);
+    }
+
+    body.day-mode .usage-bar-value,
+    body.day-mode .usage-bars-title {
+      color: #1e293b;
+    }
+
     body.day-mode .config-item {
       border-color: rgba(15, 23, 42, 0.10);
       background: rgba(15, 23, 42, 0.04);
@@ -1917,6 +1961,19 @@
 
       .usage-layout {
         min-height: unset;
+        flex-direction: column;
+      }
+
+      .usage-details-side,
+      .usage-chart-side {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      body.day-mode .usage-details-side,
+      body.day-mode .usage-chart-side {
+        border-bottom-color: rgba(15, 23, 42, 0.10);
       }
 
       .usage-details-side {
@@ -1924,44 +1981,11 @@
       }
 
       .usage-chart-side {
-        padding: 1rem 0.65rem;
+        padding: 1rem 0.65rem 1.35rem;
       }
 
-      .daily-usage-chart {
-        padding: 0 1.2rem 1.2rem;
-      }
-
-      .daily-usage-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 0.2rem;
-      }
-
-      .daily-usage-note {
-        font-size: 0.59rem;
-      }
-
-      .daily-bars {
-        gap: 0.2rem;
-        min-height: 142px;
-        padding-inline: 0;
-      }
-
-      .daily-bar-item {
-        height: 132px;
-      }
-
-      .daily-bar-track {
-        width: min(100%, 1.7rem);
-        height: 92px;
-      }
-
-      .daily-bar-value {
-        font-size: 0.5rem;
-      }
-
-      .daily-bar-label {
-        font-size: 0.58rem;
+      .usage-traffic-bar {
+        padding: 0.85rem 1.2rem 1.1rem;
       }
 
       .donut-chart {
@@ -2180,16 +2204,7 @@
     </section>
 
     <section class="card usage-card">
-        <div class="usage-chart-side">
-          <div class="donut-chart" id="donutChart" aria-label="درصد حجم مصرف‌شده">
-            <div class="donut-center">
-              <strong class="donut-percent" id="usagePercent">۰٪</strong>
-              <strong class="donut-remained" id="donutRemained">—</strong>
-              <span class="donut-caption" data-i18n="donutCaption">حجم باقی‌مانده</span>
-            </div>
-          </div>
-        </div>
-
+      <div class="usage-layout">
         <div class="usage-details-side">
           <div class="usage-title" data-i18n="usageTitle">📊 جزئیات مصرف اینترنت</div>
 
@@ -2214,13 +2229,45 @@
           </div>
         </div>
 
-        <div class="daily-usage-chart">
-          <div class="daily-usage-heading">
-            <span class="usage-title" data-i18n="dailyUsageTitle">مصرف روزانه — ۷ روز اخیر</span>
-            <span class="daily-usage-note" data-i18n="dailyUsageNote">بر اساس داده‌های ثبت‌شده در این دستگاه</span>
+        <div class="usage-chart-side">
+          <div class="donut-chart" id="donutChart" aria-label="درصد حجم مصرف‌شده">
+            <div class="donut-center">
+              <strong class="donut-percent" id="usagePercent">۰٪</strong>
+              <strong class="donut-remained" id="donutRemained">—</strong>
+              <span class="donut-caption" data-i18n="donutCaption">حجم باقی‌مانده</span>
+            </div>
           </div>
-          <div class="daily-bars" id="dailyUsageBars" aria-label="مصرف روزانه در هفت روز اخیر"></div>
+
+          <div class="usage-bars-title" data-i18n="barsTitle">📈 روند مصرف</div>
+          <div class="usage-bars">
+            <div class="usage-bar-row">
+              <span class="usage-bar-label" data-i18n="barToday">امروز</span>
+              <div class="usage-bar-track"><div class="usage-bar-fill" id="barToday"></div></div>
+              <span class="usage-bar-value" id="barTodayVal">—</span>
+            </div>
+            <div class="usage-bar-row">
+              <span class="usage-bar-label" data-i18n="barWeek">۷ روز</span>
+              <div class="usage-bar-track"><div class="usage-bar-fill" id="barWeek"></div></div>
+              <span class="usage-bar-value" id="barWeekVal">—</span>
+            </div>
+            <div class="usage-bar-row">
+              <span class="usage-bar-label" data-i18n="barMonth">۳۰ روز</span>
+              <div class="usage-bar-track"><div class="usage-bar-fill" id="barMonth"></div></div>
+              <span class="usage-bar-value" id="barMonthVal">—</span>
+            </div>
+            <div class="usage-bar-row">
+              <span class="usage-bar-label" data-i18n="barCycle">دوره</span>
+              <div class="usage-bar-track"><div class="usage-bar-fill" id="barCycle"></div></div>
+              <span class="usage-bar-value" id="barCycleVal">—</span>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="usage-traffic-bar">
+        <span class="usage-traffic-caption" data-i18n="trafficCaption">٪ از حجم کل</span>
+        <div class="usage-traffic-track"><div class="usage-traffic-fill" id="trafficBar"></div></div>
+        <span class="usage-traffic-caption" id="trafficBarVal" style="direction:ltr;">—</span>
       </div>
     </section>
 
@@ -2344,8 +2391,9 @@
         totalQuota: "حجم کل", used: "حجم مصرف‌شده", remained: "حجم باقی‌مانده",
         downloadLbl: "📥 دانلود:", uploadLbl: "📤 آپلود:",
         donutCaption: "حجم باقی‌مانده",
-        dailyUsageTitle: "مصرف روزانه — ۷ روز اخیر",
-        dailyUsageNote: "بر اساس داده‌های ثبت‌شده در این دستگاه",
+        barsTitle: "📈 روند مصرف",
+        barToday: "امروز", barWeek: "۷ روز", barMonth: "۳۰ روز", barCycle: "دوره",
+        trafficCaption: "٪ از حجم کل",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
         pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
@@ -2389,8 +2437,9 @@
         totalQuota: "Total quota", used: "Used", remained: "Remaining",
         downloadLbl: "📥 Download:", uploadLbl: "📤 Upload:",
         donutCaption: "Remaining",
-        dailyUsageTitle: "Daily usage — last 7 days",
-        dailyUsageNote: "Based on data recorded on this device",
+        barsTitle: "📈 Usage trend",
+        barToday: "Today", barWeek: "7 days", barMonth: "30 days", barCycle: "Cycle",
+        trafficCaption: "% of total quota",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
         pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
@@ -2536,43 +2585,67 @@
       return lang === "fa" ? toPersianDigits(text) : text;
     }
 
-    function renderDailyUsage(currentUsed) {
-      const chart = document.getElementById("dailyUsageBars");
-      if (!chart) return;
-
+    /* ثبت مصرف امروز در localStorage (برای روند روزهای بعد) */
+    function recordDailyUsage(currentUsed) {
       const todayKey = tehranDateKey(new Date());
       const history = readDailyUsage();
       history[todayKey] = Math.max(0, Number(currentUsed) || 0);
 
       const today = new Date(`${todayKey}T00:00:00Z`);
-      const days = [];
-      for (let offset = 6; offset >= 0; offset--) {
-        const date = new Date(today.getTime() - offset * ONE_DAY_MS);
-        const key = date.toISOString().slice(0, 10);
-        const previousKey = new Date(date.getTime() - ONE_DAY_MS).toISOString().slice(0, 10);
-        const snapshot = Number(history[key]) || 0;
-        const previous = Number(history[previousKey]);
-        days.push({ key, value: Math.max(0, snapshot - (Number.isFinite(previous) ? previous : 0)), date });
-      }
-
       const cutoff = new Date(today.getTime() - 13 * ONE_DAY_MS).toISOString().slice(0, 10);
       Object.keys(history).forEach(key => { if (key < cutoff) delete history[key]; });
-      try { localStorage.setItem(DAILY_USAGE_STORAGE_KEY, JSON.stringify(history)); } catch (error) {}
 
-      const max = Math.max(...days.map(day => day.value), 1);
-      const formatter = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fa-IR", {
-        weekday: "short", timeZone: "UTC"
-      });
-      chart.innerHTML = days.map((day, index) => {
-        const height = Math.max(5, Math.round((day.value / max) * 100));
-        const label = formatter.format(day.date);
-        const isToday = index === days.length - 1;
-        return `<div class="daily-bar-item${isToday ? " today" : ""}" title="${label}: ${formatChartBytes(day.value)}">
-          <span class="daily-bar-value">${formatChartBytes(day.value)}</span>
-          <span class="daily-bar-track"><span class="daily-bar-fill" style="height:${height}%"></span></span>
-          <span class="daily-bar-label">${label}</span>
-        </div>`;
-      }).join("");
+      try { localStorage.setItem(DAILY_USAGE_STORAGE_KEY, JSON.stringify(history)); } catch (error) {}
+    }
+
+    /* ---------- نمودار میله‌ای مصرف ----------
+       هر میله نشان میدهد «با سرعت فعلی، پنجرهٔ X روزه چند درصد از حجم کل
+       را مصرف میکند»: bar(W) = (used/total) × (W/cycleDays) × 100 —
+       میلهٔ دوره = همان درصد کل دونات. مقدار سمت چپ هر میله، ترافیک
+       تخمینی همان پنجره است. اگر حجم نامحدود باشد میله‌ها مخفی میشوند. */
+    function renderUsageBars(total, used, percent) {
+      const barsBox = document.querySelector(".usage-bars");
+      const usageCard = document.querySelector(".usage-card");
+
+      if (barsBox && usageCard) {
+        if (total === 0) {
+          usageCard.classList.add("usage-unlimited");
+          return;
+        }
+
+        usageCard.classList.remove("usage-unlimited");
+      }
+
+      let cycleDays = 30;
+
+      if (sub.expireSec && Number(sub.expireSec) > 0) {
+        cycleDays = Math.max(1, Math.ceil((Number(sub.expireSec) * 1000 - Date.now()) / ONE_DAY_MS));
+      }
+
+      const usedShare = total > 0 ? used / total : 0;
+      const windows = [["barToday", 1], ["barWeek", 7], ["barMonth", 30], ["barCycle", cycleDays]];
+
+      for (const [id, days] of windows) {
+        const fill = document.getElementById(id);
+        const val = document.getElementById(id + "Val");
+
+        if (!fill || !val) continue;
+
+        const pace = Math.min(usedShare * (days / cycleDays) * 100, 100);
+        fill.style.width = pace.toFixed(1) + "%";
+        fill.classList.toggle("warn", pace >= 85);
+        val.textContent = formatChartBytes(used * (days / cycleDays));
+      }
+
+      const trafficFill = document.getElementById("trafficBar");
+      const trafficVal = document.getElementById("trafficBarVal");
+
+      if (trafficFill && trafficVal) {
+        trafficFill.style.width = Math.min(percent, 100).toFixed(1) + "%";
+        trafficVal.textContent = lang === "fa"
+          ? `${toPersianDigits(Math.round(percent))}٪`
+          : `${Math.round(percent)}%`;
+      }
     }
 
     /* ============================================================
@@ -2849,7 +2922,7 @@
       document.getElementById("valRemained").textContent = remainedText;
       document.getElementById("valDown").textContent = sub.download || "0.00B";
       document.getElementById("valUp").textContent = sub.upload || "0.00B";
-      renderDailyUsage(used);
+      recordDailyUsage(used);
 
       let percent = 0;
 
@@ -2883,6 +2956,8 @@
 
       usagePercent.textContent = `${Math.round(percent)}${t("pct")}`;
       donutRemained.textContent = remainedText;
+
+      renderUsageBars(total, used, percent);
 
       const alertVol = document.getElementById("alertVol");
 
