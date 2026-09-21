@@ -665,26 +665,26 @@
     }
 
     .usage-layout {
-      display: flex;
-      align-items: stretch;
+      display: grid;
+      grid-template-columns: 1fr;
       min-height: 255px;
     }
 
     .usage-details-side {
-      width: 50%;
+      width: 100%;
       padding: 1.65rem;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
     }
 
     .usage-chart-side {
-      width: 50%;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .usage-title,
@@ -818,6 +818,88 @@
       color: var(--muted);
       font-size: 0.63rem;
       font-weight: 700;
+    }
+
+    .daily-usage-chart {
+      padding: 0 1.65rem 1.55rem;
+    }
+
+    .daily-usage-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .daily-usage-note {
+      color: var(--muted);
+      font-size: 0.66rem;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .daily-bars {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      align-items: end;
+      gap: clamp(0.35rem, 2.3vw, 0.85rem);
+      min-height: 155px;
+      padding: 0.85rem 0.25rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      direction: ltr;
+    }
+
+    .daily-bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      min-width: 0;
+      height: 145px;
+      gap: 0.38rem;
+    }
+
+    .daily-bar-value {
+      max-width: 100%;
+      overflow: hidden;
+      color: #cbd8ef;
+      font-family: "Inter", "Vazirmatn", sans-serif;
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .daily-bar-track {
+      display: flex;
+      align-items: flex-end;
+      width: min(100%, 2.2rem);
+      height: 105px;
+      border-radius: 0.65rem 0.65rem 0.25rem 0.25rem;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    .daily-bar-fill {
+      width: 100%;
+      min-height: 5px;
+      border-radius: 0.65rem 0.65rem 0.25rem 0.25rem;
+      background: linear-gradient(180deg, #7aa2ff, #4d70d8);
+      box-shadow: 0 0 16px rgba(91, 140, 255, 0.28);
+      transition: height 0.55s ease, background 0.55s ease;
+    }
+
+    .daily-bar-item.today .daily-bar-fill {
+      background: linear-gradient(180deg, #5ee6bb, #24ad81);
+      box-shadow: 0 0 16px rgba(55, 215, 161, 0.32);
+    }
+
+    .daily-bar-label {
+      color: var(--muted);
+      font-size: 0.66rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .section-title {
@@ -1845,6 +1927,43 @@
         padding: 1rem 0.65rem;
       }
 
+      .daily-usage-chart {
+        padding: 0 1.2rem 1.2rem;
+      }
+
+      .daily-usage-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .daily-usage-note {
+        font-size: 0.59rem;
+      }
+
+      .daily-bars {
+        gap: 0.2rem;
+        min-height: 142px;
+        padding-inline: 0;
+      }
+
+      .daily-bar-item {
+        height: 132px;
+      }
+
+      .daily-bar-track {
+        width: min(100%, 1.7rem);
+        height: 92px;
+      }
+
+      .daily-bar-value {
+        font-size: 0.5rem;
+      }
+
+      .daily-bar-label {
+        font-size: 0.58rem;
+      }
+
       .donut-chart {
         width: 135px;
         height: 135px;
@@ -2061,7 +2180,16 @@
     </section>
 
     <section class="card usage-card">
-      <div class="usage-layout">
+        <div class="usage-chart-side">
+          <div class="donut-chart" id="donutChart" aria-label="درصد حجم مصرف‌شده">
+            <div class="donut-center">
+              <strong class="donut-percent" id="usagePercent">۰٪</strong>
+              <strong class="donut-remained" id="donutRemained">—</strong>
+              <span class="donut-caption" data-i18n="donutCaption">حجم باقی‌مانده</span>
+            </div>
+          </div>
+        </div>
+
         <div class="usage-details-side">
           <div class="usage-title" data-i18n="usageTitle">📊 جزئیات مصرف اینترنت</div>
 
@@ -2086,14 +2214,12 @@
           </div>
         </div>
 
-        <div class="usage-chart-side">
-          <div class="donut-chart" id="donutChart" aria-label="درصد حجم مصرف‌شده">
-            <div class="donut-center">
-              <strong class="donut-percent" id="usagePercent">۰٪</strong>
-              <strong class="donut-remained" id="donutRemained">—</strong>
-              <span class="donut-caption" data-i18n="donutCaption">حجم باقی‌مانده</span>
-            </div>
+        <div class="daily-usage-chart">
+          <div class="daily-usage-heading">
+            <span class="usage-title" data-i18n="dailyUsageTitle">مصرف روزانه — ۷ روز اخیر</span>
+            <span class="daily-usage-note" data-i18n="dailyUsageNote">بر اساس داده‌های ثبت‌شده در این دستگاه</span>
           </div>
+          <div class="daily-bars" id="dailyUsageBars" aria-label="مصرف روزانه در هفت روز اخیر"></div>
         </div>
       </div>
     </section>
@@ -2218,6 +2344,8 @@
         totalQuota: "حجم کل", used: "حجم مصرف‌شده", remained: "حجم باقی‌مانده",
         downloadLbl: "📥 دانلود:", uploadLbl: "📤 آپلود:",
         donutCaption: "حجم باقی‌مانده",
+        dailyUsageTitle: "مصرف روزانه — ۷ روز اخیر",
+        dailyUsageNote: "بر اساس داده‌های ثبت‌شده در این دستگاه",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
         pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
@@ -2261,6 +2389,8 @@
         totalQuota: "Total quota", used: "Used", remained: "Remaining",
         downloadLbl: "📥 Download:", uploadLbl: "📤 Upload:",
         donutCaption: "Remaining",
+        dailyUsageTitle: "Daily usage — last 7 days",
+        dailyUsageNote: "Based on data recorded on this device",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
         pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
@@ -2373,9 +2503,77 @@
 
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
     const ONE_GB_BYTES = 1024 * 1024 * 1024;
+    const DAILY_USAGE_STORAGE_KEY = "temp.dailyUsage.v1";
 
     let countdownInterval = null;
     let isInactive = false;
+
+    function tehranDateKey(date) {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit"
+      }).formatToParts(date).reduce((out, part) => {
+        if (part.type !== "literal") out[part.type] = part.value;
+        return out;
+      }, {});
+      return `${parts.year}-${parts.month}-${parts.day}`;
+    }
+
+    function readDailyUsage() {
+      try {
+        const data = JSON.parse(localStorage.getItem(DAILY_USAGE_STORAGE_KEY) || "{}");
+        return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function formatChartBytes(bytes) {
+      if (!bytes) return "0B";
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      const value = bytes / (1024 ** exponent);
+      const text = `${value < 10 && exponent > 0 ? value.toFixed(1) : Math.round(value)}${units[exponent]}`;
+      return lang === "fa" ? toPersianDigits(text) : text;
+    }
+
+    function renderDailyUsage(currentUsed) {
+      const chart = document.getElementById("dailyUsageBars");
+      if (!chart) return;
+
+      const todayKey = tehranDateKey(new Date());
+      const history = readDailyUsage();
+      history[todayKey] = Math.max(0, Number(currentUsed) || 0);
+
+      const today = new Date(`${todayKey}T00:00:00Z`);
+      const days = [];
+      for (let offset = 6; offset >= 0; offset--) {
+        const date = new Date(today.getTime() - offset * ONE_DAY_MS);
+        const key = date.toISOString().slice(0, 10);
+        const previousKey = new Date(date.getTime() - ONE_DAY_MS).toISOString().slice(0, 10);
+        const snapshot = Number(history[key]) || 0;
+        const previous = Number(history[previousKey]);
+        days.push({ key, value: Math.max(0, snapshot - (Number.isFinite(previous) ? previous : 0)), date });
+      }
+
+      const cutoff = new Date(today.getTime() - 13 * ONE_DAY_MS).toISOString().slice(0, 10);
+      Object.keys(history).forEach(key => { if (key < cutoff) delete history[key]; });
+      try { localStorage.setItem(DAILY_USAGE_STORAGE_KEY, JSON.stringify(history)); } catch (error) {}
+
+      const max = Math.max(...days.map(day => day.value), 1);
+      const formatter = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fa-IR", {
+        weekday: "short", timeZone: "UTC"
+      });
+      chart.innerHTML = days.map((day, index) => {
+        const height = Math.max(5, Math.round((day.value / max) * 100));
+        const label = formatter.format(day.date);
+        const isToday = index === days.length - 1;
+        return `<div class="daily-bar-item${isToday ? " today" : ""}" title="${label}: ${formatChartBytes(day.value)}">
+          <span class="daily-bar-value">${formatChartBytes(day.value)}</span>
+          <span class="daily-bar-track"><span class="daily-bar-fill" style="height:${height}%"></span></span>
+          <span class="daily-bar-label">${label}</span>
+        </div>`;
+      }).join("");
+    }
 
     /* ============================================================
        5. Renderers
@@ -2651,6 +2849,7 @@
       document.getElementById("valRemained").textContent = remainedText;
       document.getElementById("valDown").textContent = sub.download || "0.00B";
       document.getElementById("valUp").textContent = sub.upload || "0.00B";
+      renderDailyUsage(used);
 
       let percent = 0;
 
