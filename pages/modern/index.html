@@ -2207,7 +2207,7 @@
     const I18N = {
       fa: {
         title: "اشتراک",
-        dir: "rtl", locale: "fa-IR",
+        dir: "rtl",
         brandTitle: "پنل مشخصات و کنترل حجم",
         serviceStatus: "وضعیت سرویس",
         active: "🟢 فعال", inactive: "🔴 غیرفعال",
@@ -2220,7 +2220,7 @@
         donutCaption: "حجم باقی‌مانده",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
-        pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnavailable: "—", pingUnit: "ms",
+        pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
         configsTitle: "⚙️ کانفیگ‌ها",
         installTitle: "📱 نصب و راه‌اندازی",
         downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
@@ -2246,11 +2246,11 @@
         noSubLink: "❌ لینک اشتراک یافت نشد",
         copiedHelp: "✅ لینک اشتراک کپی شد!\n\nاگر برنامه {app} به‌صورت خودکار باز نشد:\n1. برنامه {app} را باز کنید\n2. به بخش «اشتراک / پروفایل» بروید\n3. روی + بزنید و لینک را Paste کنید\n4. ذخیره کنید و با آیکون ↻ به‌روزرسانی کنید",
         copyOnlyHelp: "✅ لینک اشتراک کپی شد!\n\nلطفاً برنامه {app} را باز کنید و لینک را از کلیپ‌بورد در بخش افزودن اشتراک Paste کنید.",
-        copyFailed: "❌ خطا در کپی:"
+        copyFailed: "❌ خطا در کپی"
       },
       en: {
         title: "Subscription",
-        dir: "ltr", locale: "en-GB",
+        dir: "ltr",
         brandTitle: "Account & Usage Panel",
         serviceStatus: "Service status",
         active: "🟢 Active", inactive: "🔴 Inactive",
@@ -2263,7 +2263,7 @@
         donutCaption: "Remaining",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
-        pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnavailable: "—", pingUnit: "ms",
+        pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
         configsTitle: "⚙️ Configs",
         installTitle: "📱 Install & setup",
         downloadAppsTitle: "⬇️ Download app",
@@ -2289,7 +2289,7 @@
         noSubLink: "❌ Subscription link not found",
         copiedHelp: "✅ Subscription link copied!\n\nIf {app} didn't open automatically:\n1. Open {app}\n2. Go to the Subscription / Profiles tab\n3. Tap + and paste the link\n4. Save it, then tap the ↻ update icon",
         copyOnlyHelp: "✅ Subscription link copied!\n\nOpen {app} and paste the link from the clipboard in its Add Subscription section.",
-        copyFailed: "❌ Copy failed:"
+        copyFailed: "❌ Copy failed"
       }
     };
 
@@ -2360,7 +2360,6 @@
     const sub = {
       enabled: {{ .enabled }},
       isOnline: {{ .isOnline }},
-      lastOnlineMs: {{ .lastOnline }},
       expireSec: {{ .expire }},
       totalByte: {{ .totalByte }},
       dlByte: {{ .downloadByte }},
@@ -2376,7 +2375,7 @@
     const ONE_GB_BYTES = 1024 * 1024 * 1024;
 
     let countdownInterval = null;
-    let isExpiredOrZero = false;
+    let isInactive = false;
 
     /* ============================================================
        5. Renderers
@@ -2392,24 +2391,19 @@
       }).format(date);
     }
 
-    function isUsageZero() {
-      const downloadBytes = Number(sub.dlByte) || 0;
-      const uploadBytes = Number(sub.upByte) || 0;
-      return (downloadBytes + uploadBytes) <= 0;
-    }
-
     function renderStatus() {
       const badge = document.getElementById("statusBadge");
-      const zeroUsage = isUsageZero();
+      const expireMs = Number(sub.expireSec) * 1000;
+      const expired = Number.isFinite(expireMs) && expireMs > 0 && expireMs <= Date.now();
 
-      if (!sub.enabled || zeroUsage) {
+      if (!sub.enabled || expired) {
         badge.textContent = t("inactive");
         badge.className = "status-badge badge-inactive";
-        isExpiredOrZero = true;
+        isInactive = true;
       } else {
         badge.textContent = t("active");
         badge.className = "status-badge badge-active";
-        isExpiredOrZero = false;
+        isInactive = false;
       }
 
       // نشانگر آنلاین/آفلاین: فقط اتصال زنده‌ی واقعی کاربر ملاک است — فیلد isOnline
@@ -2428,7 +2422,7 @@
     function renderExpireDate() {
       const expireDate = document.getElementById("expireDateText");
 
-      if (isExpiredOrZero || !sub.expireSec || Number(sub.expireSec) === 0) {
+      if (isInactive || !sub.expireSec || Number(sub.expireSec) === 0) {
         expireDate.textContent = "-";
         return;
       }
@@ -2586,7 +2580,7 @@
       const timerGrid = document.getElementById("timerGrid");
       const alertTime = document.getElementById("alertTime");
 
-      if (isExpiredOrZero || !sub.expireSec || Number(sub.expireSec) === 0) {
+      if (isInactive || !sub.expireSec || Number(sub.expireSec) === 0) {
         renderZeroTimer();
         alertTime.classList.remove("show");
 
@@ -2720,7 +2714,6 @@
         if (!res.ok) return;
         const info = await res.json();
         if (typeof info.isOnline === "boolean") sub.isOnline = info.isOnline;
-        if (typeof info.lastOnline === "number") sub.lastOnlineMs = info.lastOnline;
         renderStatus();
       } catch (error) { /* صفحه به‌صورت فایل باز شده یا شبکه قطع است — بی‌صدا */ }
     }
@@ -2739,31 +2732,44 @@
        6. Clipboard helpers
        ============================================================ */
     async function copyText(text, button) {
-      if (!text) return;
+      if (!text) return false;
+
+      let copied = false;
 
       try {
-        await navigator.clipboard.writeText(text);
-      } catch (error) {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        textarea.remove();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        }
+      } catch (error) {}
+
+      if (!copied) {
+        try {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          copied = document.execCommand("copy");
+          textarea.remove();
+        } catch (error) {
+          copied = false;
+        }
       }
 
-      if (!button) return;
+      if (!button) return copied;
 
       const originalText = button.textContent;
-      button.textContent = t("copied");
-      button.classList.add("btn-success");
+      button.textContent = t(copied ? "copied" : "copyFailed");
+      button.classList.toggle("btn-success", copied);
 
       setTimeout(() => {
         button.textContent = originalText;
         button.classList.remove("btn-success");
       }, 1600);
+
+      return copied;
     }
 
     function copyFromButton(button) {
@@ -3077,7 +3083,8 @@
           // تصویر نبودن پاسخ gRPC طبیعی است؛ خطای منبع بعد از پاسخ HTTP هم
           // برای سنجش زمان رسیدن پاسخ کافی است و به CORS وابسته نیست.
           img.onerror = () => { clearTimeout(timer); finish(performance.now() - t0 > 100 ? "ok" : "err"); };
-          img.src = (endpoint.tls ? "https://" : "http://") + endpoint.host + ":" + endpoint.port + endpoint.path + "?latency=" + Date.now();
+          const separator = endpoint.path.includes("?") ? "&" : "?";
+          img.src = (endpoint.tls ? "https://" : "http://") + endpoint.host + ":" + endpoint.port + endpoint.path + separator + "latency=" + Date.now();
         });
       }
       return new Promise(resolve => {
@@ -3140,55 +3147,56 @@
 
       btn.disabled = true;
 
-      for (const [index, item] of items.entries()) {
-        const chip = item.querySelector(".ping-result");
-        const endpoint = extractEndpoint(item.dataset.link);
+      try {
+        for (const [index, item] of items.entries()) {
+          const chip = item.querySelector(".ping-result");
+          const endpoint = extractEndpoint(item.dataset.link);
 
-        if (!endpoint) continue;
+          if (!endpoint) continue;
 
-        // سه کانفیگ پایانی فقط باید زنده‌بودنشان بررسی و OK نمایش داده شود.
-        const statusOnly = index >= Math.max(0, items.length - 3);
-        if (statusOnly) {
+          // سه کانفیگ پایانی فقط باید زنده‌بودنشان بررسی و OK نمایش داده شود.
+          const statusOnly = index >= Math.max(0, items.length - 3);
+          if (statusOnly) {
+            if (chip) {
+              chip.hidden = false;
+              chip.className = "ping-result testing";
+              chip.textContent = t("pingTesting");
+            }
+            const live = await legacyPortCheck(endpoint, 3500);
+            if (chip) {
+              chip.className = "ping-result " + (live ? "good" : "bad");
+              chip.textContent = live ? t("pingOk") : t("pingFail");
+            }
+            continue;
+          }
+
+          // پروتکل‌های غیر HTTP عمداً دست‌نخورده می‌مانند؛ مرورگر نباید آن‌ها را probe کند.
+          if (!endpoint.http) continue;
+
           if (chip) {
             chip.hidden = false;
             chip.className = "ping-result testing";
             chip.textContent = t("pingTesting");
           }
-          const live = await legacyPortCheck(endpoint, 3500);
+
+          // Reality/xhttp در اولین TLS handshake ممکن است بیش از ۳٫۵ ثانیه زمان ببرد.
+          // timeout فقط برای همین ترنسپورت افزایش می‌یابد؛ سایر تست‌ها همان مقدار قبلی را دارند.
+          const probeTimeout = endpoint.kind === "xhttp" && endpoint.tls ? 8000 : 3500;
+          const result = await measureLatency(endpoint, probeTimeout);
+          const ms = result.ms;
+
           if (chip) {
-            chip.className = "ping-result " + (live ? "good" : "bad");
-            chip.textContent = live ? t("pingOk") : t("pingFail");
+            chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+            chip.title = "";
+            /* فارسی و انگلیسی هر دو: «۲۳۴ ms» / «234 ms» */
+            const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
+            chip.textContent = ms < 0 ? t("pingFail")
+              : num + " " + t("pingUnit");
           }
-          continue;
         }
-
-        // پروتکل‌های غیر HTTP عمداً دست‌نخورده می‌مانند؛ مرورگر نباید آن‌ها را probe کند.
-        if (!endpoint.http) continue;
-
-        if (chip) {
-          chip.hidden = false;
-          chip.className = "ping-result testing";
-          chip.textContent = t("pingTesting");
-        }
-
-        // Reality/xhttp در اولین TLS handshake ممکن است بیش از ۳٫۵ ثانیه زمان ببرد.
-        // timeout فقط برای همین ترنسپورت افزایش می‌یابد؛ سایر تست‌ها همان مقدار قبلی را دارند.
-        const probeTimeout = endpoint.kind === "xhttp" && endpoint.tls ? 8000 : 3500;
-        const result = await measureLatency(endpoint, probeTimeout);
-        const ms = result.ms;
-
-        if (chip) {
-          chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
-          chip.title = "";
-          /* فارسی و انگلیسی هر دو: «۲۳۴ ms» / «234 ms» */
-          const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
-          chip.textContent = ms < 0 ? t("pingFail")
-            : num + " " + t("pingUnit");
-        }
-
+      } finally {
+        btn.disabled = false;
       }
-
-      btn.disabled = false;
     }
 
     // تشخیص سیستمعامل دستگاه (اندروید / آیفون / ویندوز / مک / لینوکس)
@@ -3615,7 +3623,6 @@
     applyTheme(false);
     buildImportSelect();
     applyLang();
-    renderApps();
     addBadges();
     startTehranClock();
     setTimeout(prepareIncyImport, 0);
