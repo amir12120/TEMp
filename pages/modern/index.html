@@ -524,6 +524,13 @@
       background: rgba(251, 113, 133, 0.12);
     }
 
+    /* ---------- بج «در انتظار فعال‌سازی»: اکانت خریداری‌شده با مصرف صفر ---------- */
+    .badge-pending {
+      border: 1px solid rgba(246, 200, 95, 0.28);
+      color: var(--yellow);
+      background: rgba(246, 200, 95, 0.12);
+    }
+
     /* ---------- نشانگر آنلاین / آفلاین بودن کاربر ---------- */
     .status-side {
       display: inline-flex;
@@ -2120,7 +2127,7 @@
       <div class="status-row">
         <span class="data-label" data-i18n="serviceStatus">وضعیت سرویس</span>
         <div class="status-side">
-          <span id="statusBadge" class="status-badge badge-active">🟢 فعال</span>
+          <span id="statusBadge" class="status-badge badge-pending">⏳ در انتظار فعال‌سازی</span>
           <span id="presence" class="presence offline"><i class="presence-dot" aria-hidden="true"></i><span id="presenceText">آفلاین</span></span>
         </div>
       </div>
@@ -2312,6 +2319,7 @@
         brandTitle: "پنل مشخصات و کنترل حجم",
         serviceStatus: "وضعیت سرویس",
         active: "🟢 فعال", inactive: "🔴 غیرفعال",
+        pending: "⏳ در انتظار فعال‌سازی",
         online: "آنلاین", offline: "آفلاین",
         timeRemaining: "⏱️ زمان باقی‌مانده",
         expireDate: "تاریخ انقضا:",
@@ -2357,6 +2365,7 @@
         brandTitle: "Account & Usage Panel",
         serviceStatus: "Service status",
         active: "🟢 Active", inactive: "🔴 Inactive",
+        pending: "⏳ Pending activation",
         online: "Online", offline: "Offline",
         timeRemaining: "⏱️ Time remaining",
         expireDate: "Expires:",
@@ -2482,6 +2491,8 @@
 
     let countdownInterval = null;
     let isInactive = false;
+    /* اکانت با حجم مشخص و مصرف صفر = «در انتظار فعال‌سازی» (تا اولین اتصال) */
+    let isPending = false;
 
     function tehranDateKey(date) {
       const parts = new Intl.DateTimeFormat("en-CA", {
@@ -2534,7 +2545,7 @@
       const usageCard = document.querySelector(".usage-card");
 
       if (barsBox && usageCard) {
-        if (total === 0) {
+        if (total === 0 || isPending) {
           usageCard.classList.add("usage-unlimited");
           return;
         }
@@ -2582,10 +2593,20 @@
       const badge = document.getElementById("statusBadge");
       const expireMs = Number(sub.expireSec) * 1000;
       const expired = Number.isFinite(expireMs) && expireMs > 0 && expireMs <= Date.now();
+      const totalBytes = Number(sub.totalByte) || 0;
+      const usedBytes = (Number(sub.dlByte) || 0) + (Number(sub.upByte) || 0);
+
+      // اکانت حجم‌دار با مصرف صفر، حتی اگر پنل آن را فعال ثبت کرده باشد،
+      // «در انتظار فعال‌سازی» است: تایمر صفر و تاریخ انقضای «-» نمایش داده میشود.
+      isPending = totalBytes > 0 && usedBytes === 0 && !expired;
 
       if (!sub.enabled || expired) {
         badge.textContent = t("inactive");
         badge.className = "status-badge badge-inactive";
+        isInactive = true;
+      } else if (isPending) {
+        badge.textContent = t("pending");
+        badge.className = "status-badge badge-pending";
         isInactive = true;
       } else {
         badge.textContent = t("active");
@@ -2877,7 +2898,7 @@
 
       const alertVol = document.getElementById("alertVol");
 
-      if (total > 0 && remained < ONE_GB_BYTES) {
+      if (!isPending && total > 0 && remained < ONE_GB_BYTES) {
         alertVol.classList.add("show");
       } else {
         alertVol.classList.remove("show");
