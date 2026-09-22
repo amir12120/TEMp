@@ -1072,13 +1072,6 @@
       background: rgba(251, 113, 133, 0.08);
     }
 
-    .ping-result.unsupported {
-      border-color: rgba(148, 163, 184, 0.35);
-      color: var(--muted);
-      background: rgba(148, 163, 184, 0.08);
-      cursor: help;
-    }
-
     @keyframes ping-blink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.35; }
@@ -1103,15 +1096,6 @@
       align-items: center;
       gap: 0.55rem;
       text-align: center;
-    }
-
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: stretch;
-      gap: 0.6rem;
-      width: 100%;
     }
 
     .btn-download {
@@ -1142,17 +1126,6 @@
 
     .btn-video:hover {
       box-shadow: 0 12px 30px rgba(55, 215, 161, 0.44);
-    }
-
-    /* equal fixed-width buttons: every label fits fully and stays readable */
-    .btn-row .btn-download {
-      flex: 0 0 auto;
-      width: 190px;
-      padding: 0.7rem 0.7rem;
-      font-size: 0.88rem;
-      gap: 0.35rem;
-      border-radius: 12px;
-      line-height: 1.35;
     }
 
     .download-note {
@@ -2053,13 +2026,6 @@
         font-size: 0.6rem;
       }
 
-      .btn-row .btn-download {
-        width: 100%;
-        max-width: 300px;
-        padding: 0.65rem 0.8rem;
-        font-size: 0.85rem;
-      }
-
       .apps-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.55rem;
@@ -2545,7 +2511,7 @@
       return lang === "fa" ? toPersianDigits(text) : text;
     }
 
-    /* ثبت مصرف امروز در localStorage (برای روند روزهای بعد) */
+    /* ثبت مصرف امروز در localStorage (پشتیبان برای روند روزهای بعد) */
     function recordDailyUsage(currentUsed) {
       const todayKey = tehranDateKey(new Date());
       const history = readDailyUsage();
@@ -2596,7 +2562,6 @@
         fill.classList.toggle("warn", pace >= 85);
         val.textContent = formatChartBytes(used * (days / cycleDays));
       }
-
     }
 
     /* ============================================================
@@ -3665,17 +3630,16 @@
       // INCY uses the official encrypted crypt1 link. It is prepared after
       // load; if a slow connection has not finished yet, keep the manual URL
       // fallback visible rather than opening a malformed custom-scheme URL.
-      if (app.incy && !deep) {
+      if (app.incy) {
         copyToClipboardSilent(subLink);
-        if (incyLinkPromise) {
+
+        if (deep) {
+          try { window.location.href = deep; } catch (error) {}
+        } else if (incyLinkPromise) {
           incyLinkPromise.then(link => { window.location.href = link; }).catch(() => {});
         }
       } else if (deep) {
-        try { window.location.href = deep; } catch (error) {}
-      }
-
-      // باز کردن برنامه در همان لحظه‌ی کلیک (تا gesture مرورگر معتبر بماند)
-      if (deep && !app.incy) {
+        // deep-link داخل همین gesture کلیک اجرا میشود تا مرورگر آن را نپذیرد رد نکند
         try { window.location.href = deep; } catch (error) {}
       }
 
