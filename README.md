@@ -62,7 +62,7 @@ Select theme number [1-2]:
 | صفحه     | توضیح |
 |----------|-------|
 | `modern` | صفحه اشتراک مدرن — دو زبانه (فارسی/انگلیسی)، حالت شب و روز، QR کد برای تک‌تک کانفیگ‌ها، اندازه‌گیری تأخیر ترنسپورت‌های HTTP از مرورگر، نشانگر آنلاین/آفلاین زنده، ساعت تهران با رویدادهای تقویم ایرانی، بخش دانلود اپلیکیشن (۸ برنامه با لینک آخرین نسخه پایدار) |
-| `speed`  | داشبورد اسپرت «کیلومتر و دور موتور» — دو گیج عقربه‌ای (زمان باقی‌مانده + جزئیات مصرف)، ساعت گرد به وقت تهران با تاریخ و مناسبت زیر آن، کارت وضعیت سرویس/آنلاین/کاربر در گوشه، انتخاب زبان و حالت شب/روز بالای گیج‌ها، لینک ساب و کانفیگ‌ها پایین گیج‌ها، منوی دانلود اپلیکیشن با سه تب اندروید/آیفون/ویندوز و لوگوی اختصاصی هر برنامه (۸ برنامه، همیشه آخرین نسخه پایدار) |
+| `speed`  | داشبورد اسپرت «کیلومتر و دور موتور» — دو گیج عقربه‌ای (زمان باقی‌مانده + جزئیات مصرف) که **همیشه کنار هم** می‌مانند و روی موبایل هم با یک ضربه **بزرگ و خوانا** می‌شوند و با ضربه‌ی بعدی سر جایشان برمی‌گردند، ساعت گرد به وقت تهران با تاریخ و مناسبت زیر آن، کارت وضعیت سرویس/آنلاین/کاربر در گوشه، کلیدهای زبان و شب/روز به شکل **کلیدهای داشبورد ماشین** در بالاترین نقطهٔ صفحه، لوگوی سکهٔ چرخان (همان تم مدرن)، لینک ساب و کانفیگ‌ها پایین گیج‌ها، منوی دانلود اپلیکیشن با سه تب اندروید/آیفون/ویندوز و لوگوی اختصاصی هر برنامه (۸ برنامه، همیشه آخرین نسخه پایدار) |
 
 ## افزودن تم جدید در آینده
 
@@ -121,7 +121,7 @@ and **Save**. The subscription page now renders from this folder.
 | Theme    | Description |
 |----------|-------------|
 | `modern` | Modern bilingual (fa/en) subscription & usage panel — dark/light modes, per-config QR codes, browser latency measurement for HTTP transports, live online/offline presence, Tehran clock with Iranian-calendar events, app download section (8 apps, always latest stable) |
-| `speed`  | Sporty car-dashboard (speedometer/tachometer) theme — two needle gauges (time remaining + usage details), round Tehran clock with date and occasion beneath it, service status/online/user card in the corner, language and day/night controls above the gauges, sub link and configs below, and an app-download menu with Android/iPhone/Windows tabs plus per-app logos (8 apps, always latest stable) |
+| `speed`  | Sporty car-dashboard (speedometer/tachometer) theme — two needle gauges (time remaining + usage details) that always sit **side by side** and blow up to a readable size on tap (tap again to put them back), round Tehran clock with date and occasion beneath it, service status/online/user card in the corner, language and day/night controls styled as **car-dashboard rocker switches** at the very top, the modern theme's spinning coin logo, sub link and configs below, and an app-download menu with Android/iPhone/Windows tabs plus per-app logos (8 apps, always latest stable) |
 
 ### Adding a new theme
 
