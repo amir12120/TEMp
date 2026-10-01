@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" class="day-mode">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" id="themeColorMeta" content="#01030a">
+  <meta name="theme-color" id="themeColorMeta" content="#d6e8fb">
   <title>اشتراک</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,8 +30,14 @@
       --bad: #ff4d5e;
       --violet: #a78bfa;
       --dial: rgba(4, 8, 15, 0.95);
+      --dial-hi: rgba(28, 44, 70, 0.95);
       --needle: #ff4d5e;
       --shadow: 0 26px 64px rgba(0, 0, 0, 0.7);
+      /* emboss / 3D: top highlight, bottom shade, top gloss */
+      --emboss-hi: rgba(255, 255, 255, 0.13);
+      --emboss-lo: rgba(0, 0, 0, 0.6);
+      --gloss: rgba(255, 255, 255, 0.09);
+      --emboss-drop: 0 16px 30px rgba(0, 0, 0, 0.5);
       --font-dig: "Orbitron", "Inter", monospace;
       --radius: 22px;
     }
@@ -46,7 +52,13 @@
       --txt: #07223c;
       --muted: #48688e;
       --dial: rgba(240, 248, 255, 0.96);
+      --dial-hi: #ffffff;
       --shadow: 0 20px 50px rgba(25, 70, 130, 0.2);
+      /* emboss / 3D in daylight: bright top edge, soft blue shade below */
+      --emboss-hi: rgba(255, 255, 255, 0.98);
+      --emboss-lo: rgba(30, 80, 140, 0.22);
+      --gloss: rgba(255, 255, 255, 0.7);
+      --emboss-drop: 0 16px 28px rgba(25, 70, 130, 0.22);
     }
 
     * { box-sizing: border-box; }
@@ -55,7 +67,7 @@
 
     /* mobile iOS/Android: no tap flash, no double-tap zoom delay */
     html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-    button, a, .btn, .ptab, .gauge-card, .app-download-btn {
+    button, a, .btn, .os-select, .gauge-card, .app-download-btn {
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
@@ -272,15 +284,16 @@
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.09),
         inset 0 -2px 4px rgba(0, 0, 0, 0.5),
-        0 4px 12px rgba(0, 0, 0, 0.4);
+        0 4px 0 rgba(0, 0, 0, 0.35),
+        0 8px 14px rgba(0, 0, 0, 0.4);
       transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.12s ease;
     }
     html.day-mode .ctrl-btn {
       background: linear-gradient(180deg, #ffffff, #d9e3f0);
       border-color: rgba(20, 45, 90, 0.16);
-      box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(30, 60, 110, 0.12), 0 4px 12px rgba(30, 60, 110, 0.14);
+      box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(30, 60, 110, 0.12), 0 4px 0 rgba(30, 60, 110, 0.16), 0 8px 14px rgba(30, 60, 110, 0.14);
     }
-    .ctrl-btn:active { transform: translateY(1px); }
+    .ctrl-btn:active { transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45); }
     .ctrl-btn.active-glow {
       border-color: rgba(34, 211, 238, 0.65);
       box-shadow:
@@ -332,7 +345,8 @@
       padding: 0.6rem 0.8rem; border-radius: 14px;
       font-size: clamp(0.7rem, 2.8vw, 0.85rem); font-weight: 600;
       border: 1px solid rgba(255, 77, 94, 0.45);
-      background: linear-gradient(90deg, rgba(255, 77, 94, 0.18), rgba(255, 77, 94, 0.06));
+      background: linear-gradient(180deg, var(--gloss), transparent 55%), linear-gradient(90deg, rgba(255, 77, 94, 0.22), rgba(255, 77, 94, 0.08));
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 8px 18px rgba(0, 0, 0, 0.28);
       color: #ffd9de;
     }
     html.day-mode .alert { color: #8a1120; }
@@ -353,10 +367,13 @@
     .gauge-card {
       position: relative;
       min-width: 0;
-      background: var(--panel);
+      /* raised dashboard housing: gloss on top, highlight inside, shade below */
+      background: linear-gradient(180deg, var(--gloss), transparent 42%), var(--panel);
+      background-clip: padding-box;
       border: 1px solid var(--line);
+      border-top-color: var(--emboss-hi);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--emboss-drop), var(--shadow);
       backdrop-filter: blur(12px);
       padding: 0.65rem 0.6rem 0.8rem;
       overflow: hidden;
@@ -390,6 +407,8 @@
       display: inline-flex; align-items: center; justify-content: center;
       width: 22px; height: 22px; border-radius: 7px;
       border: 1px solid var(--line); color: var(--muted);
+      background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), 0 3px 7px rgba(0, 0, 0, 0.3);
       font-size: 0.72rem; line-height: 1;
       transition: transform 0.25s ease, color 0.2s ease, border-color 0.2s ease;
     }
@@ -416,7 +435,21 @@
 
     .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; }
     .gauge-card.zoomed .gauge { width: min(100%, 460px); }
-    .gauge-svg { width: 100%; height: 100%; overflow: visible; }
+
+    /* embossed instrument dial behind the SVG (rim light + deep inner shade) */
+    .gauge::before {
+      content: ""; position: absolute; inset: 2%; border-radius: 50%; z-index: 0;
+      background:
+        radial-gradient(circle at 50% 26%, var(--dial-hi), var(--dial) 72%),
+        var(--dial);
+      box-shadow:
+        inset 0 8px 20px rgba(255, 255, 255, 0.10),
+        inset 0 -14px 26px var(--emboss-lo),
+        inset 0 0 0 1px var(--line),
+        0 14px 28px rgba(0, 0, 0, 0.45),
+        0 2px 0 var(--emboss-hi);
+    }
+    .gauge-svg { position: relative; z-index: 1; width: 100%; height: 100%; overflow: visible; }
     .gauge-track { fill: none; stroke: var(--line); stroke-width: 12; stroke-linecap: round; }
     .gauge-value { fill: none; stroke: var(--ok); stroke-width: 12; stroke-linecap: round; transition: d 0.5s ease; filter: drop-shadow(0 0 8px currentColor); }
     .gauge[data-level="ok"] .gauge-value { stroke: var(--accent); color: var(--accent); }
@@ -432,7 +465,7 @@
     .needle-base { fill: #0b1220; stroke: var(--txt); stroke-width: 2; }
 
     .gauge-readout {
-      position: absolute; left: 50%; top: 62%; transform: translate(-50%, 0);
+      position: absolute; z-index: 2; left: 50%; top: 62%; transform: translate(-50%, 0);
       display: flex; flex-direction: column; align-items: center; gap: 0.05rem;
       text-align: center; pointer-events: none; width: 78%;
     }
@@ -476,10 +509,10 @@
     .clock-badge {
       position: absolute; top: 0.2rem; inset-inline-end: 0.2rem;
       width: 116px;
-      background: var(--dial);
-      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--gloss), transparent 45%), var(--dial);
+      border: 1px solid var(--line); border-top-color: var(--emboss-hi);
       border-radius: 18px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 12px 30px rgba(0, 0, 0, 0.4);
       padding: 0.5rem 0.5rem 0.6rem;
       display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
       z-index: 3;
@@ -532,7 +565,9 @@
     }
     @media (max-width: 560px) { .usage-details { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem; } }
     .ud {
-      background: var(--panel-2); border: 1px solid var(--line);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 5px 11px rgba(0, 0, 0, 0.26);
       border-radius: 12px; padding: 0.4rem 0.35rem;
       display: flex; flex-direction: column; gap: 0.12rem; text-align: center; min-width: 0;
     }
@@ -543,8 +578,11 @@
 
     /* ---------- generic panels ---------- */
     .panel {
-      background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--radius); box-shadow: var(--shadow);
+      background: linear-gradient(180deg, var(--gloss), transparent 34%), var(--panel);
+      background-clip: padding-box;
+      border: 1px solid var(--line); border-top-color: var(--emboss-hi);
+      border-radius: var(--radius);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--emboss-drop), var(--shadow);
       backdrop-filter: blur(12px); padding: 0.85rem;
       animation: fadeUp 0.6s ease both;
     }
@@ -558,34 +596,49 @@
     .sub-link-wrapper { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
     .sub-link-text {
       flex: 1 1 240px; font-family: var(--font-dig); font-size: 0.78rem;
-      background: var(--panel-2); border: 1px solid var(--line);
+      /* recessed slot: the link sits inside the dashboard, not on it */
+      background: rgba(0, 0, 0, 0.28); border: 1px solid var(--line);
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.55), inset 0 -1px 0 var(--emboss-hi);
       border-radius: 12px; padding: 0.7rem 0.8rem;
       word-break: break-all; direction: ltr; text-align: left;
+    }
+    html.day-mode .sub-link-text {
+      background: rgba(210, 228, 248, 0.9);
+      box-shadow: inset 0 3px 8px rgba(30, 80, 140, 0.2), inset 0 -1px 0 #fff;
     }
     .btn-group { display: flex; gap: 0.4rem; }
 
     .btn {
       font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
       border-radius: 12px; padding: 0.62rem 0.95rem;
-      border: 1px solid var(--line); background: var(--panel-2); color: var(--txt);
-      transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+      border: 1px solid var(--line); background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2); color: var(--txt);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(0, 0, 0, 0.28), 0 7px 14px rgba(0, 0, 0, 0.3);
+      transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.12s ease;
     }
-    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04121a; border-color: transparent; }
+    html.day-mode .btn { box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(30, 80, 140, 0.18), 0 7px 14px rgba(25, 70, 130, 0.18); }
+    .btn:active { transform: translateY(2px); box-shadow: inset 0 2px 4px var(--emboss-lo); }
+    .btn-primary {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 55%), linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #04121a; border-color: transparent;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(0, 0, 0, 0.25), 0 3px 0 rgba(6, 60, 84, 0.55), 0 8px 16px rgba(0, 0, 0, 0.32);
+    }
+    .btn-primary:active { transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.32), 0 1px 0 rgba(6, 60, 84, 0.5); }
     @media (hover: hover) {
       .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
       .app-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-      .ptab:hover { color: var(--txt); }
     }
     .btn-success { background: linear-gradient(135deg, var(--ok), #22c55e) !important; color: #04210f !important; }
 
-    .soft-hr { border: none; border-top: 1px solid var(--line); margin: 1rem 0; }
+    .soft-hr { border: none; border-top: 1px solid var(--line); margin: 1rem 0; box-shadow: 0 1px 0 var(--emboss-hi); }
 
     .config-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.2rem; }
 
     #configList { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 0.8rem; }
     .config-item {
       display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-      background: var(--panel-2); border: 1px solid var(--line);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 5px 12px rgba(0, 0, 0, 0.28);
       border-radius: 12px; padding: 0.6rem 0.7rem;
     }
     .config-text {
@@ -602,7 +655,6 @@
         grid-template-columns: auto minmax(0, 1fr);
         grid-template-areas:
           "badge text"
-          "ping  ping"
           "act   act";
         gap: 0.4rem 0.5rem;
         align-items: center;
@@ -613,7 +665,6 @@
         flex: none;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
-      .config-item .ping-result { grid-area: ping; justify-self: start; }
       .config-item .config-actions {
         grid-area: act;
         display: flex; flex-direction: column; gap: 0.4rem;
@@ -624,61 +675,103 @@
     .badge {
       font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em;
       padding: 0.2rem 0.45rem; border-radius: 6px; color: #06121c;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -2px 0 rgba(0, 0, 0, 0.32), 0 3px 6px rgba(0, 0, 0, 0.32);
     }
     .btn-qr {
       font: inherit; font-size: 0.74rem; font-weight: 700; cursor: pointer;
       padding: 0.45rem 0.6rem; border-radius: 9px;
-      border: 1px solid var(--line); background: transparent; color: var(--txt);
+      border: 1px solid var(--line); background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2); color: var(--txt);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(0, 0, 0, 0.26), 0 6px 12px rgba(0, 0, 0, 0.26);
+      transition: transform 0.12s ease, border-color 0.2s ease, box-shadow 0.12s ease;
     }
+    .btn-qr:active { transform: translateY(2px); box-shadow: inset 0 2px 4px var(--emboss-lo); }
     .btn-qr:hover { border-color: var(--accent); }
-    .ping-result {
-      font-family: var(--font-dig); font-size: 0.7rem; font-weight: 700;
-      padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid var(--line);
-    }
-    .ping-result.good { color: var(--ok); border-color: rgba(52, 211, 153, 0.5); }
-    .ping-result.mid { color: var(--warn); border-color: rgba(245, 181, 68, 0.5); }
-    .ping-result.bad { color: var(--bad); border-color: rgba(255, 77, 94, 0.5); }
-    .ping-result.testing { color: var(--muted); }
-    .ping-bar { margin-top: 0.9rem; display: flex; justify-content: center; }
-    .ping-btn { width: 100%; max-width: 320px; }
-    .ping-btn:disabled { opacity: 0.6; cursor: progress; }
 
-    /* ---------- apps download menu with platform tabs ---------- */
+    /* ---------- نصب و راه‌اندازی: منوی کشویی سیستم‌عامل ---------- */
     .apps-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
-    .apps-menu { margin-top: 0.9rem; }
-    .apps-menu[hidden] { display: none; }
-    .platform-tabs {
-      display: inline-flex; gap: 0.3rem; padding: 0.28rem;
-      background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
-    }
-    .ptab {
-      font: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
-      border: none; background: transparent; color: var(--muted);
-      padding: 0.45rem 0.9rem; border-radius: 999px;
+
+    .os-chip {
       display: inline-flex; align-items: center; gap: 0.35rem;
-      transition: background 0.2s ease, color 0.2s ease;
+      font-size: 0.7rem; font-weight: 700; color: var(--txt);
+      padding: 0.28rem 0.6rem; border-radius: 999px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--gloss), transparent), var(--panel-2);
     }
-    .ptab.active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04121a; }
+    .os-chip[hidden] { display: none; }
+    .os-chip-icon { font-size: 0.9rem; line-height: 1; }
+
+    .os-picker { margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .os-picker-title {
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .os-picker-title::before { content: ""; width: 4px; height: 0.9rem; border-radius: 2px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+    .os-select-wrap { position: relative; display: block; }
+    .os-select {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; font: inherit; font-size: 0.86rem; font-weight: 700; cursor: pointer;
+      color: var(--txt); padding: 0.72rem 2.2rem 0.72rem 0.9rem;
+      border-radius: 14px; border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 5px 12px rgba(0, 0, 0, 0.32);
+    }
+    html.day-mode .os-select {
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 5px 12px rgba(25, 70, 130, 0.18);
+    }
+    .os-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .os-caret {
+      position: absolute; top: 50%; inset-inline-end: 0.85rem;
+      width: 0.5rem; height: 0.5rem; margin-top: -0.32rem; pointer-events: none;
+      border-right: 2px solid var(--accent-2); border-bottom: 2px solid var(--accent-2);
+      transform: rotate(45deg);
+    }
+
+    .apps-lead {
+      margin: 0.85rem 0 0; font-size: clamp(0.72rem, 3vw, 0.84rem);
+      font-weight: 700; line-height: 1.6; color: var(--txt);
+      display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+    }
+    .apps-lead .lead-os {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.18rem 0.55rem; border-radius: 999px;
+      color: #04121a; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 6px rgba(0, 0, 0, 0.3);
+      font-weight: 800;
+    }
 
     .apps-grid {
       margin-top: 0.9rem;
       display: grid; grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr)); gap: 0.6rem;
     }
     .app-card {
-      background: var(--panel-2); border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--gloss), transparent 55%), var(--panel-2);
+      border: 1px solid var(--line);
       border-radius: 16px; padding: 0.7rem 0.55rem;
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 8px 18px rgba(0, 0, 0, 0.34);
       display: flex; flex-direction: column; align-items: center; gap: 0.45rem; text-align: center;
-      transition: transform 0.15s ease, border-color 0.2s ease;
+      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .app-icon { width: 46px; height: 46px; border-radius: 12px; object-fit: cover; background: rgba(255, 255, 255, 0.06); }
+    html.day-mode .app-card { box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 8px 16px rgba(25, 70, 130, 0.2); }
+    .app-card:active { transform: translateY(1px); }
+    .app-icon {
+      width: 46px; height: 46px; border-radius: 12px; object-fit: cover;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 14px rgba(0, 0, 0, 0.4);
+    }
     .app-name { font-size: 0.78rem; font-weight: 700; }
     .app-download-btn {
       font: inherit; font-size: 0.72rem; font-weight: 700; cursor: pointer;
       width: 100%; padding: 0.42rem 0.5rem; border-radius: 10px;
       border: 1px solid transparent; color: #04121a;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 0 rgba(0, 0, 0, 0.28), 0 4px 0 rgba(6, 60, 84, 0.55), 0 8px 14px rgba(0, 0, 0, 0.32);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.15s ease;
     }
     .app-download-btn:hover { filter: brightness(1.08); }
+    .app-download-btn:active {
+      transform: translateY(3px);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(6, 60, 84, 0.5);
+    }
     .download-note { margin-top: 0.8rem; font-size: 0.72rem; color: var(--muted); text-align: center; }
 
     /* ---------- modals ---------- */
@@ -689,8 +782,11 @@
     }
     .qr-overlay.open { display: flex; }
     .qr-box {
-      position: relative; background: var(--panel); border: 1px solid var(--line);
-      border-radius: 20px; padding: 1.2rem; box-shadow: var(--shadow);
+      position: relative;
+      background: linear-gradient(180deg, var(--gloss), transparent 40%), var(--panel);
+      border: 1px solid var(--line); border-top-color: var(--emboss-hi);
+      border-radius: 20px; padding: 1.2rem;
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 12px var(--emboss-lo), var(--emboss-drop), var(--shadow);
       max-width: min(92vw, 380px); text-align: center;
     }
     .qr-label { font-size: 0.82rem; font-weight: 700; margin-bottom: 0.7rem; }
@@ -699,7 +795,10 @@
       border: none; background: transparent; color: var(--muted);
       font-size: 1.5rem; line-height: 1; cursor: pointer;
     }
-    .qr-box img { width: min(70vw, 260px); height: auto; border-radius: 12px; background: #fff; padding: 0.4rem; }
+    .qr-box img {
+      width: min(70vw, 260px); height: auto; border-radius: 12px; background: #fff; padding: 0.4rem;
+      box-shadow: inset 0 0 0 1px var(--line), 0 8px 18px rgba(0, 0, 0, 0.35);
+    }
     .qr-url { margin-top: 0.7rem; font-family: var(--font-dig); font-size: 0.68rem; color: var(--muted); word-break: break-all; direction: ltr; }
 
     /* ---------- gauge zoom stage ----------
@@ -760,7 +859,7 @@
   </style>
 </head>
 
-<body>
+<body class="day-mode">
   <div class="background-effects" aria-hidden="true">
     <span class="speed-line"></span>
     <span class="speed-line"></span>
@@ -927,41 +1026,34 @@
       </div>
 
       <div id="configList">
-        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text" title="{{ $link }}">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><div class="config-actions"><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="نمایش QR">▦ QR</button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button></div></div>{{ end }}
-      </div>
-
-      <div class="ping-bar">
-        <button class="btn btn-primary ping-btn" type="button" id="pingBtn" onclick="runPingTest(this)">
-          <span data-i18n="pingBtn">📶 تست تأخیر کانفیگ‌ها</span>
-        </button>
+        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text" title="{{ $link }}">{{ $link }}</div><div class="badge-group"></div><div class="config-actions"><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="نمایش QR">▦ QR</button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button></div></div>{{ end }}
       </div>
     </section>
 
-    <!-- download apps menu with platform tabs -->
-    <section class="panel">
+    <!-- نصب و راه‌اندازی: دانلود برنامه‌ها — سیستم‌عامل خودکار تشخیص داده می‌شود،
+         منوی کشویی برای انتخاب دستی هم همیشه در دسترس است -->
+    <section class="panel" id="installPanel">
       <div class="apps-head">
-        <span class="panel-title" data-i18n="downloadAppsTitle">⬇️ دانلود اپلیکیشن</span>
-        <button class="btn" type="button" id="appsMenuBtn" onclick="toggleAppsMenu()" aria-expanded="false">
-          <span data-i18n="appsMenuBtn">نمایش برنامه‌ها</span>
-        </button>
+        <span class="panel-title" data-i18n="downloadAppsTitle">⬇️ دانلود برنامه‌ها</span>
+        <span class="os-chip" id="osChip" hidden><span class="os-chip-icon" aria-hidden="true" id="osChipIcon">🤖</span><span id="osChipText">—</span></span>
       </div>
 
-      <div class="apps-menu" id="appsMenu" hidden>
-        <div class="platform-tabs" role="tablist" aria-label="Platform">
-          <button class="ptab" type="button" data-platform="android" onclick="setPlatformTab('android')">
-            <span aria-hidden="true">🤖</span><span data-i18n="androidName">اندروید</span>
-          </button>
-          <button class="ptab" type="button" data-platform="ios" onclick="setPlatformTab('ios')">
-            <span aria-hidden="true">🍎</span><span data-i18n="iosName">آیفون</span>
-          </button>
-          <button class="ptab" type="button" data-platform="windows" onclick="setPlatformTab('windows')">
-            <span aria-hidden="true">🪟</span><span data-i18n="windowsName">ویندوز</span>
-          </button>
-        </div>
-
-        <div class="apps-grid" id="appsGrid"></div>
-        <div class="download-note" data-i18n="downloadNote">برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.</div>
+      <div class="os-picker">
+        <span class="os-picker-title" id="osPickerTitle" data-i18n="osPickTitle">نوع دستگاه خودتون رو مشخص کنید</span>
+        <label class="os-select-wrap" for="osSelect">
+          <select class="os-select" id="osSelect" aria-labelledby="osPickerTitle" onchange="setPlatformTab(this.value)">
+            <option value="android" data-platform="android">🤖 اندروید</option>
+            <option value="ios" data-platform="ios">🍎 آیفون</option>
+            <option value="windows" data-platform="windows">🪟 ویندوز</option>
+          </select>
+          <span class="os-caret" aria-hidden="true"></span>
+        </label>
       </div>
+
+      <p class="apps-lead" id="appsLead">—</p>
+
+      <div class="apps-grid" id="appsGrid"></div>
+      <div class="download-note" data-i18n="downloadNote">برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.</div>
     </section>
   </main>
 
@@ -1016,12 +1108,17 @@
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
         zoomInHint: "برای بزرگ‌نمایی ضربه بزنید", zoomOutHint: "برای بازگشت ضربه بزنید",
         configsTitle: "⚙️ کانفیگ‌ها",
-        pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
-        downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
+        downloadAppsTitle: "⬇️ دانلود برنامه‌ها",
         downloadNote: "برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.",
-        appsMenuBtn: "نمایش برنامه‌ها",
+        osPickTitle: "نوع دستگاه خودتون رو مشخص کنید",
+        osPickLabel: "دستگاه من",
+        leadDetected: "✅ برنامه‌های مناسب سیستم‌عامل شما اینا هستند:",
+        leadChosen: "برنامه‌های مناسب این دستگاه:",
+        leadUnknown: "👇 نوع دستگاه خودتون رو مشخص کنید تا برنامه‌های مناسبش رو ببینید.",
+        detectedHint: "تشخیص خودکار",
         downloadBtn: "⬇️ دانلود",
         androidName: "اندروید", iosName: "آیفون", windowsName: "ویندوز",
+        androidIcon: "🤖", iosIcon: "🍎", windowsIcon: "🪟",
         qrLabel: "📱 QR کد اشتراک",
         configQrLabel: "📱 QR کد کانفیگ",
         dayMode: "روز", nightMode: "شب",
@@ -1052,12 +1149,17 @@
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
         zoomInHint: "Tap to enlarge", zoomOutHint: "Tap to shrink back",
         configsTitle: "⚙️ Configs",
-        pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
-        downloadAppsTitle: "⬇️ Download app",
+        downloadAppsTitle: "⬇️ Download apps",
         downloadNote: "For each app, the download page of the latest version for your OS will open.",
-        appsMenuBtn: "Show apps",
+        osPickTitle: "Pick your device type",
+        osPickLabel: "My device",
+        leadDetected: "✅ These are the apps for your operating system:",
+        leadChosen: "Apps for this platform:",
+        leadUnknown: "👇 Pick your device type to see the matching apps.",
+        detectedHint: "Auto-detected",
         downloadBtn: "⬇️ Download",
         androidName: "Android", iosName: "iOS", windowsName: "Windows",
+        androidIcon: "🤖", iosIcon: "🍎", windowsIcon: "🪟",
         qrLabel: "📱 Subscription QR code",
         configQrLabel: "📱 Config QR code",
         dayMode: "Day", nightMode: "Night",
@@ -1670,166 +1772,11 @@
     }
 
     /* ============================================================
-       9. Config latency test (browser-safe)
-       ============================================================ */
-    function decodeConfigPart(part) {
-      try {
-        const norm = part.replace(/-/g, "+").replace(/_/g, "/");
-        const padded = norm + "=".repeat((4 - (norm.length % 4)) % 4);
-        return decodeURIComponent(escape(atob(padded)));
-      } catch (error) { return null; }
-    }
-
-    function extractEndpoint(link) {
-      try {
-        if (!link) return null;
-        const scheme = (link.split("://")[0] || "").toLowerCase();
-
-        if (scheme === "vmess") {
-          const json = JSON.parse(decodeConfigPart(link.slice(8)) || "null");
-          if (!json || !json.add || !json.port) return null;
-          const net = String(json.net || "tcp").toLowerCase();
-          return { host: String(json.add), port: Number(json.port),
-            http: net === "ws" || net === "http" || net === "h2",
-            tls: String(json.tls || "").toLowerCase() === "tls",
-            path: json.path || "/" };
-        }
-
-        if (!link.includes("://")) return null;
-        const rest = link.slice(link.indexOf("://") + 3);
-        const authority = rest.split(/[/?#]/)[0];
-        const hostPart = authority.lastIndexOf("@") !== -1 ? authority.slice(authority.lastIndexOf("@") + 1) : authority;
-        const m = hostPart.match(/^(?:\[([^\]]+)\]|([^:]+)):(\d+)$/);
-        if (!m) return null;
-        const query = new URL(link).searchParams;
-        const type = (query.get("type") || query.get("net") || "tcp").toLowerCase();
-        const http = ["ws", "http", "h2", "xhttp", "grpc"].includes(type);
-        const tls = query.get("security") === "tls" || query.get("security") === "reality" || query.get("tls") === "1";
-        const rawPath = query.get("path") || "/";
-        return { host: m[1] || m[2], port: Number(m[3]), http, tls, kind: type, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
-      } catch (error) { return null; }
-    }
-
-    function probeHttp(endpoint, timeoutMs) {
-      if (endpoint.kind === "grpc") {
-        return new Promise(resolve => {
-          const t0 = performance.now();
-          let done = false;
-          const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
-          const timer = setTimeout(() => finish("timeout"), timeoutMs);
-          const img = new Image();
-          img.onload = () => { clearTimeout(timer); finish("ok"); };
-          img.onerror = () => { clearTimeout(timer); finish(performance.now() - t0 > 100 ? "ok" : "err"); };
-          const separator = endpoint.path.includes("?") ? "&" : "?";
-          img.src = (endpoint.tls ? "https://" : "http://") + endpoint.host + ":" + endpoint.port + endpoint.path + separator + "latency=" + Date.now();
-        });
-      }
-      return new Promise(resolve => {
-        const t0 = performance.now();
-        let done = false;
-        const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
-        const timer = setTimeout(() => finish("timeout"), timeoutMs);
-        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
-        const base = endpoint.tls ? "https://" : "http://";
-        const separator = endpoint.path.includes("?") ? "&" : "?";
-        const probeUrl = base + endpoint.host + ":" + endpoint.port + endpoint.path + separator + "latency=" + Date.now();
-        fetch(probeUrl, { mode: "no-cors", cache: "no-store", signal })
-          .then(() => finish("ok"))
-          .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
-          .finally(() => clearTimeout(timer));
-      });
-    }
-
-    function probePortOnce(base, host, port, timeoutMs) {
-      return new Promise(resolve => {
-        const t0 = performance.now();
-        let done = false;
-        const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
-        const timer = setTimeout(() => finish("timeout"), timeoutMs);
-        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
-        fetch(base + host + ":" + port + "/", { mode: "no-cors", cache: "no-store", signal })
-          .then(() => finish("ok"))
-          .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
-          .finally(() => clearTimeout(timer));
-      });
-    }
-
-    async function legacyPortCheck(endpoint, timeoutMs) {
-      const probes = [];
-      const round = async () => {
-        probes.push(await probePortOnce("https://", endpoint.host, endpoint.port, timeoutMs));
-        probes.push(await probePortOnce("http://", endpoint.host, endpoint.port, timeoutMs));
-      };
-      await round();
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (probes.some(x => x.k === "ok")) return true;
-        const errs = probes.filter(x => x.k === "err").map(x => x.ms).sort((a, b) => a - b);
-        if (errs.length >= 2 && errs[1] < 2500 && errs[0] < 1000) return true;
-        if (attempt < 2) await round();
-      }
-      return false;
-    }
-
-    async function measureLatency(endpoint, timeoutMs) {
-      if (!endpoint || !endpoint.http) return null;
-      const samples = [await probeHttp(endpoint, timeoutMs), await probeHttp(endpoint, timeoutMs)];
-      const ok = samples.filter(x => x.k === "ok").map(x => x.ms);
-      return ok.length ? { status: "ok", ms: Math.min(...ok) } : { status: "fail", ms: -1 };
-    }
-
-    async function runPingTest(btn) {
-      const items = [...document.querySelectorAll(".config-item[data-link]")];
-      if (!items.length) return;
-      btn.disabled = true;
-
-      try {
-        for (const [index, item] of items.entries()) {
-          const chip = item.querySelector(".ping-result");
-          const endpoint = extractEndpoint(item.dataset.link);
-          if (!endpoint) continue;
-
-          const statusOnly = index >= Math.max(0, items.length - 3);
-          if (statusOnly) {
-            if (chip) {
-              chip.hidden = false;
-              chip.className = "ping-result testing";
-              chip.textContent = t("pingTesting");
-            }
-            const live = await legacyPortCheck(endpoint, 3500);
-            if (chip) {
-              chip.className = "ping-result " + (live ? "good" : "bad");
-              chip.textContent = live ? t("pingOk") : t("pingFail");
-            }
-            continue;
-          }
-
-          if (!endpoint.http) continue;
-
-          if (chip) {
-            chip.hidden = false;
-            chip.className = "ping-result testing";
-            chip.textContent = t("pingTesting");
-          }
-
-          const probeTimeout = endpoint.kind === "xhttp" && endpoint.tls ? 8000 : 3500;
-          const result = await measureLatency(endpoint, probeTimeout);
-          const ms = result.ms;
-
-          if (chip) {
-            chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
-            const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
-            chip.textContent = ms < 0 ? t("pingFail") : num + " " + t("pingUnit");
-          }
-        }
-      } finally {
-        btn.disabled = false;
-      }
-    }
-
-    /* ============================================================
-       10. Apps: platform tabs, logos & downloads
+       9. Apps: detect the visitor's OS, then offer its downloads
        ============================================================ */
     const PLATFORMS = ["android", "ios", "windows"];
+    const OS_LABEL = { android: "androidName", ios: "iosName", windows: "windowsName" };
+    const OS_ICON = { android: "androidIcon", ios: "iosIcon", windows: "windowsIcon" };
 
     const APPS = [
       {
@@ -1904,24 +1851,67 @@
       }
     ];
 
+    /* دستگاه واقعی کاربر: اندروید / آیفون / ویندوز — اگر مطمئن نباشیم null */
     function detectOS() {
       const ua = (navigator.userAgent || "").toLowerCase();
+      if (!ua) return null;
       if (/android/i.test(ua)) return "android";
-      if (/iphone|ipad|ipod/i.test(ua)) return "ios";
-      if (/windows/i.test(ua)) return "windows";
-      return "android";
+      if (/iphone|ipod|ipad|ipados/i.test(ua)) return "ios";
+      // آیپد جدید خودش را Macintosh معرفی می‌کند؛ لمس چند‌نقطه‌ای لو می‌دهد
+      if (/macintosh|mac os x/i.test(ua)) return (navigator.maxTouchPoints || 0) > 1 ? "ios" : null;
+      if (/windows|win32|win64|wow64/i.test(ua)) return "windows";
+      return null;
     }
 
-    let platformTab = detectOS();
-    if (!PLATFORMS.includes(platformTab)) platformTab = "android";
+    const detectedOS = detectOS();
+    let platformTab = PLATFORMS.includes(detectedOS) ? detectedOS : "android";
 
-    function toggleAppsMenu() {
-      const menu = document.getElementById("appsMenu");
-      const btn = document.getElementById("appsMenuBtn");
-      if (!menu) return;
-      const open = menu.hidden;
-      menu.hidden = !open;
-      if (btn) btn.setAttribute("aria-expanded", String(open));
+    function osName(platform) { return t(OS_LABEL[platform] || "androidName"); }
+    function osIcon(platform) { return t(OS_ICON[platform] || "androidIcon"); }
+
+    /* منوی کشویی: برچسب‌ها با زبان عوض می‌شوند و گزینهٔ تشخیص‌داده‌شده نشان دارد */
+    function updateOsSelect() {
+      const select = document.getElementById("osSelect");
+      if (!select) return;
+
+      [...select.options].forEach(opt => {
+        const platform = opt.dataset.platform;
+        opt.textContent = osIcon(platform) + " " + osName(platform) +
+          (platform === detectedOS ? " ✓" : "");
+      });
+      select.value = platformTab;
+
+      const title = document.getElementById("osPickerTitle");
+      if (title) title.textContent = t("osPickTitle");
+
+      const chip = document.getElementById("osChip");
+      if (chip) chip.hidden = !detectedOS;
+      if (detectedOS) {
+        const chipText = document.getElementById("osChipText");
+        const chipIcon = document.getElementById("osChipIcon");
+        if (chipText) chipText.textContent = t("detectedHint") + ": " + osName(detectedOS);
+        if (chipIcon) chipIcon.textContent = osIcon(detectedOS);
+      }
+    }
+
+    /* پیام بالای لیست: «برنامه‌های مناسب سیستم‌عامل شما» یا درخواست انتخاب دستی */
+    function updateAppsLead() {
+      const lead = document.getElementById("appsLead");
+      if (!lead) return;
+
+      const text = !detectedOS ? t("leadUnknown")
+        : platformTab === detectedOS ? t("leadDetected")
+        : t("leadChosen");
+
+      lead.textContent = "";
+      const line = document.createElement("span");
+      line.textContent = text;
+      lead.appendChild(line);
+
+      const badge = document.createElement("span");
+      badge.className = "lead-os";
+      badge.textContent = osIcon(platformTab) + " " + osName(platformTab);
+      lead.appendChild(badge);
     }
 
     function setPlatformTab(platform) {
@@ -1931,6 +1921,9 @@
     }
 
     function renderApps() {
+      updateOsSelect();
+      updateAppsLead();
+
       const grid = document.getElementById("appsGrid");
       if (!grid) return;
 
@@ -1942,10 +1935,6 @@
           <button type="button" class="app-download-btn" onclick="startDownload('${app.id}','${platformTab}')">${t("downloadBtn")}</button>
         </div>
       `).join("");
-
-      document.querySelectorAll(".ptab[data-platform]").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.platform === platformTab);
-      });
     }
 
     /* ---------- resolve latest stable release at runtime ---------- */
@@ -2052,7 +2041,7 @@
     }
 
     /* ============================================================
-       11. Modals: QR codes
+       10. Modals: QR codes
        ============================================================ */
     function toggleQR() {
       document.getElementById("qrModal").classList.toggle("open");
@@ -2086,7 +2075,7 @@
     });
 
     /* ============================================================
-       12. Protocol badges on config items
+       11. Protocol badges on config items
        ============================================================ */
     function addBadges() {
       document.querySelectorAll(".config-item[data-link]").forEach(item => {
@@ -2111,11 +2100,11 @@
     }
 
     /* ============================================================
-       13. Init — Persian + night mode by default
+       12. Init — Persian + day mode by default
        ============================================================ */
     initGauges();
     buildClockTicks();
-    applyTheme(false);
+    applyTheme(true);
     applyLang();
     addBadges();
     startTehranClock();

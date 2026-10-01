@@ -66,12 +66,18 @@ jobs:
           grep -q 'id="usageGauge"' pages/speed/index.html
           grep -q 'id="clockDigital"' pages/speed/index.html
           grep -q 'id="configQRModal"' pages/speed/index.html
+          grep -q 'id="osSelect"' pages/speed/index.html
           grep -q 'data-platform="android"' pages/speed/index.html
+          grep -q 'function detectOS' pages/speed/index.html
           grep -q 'function toggleConfigQR' pages/speed/index.html
-          grep -q 'function runPingTest' pages/speed/index.html
           grep -q 'function startDownload' pages/speed/index.html
           grep -q 'api.github.com/repos/' pages/speed/index.html
           ! grep -q 'importAppSelect' pages/speed/index.html
+          # the speed theme deliberately ships without the latency test
+          ! grep -q -e 'runPingTest' -e 'ping-result' -e 'pingBtn' pages/speed/index.html
+          # day mode + Persian are the defaults
+          grep -q 'class="day-mode"' pages/speed/index.html
+          grep -q 'applyTheme(true)' pages/speed/index.html
 
       - name: Run deployed-page smoke tests
         if: ${{ env.DEPLOY_URL != '' }}
