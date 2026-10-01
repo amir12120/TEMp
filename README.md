@@ -23,8 +23,9 @@ bash <(curl -sL https://raw.githubusercontent.com/amir12120/TEMp/main/install.sh
 :: Available themes:
 
   1) modern
+  2) speed
 
-Select theme number [1-1]:
+Select theme number [1-2]:
 ```
 
 عدد تم موردنظر را وارد کنید — همان تم با نام `index.html` در مسیر `/etc/3x-ui/templates/my-theme/` قرار می‌گیرد، پنل ری‌استارت می‌شود و کار تمام است.
@@ -61,6 +62,7 @@ Select theme number [1-1]:
 | صفحه     | توضیح |
 |----------|-------|
 | `modern` | صفحه اشتراک مدرن — دو زبانه (فارسی/انگلیسی)، حالت شب و روز، QR کد برای تک‌تک کانفیگ‌ها، اندازه‌گیری تأخیر ترنسپورت‌های HTTP از مرورگر، نشانگر آنلاین/آفلاین زنده، ساعت تهران با رویدادهای تقویم ایرانی، بخش دانلود اپلیکیشن (۸ برنامه با لینک آخرین نسخه پایدار) |
+| `speed`  | داشبورد اسپرت «کیلومتر و دور موتور» — دو گیج عقربه‌ای (زمان باقی‌مانده + جزئیات مصرف)، ساعت گرد به وقت تهران با تاریخ و مناسبت زیر آن، کارت وضعیت سرویس/آنلاین/کاربر در گوشه، انتخاب زبان و حالت شب/روز بالای گیج‌ها، لینک ساب و کانفیگ‌ها پایین گیج‌ها، منوی دانلود اپلیکیشن با سه تب اندروید/آیفون/ویندوز و لوگوی اختصاصی هر برنامه (۸ برنامه، همیشه آخرین نسخه پایدار) |
 
 ## افزودن تم جدید در آینده
 
@@ -73,10 +75,12 @@ Select theme number [1-1]:
 ```
 TEMp/
 ├── install.sh          # نصاب با منوی تعاملی
-├── pages.txt           # لیست تم‌های موجود (هر نام یک خط)
+├── pages.txt           # لیست تم‌های موجود (هر نام یک خط: modern، speed)
 └── pages/
-    └── modern/
-        └── index.html  # تم‌ای که به‌عنوان my-theme/index.html نصب می‌شود
+    ├── modern/
+    │   └── index.html  # تم مدرن
+    └── speed/
+        └── index.html  # تم اسپرت کیلومتر
 ```
 
 ---
@@ -117,6 +121,7 @@ and **Save**. The subscription page now renders from this folder.
 | Theme    | Description |
 |----------|-------------|
 | `modern` | Modern bilingual (fa/en) subscription & usage panel — dark/light modes, per-config QR codes, browser latency measurement for HTTP transports, live online/offline presence, Tehran clock with Iranian-calendar events, app download section (8 apps, always latest stable) |
+| `speed`  | Sporty car-dashboard (speedometer/tachometer) theme — two needle gauges (time remaining + usage details), round Tehran clock with date and occasion beneath it, service status/online/user card in the corner, language and day/night controls above the gauges, sub link and configs below, and an app-download menu with Android/iPhone/Windows tabs plus per-app logos (8 apps, always latest stable) |
 
 ### Adding a new theme
 

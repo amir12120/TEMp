@@ -35,14 +35,16 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          source = Path("pages/modern/index.html").read_text(encoding="utf-8")
-          scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", source, re.S)
-          if len(scripts) != 1:
-              raise SystemExit(f"expected one inline script, found {len(scripts)}")
-          rendered = re.sub(r"\{\{[^}]*\}\}", "0", scripts[0])
-          Path("/tmp/modern-rendered.js").write_text(rendered, encoding="utf-8")
+          for name in ("modern", "speed"):
+              source = Path(f"pages/{name}/index.html").read_text(encoding="utf-8")
+              scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", source, re.S)
+              if len(scripts) != 1:
+                  raise SystemExit(f"{name}: expected one inline script, found {len(scripts)}")
+              rendered = re.sub(r"\{\{[^}]*\}\}", "0", scripts[0])
+              Path(f"/tmp/{name}-rendered.js").write_text(rendered, encoding="utf-8")
           PY
           node --check /tmp/modern-rendered.js
+          node --check /tmp/speed-rendered.js
 
       - name: Validate required page features
         shell: bash
@@ -55,6 +57,21 @@ jobs:
           grep -q 'function toggleConfigQR' pages/modern/index.html
           grep -q 'function runPingTest' pages/modern/index.html
           grep -q 'api.github.com/repos/' pages/modern/index.html
+
+      - name: Validate speed page features
+        shell: bash
+        run: |
+          test -s pages/speed/index.html
+          grep -q 'id="timeGauge"' pages/speed/index.html
+          grep -q 'id="usageGauge"' pages/speed/index.html
+          grep -q 'id="clockDigital"' pages/speed/index.html
+          grep -q 'id="configQRModal"' pages/speed/index.html
+          grep -q 'data-platform="android"' pages/speed/index.html
+          grep -q 'function toggleConfigQR' pages/speed/index.html
+          grep -q 'function runPingTest' pages/speed/index.html
+          grep -q 'function startDownload' pages/speed/index.html
+          grep -q 'api.github.com/repos/' pages/speed/index.html
+          ! grep -q 'importAppSelect' pages/speed/index.html
 
       - name: Run deployed-page smoke tests
         if: ${{ env.DEPLOY_URL != '' }}

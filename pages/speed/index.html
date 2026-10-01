@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اشتراک</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       SPEED — sporty car-dashboard subscription page
+       ============================================================ */
+    :root {
+      --bg: #04060c;
+      --bg-2: #080d18;
+      --panel: rgba(14, 21, 35, 0.74);
+      --panel-2: rgba(20, 30, 48, 0.55);
+      --line: rgba(120, 150, 200, 0.14);
+      --txt: #e9eff8;
+      --muted: #8ea3c0;
+      --accent: #22d3ee;
+      --accent-2: #38bdf8;
+      --ok: #34d399;
+      --warn: #f5b544;
+      --bad: #ff4d5e;
+      --violet: #a78bfa;
+      --dial: rgba(9, 14, 24, 0.9);
+      --needle: #ff4d5e;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      --font-dig: "Orbitron", "Inter", monospace;
+      --radius: 22px;
+    }
+
+    html.day-mode, body.day-mode {
+      --bg: #e8eef7;
+      --bg-2: #f4f7fc;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-2: rgba(255, 255, 255, 0.72);
+      --line: rgba(20, 45, 90, 0.12);
+      --txt: #0c1727;
+      --muted: #5c6f8c;
+      --dial: rgba(244, 248, 253, 0.92);
+      --shadow: 0 20px 50px rgba(30, 60, 110, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", "Vazirmatn", system-ui, -apple-system, sans-serif;
+      color: var(--txt);
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(34, 211, 238, 0.12), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(167, 139, 250, 0.12), transparent 55%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    body.lang-en { font-family: "Inter", system-ui, sans-serif; }
+
+    /* carbon-fibre style texture + animated speed streaks */
+    .background-effects { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .background-effects::before {
+      content: "";
+      position: absolute; inset: -20%;
+      background-image:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 2px, transparent 2px 8px),
+        repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 8px);
+      opacity: 0.6;
+    }
+    .speed-line {
+      position: absolute; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+      opacity: 0.22; animation: streak 3.4s linear infinite;
+    }
+    .speed-line:nth-child(2) { left: 22%; animation-delay: 0.4s; }
+    .speed-line:nth-child(3) { left: 58%; animation-delay: 1.1s; background: linear-gradient(to bottom, transparent, var(--violet), transparent); }
+    .speed-line:nth-child(4) { left: 82%; animation-delay: 1.8s; }
+    @keyframes streak { 0% { transform: translateY(-120%); } 100% { transform: translateY(120%); } }
+
+    .container {
+      position: relative; z-index: 1;
+      max-width: 1060px; margin: 0 auto;
+      padding: 1.1rem 1rem 3rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    /* ---------- top bar: spinning logo (left) + driver HUD (corner) ---------- */
+    .topbar { position: relative; min-height: 92px; display: flex; align-items: flex-start; }
+
+    .spin-logo {
+      position: absolute; top: 0; left: 0;
+      width: 78px; height: 78px; display: grid; place-items: center;
+      filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.45));
+    }
+    .spin-logo svg { width: 100%; height: 100%; animation: wheelspin 3s linear infinite; }
+    @keyframes wheelspin { to { transform: rotate(360deg); } }
+    .wheel-rim { fill: none; stroke: var(--accent); stroke-width: 4; }
+    .wheel-inner { fill: none; stroke: var(--violet); stroke-width: 2; opacity: 0.75; }
+    .wheel-spoke { stroke: var(--txt); stroke-width: 3; stroke-linecap: round; opacity: 0.85; }
+    .wheel-hub { fill: var(--accent); }
+
+    .hud {
+      margin-left: auto;
+      max-width: min(100%, 380px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 0.7rem 0.9rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hud-user { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .hud-label {
+      font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); font-weight: 700;
+    }
+    .hud-email {
+      font-family: var(--font-dig); font-size: 0.86rem; font-weight: 700;
+      color: var(--txt); word-break: break-all; direction: ltr;
+    }
+    .hud-status { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+
+    .status-badge, .presence {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.74rem; font-weight: 700;
+      padding: 0.3rem 0.66rem; border-radius: 999px;
+      border: 1px solid var(--line); white-space: nowrap;
+    }
+    .status-badge.badge-active { color: var(--ok); background: rgba(52, 211, 153, 0.12); border-color: rgba(52, 211, 153, 0.4); }
+    .status-badge.badge-inactive { color: var(--bad); background: rgba(255, 77, 94, 0.12); border-color: rgba(255, 77, 94, 0.4); }
+    .status-badge.badge-pending { color: var(--warn); background: rgba(245, 181, 68, 0.12); border-color: rgba(245, 181, 68, 0.4); }
+    .presence { color: var(--muted); }
+    .presence.online { color: var(--ok); border-color: rgba(52, 211, 153, 0.35); }
+    .presence.offline { color: var(--muted); }
+    .presence-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .presence.online .presence-dot { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18); animation: pulse 1.8s ease infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* ---------- controls (language + theme) above the gauges ---------- */
+    .controls { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      font: inherit; font-size: 0.84rem; font-weight: 700; color: var(--txt);
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 999px; padding: 0.5rem 1rem; cursor: pointer;
+      backdrop-filter: blur(10px); transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ctrl-btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .ctrl-btn.active-glow { border-color: var(--accent); box-shadow: 0 0 18px rgba(34, 211, 238, 0.35); }
+
+    /* ---------- alerts (dashboard warning lights) ---------- */
+    .alert {
+      display: none; align-items: center; gap: 0.6rem;
+      padding: 0.7rem 1rem; border-radius: 14px;
+      font-size: 0.85rem; font-weight: 600;
+      border: 1px solid rgba(255, 77, 94, 0.45);
+      background: linear-gradient(90deg, rgba(255, 77, 94, 0.18), rgba(255, 77, 94, 0.06));
+      color: #ffd9de;
+    }
+    html.day-mode .alert { color: #8a1120; }
+    .alert.show { display: flex; animation: fadeUp 0.4s ease both; }
+    .alert-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ---------- gauge cluster ---------- */
+    .cluster {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    @media (max-width: 760px) { .cluster { grid-template-columns: 1fr; } }
+
+    .gauge-card {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 1rem 1rem 1.1rem;
+      overflow: hidden;
+      animation: fadeUp 0.6s ease both;
+    }
+    .gauge-card::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(circle at 50% 18%, rgba(34, 211, 238, 0.14), transparent 62%);
+    }
+    .card-head {
+      position: relative; z-index: 2;
+      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+      font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .card-head .accent-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+    .gauge-wrap { position: relative; display: grid; place-items: center; }
+
+    .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; }
+    .gauge-svg { width: 100%; height: 100%; overflow: visible; }
+    .gauge-track { fill: none; stroke: var(--line); stroke-width: 12; stroke-linecap: round; }
+    .gauge-value { fill: none; stroke: var(--ok); stroke-width: 12; stroke-linecap: round; transition: d 0.5s ease; filter: drop-shadow(0 0 8px currentColor); }
+    .gauge[data-level="ok"] .gauge-value { stroke: var(--accent); color: var(--accent); }
+    .gauge[data-level="warn"] .gauge-value { stroke: var(--warn); color: var(--warn); }
+    .gauge[data-level="bad"] .gauge-value { stroke: var(--bad); color: var(--bad); }
+
+    .tick { stroke: var(--muted); stroke-width: 1.4; opacity: 0.35; }
+    .tick.major { stroke: var(--txt); stroke-width: 2.6; opacity: 0.75; }
+
+    .needle-body { fill: var(--needle); filter: drop-shadow(0 0 6px rgba(255, 77, 94, 0.75)); transition: all 0.6s cubic-bezier(0.2, 0.9, 0.2, 1); }
+    .gauge[data-level="ok"] .needle-body { fill: var(--accent); filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.7)); }
+    .gauge[data-level="warn"] .needle-body { fill: var(--warn); filter: drop-shadow(0 0 6px rgba(245, 181, 68, 0.7)); }
+    .needle-base { fill: #0b1220; stroke: var(--txt); stroke-width: 2; }
+
+    .gauge-readout {
+      position: absolute; left: 50%; top: 60%; transform: translate(-50%, 0);
+      display: flex; flex-direction: column; align-items: center; gap: 0.05rem;
+      text-align: center; pointer-events: none; width: 78%;
+    }
+    .readout-big {
+      font-family: var(--font-dig); font-size: clamp(1.7rem, 5vw, 2.2rem);
+      font-weight: 800; line-height: 1; letter-spacing: 0.02em;
+      color: var(--txt); text-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+    }
+    .readout-unit { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .readout-sub { font-family: var(--font-dig); font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-top: 0.15rem; }
+    .readout-cap { font-size: 0.66rem; color: var(--muted); margin-top: 0.2rem; }
+
+    .gauge-foot {
+      position: relative; z-index: 2;
+      margin-top: 0.5rem; text-align: center; font-size: 0.8rem; color: var(--muted);
+    }
+    .gauge-foot strong { color: var(--txt); font-weight: 700; }
+
+    /* ---------- round Tehran clock (corner of the time gauge) ---------- */
+    .clock-badge {
+      position: absolute; top: 0.2rem; inset-inline-end: 0.2rem;
+      width: 116px;
+      background: var(--dial);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      padding: 0.5rem 0.5rem 0.6rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      z-index: 3;
+      animation: fadeUp 0.7s ease both;
+    }
+    @media (max-width: 520px) { .clock-badge { position: static; margin: 0 auto; } }
+    .clock-face { width: 74px; height: 74px; }
+    .clock-rim { fill: none; stroke: var(--line); stroke-width: 2.5; }
+    .ctick { stroke: var(--muted); stroke-width: 1; opacity: 0.4; }
+    .ctick.major { stroke: var(--txt); stroke-width: 2; opacity: 0.8; }
+    .clock-hand { stroke: var(--txt); stroke-linecap: round; }
+    .clock-hand.hour { stroke-width: 4; }
+    .clock-hand.minute { stroke-width: 2.6; }
+    .clock-hand.second { stroke: var(--accent); stroke-width: 1.4; }
+    .clock-hub { fill: var(--accent); }
+    .clock-digital { font-family: var(--font-dig); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; }
+    .clock-date { font-size: 0.62rem; color: var(--muted); text-align: center; line-height: 1.35; }
+    .clock-event {
+      font-size: 0.6rem; color: var(--warn); text-align: center; line-height: 1.35;
+      border-top: 1px dashed var(--line); padding-top: 0.2rem; margin-top: 0.1rem;
+    }
+
+    /* ---------- usage detail grid ---------- */
+    .usage-details {
+      position: relative; z-index: 2;
+      margin-top: 0.6rem;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem;
+    }
+    @media (max-width: 420px) { .usage-details { grid-template-columns: repeat(2, 1fr); } }
+    .ud {
+      background: var(--panel-2); border: 1px solid var(--line);
+      border-radius: 12px; padding: 0.45rem 0.5rem;
+      display: flex; flex-direction: column; gap: 0.15rem; text-align: center;
+    }
+    .ud span { font-size: 0.62rem; color: var(--muted); }
+    .ud b { font-family: var(--font-dig); font-size: 0.82rem; font-weight: 700; }
+
+    /* ---------- generic panels ---------- */
+    .panel {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      backdrop-filter: blur(12px); padding: 1rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .panel-title {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.82rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+    }
+
+    .sub-link-box { margin-top: 0.8rem; }
+    .sub-link-wrapper { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .sub-link-text {
+      flex: 1 1 240px; font-family: var(--font-dig); font-size: 0.78rem;
+      background: var(--panel-2); border: 1px solid var(--line);
+      border-radius: 12px; padding: 0.7rem 0.8rem;
+      word-break: break-all; direction: ltr; text-align: left;
+    }
+    .btn-group { display: flex; gap: 0.4rem; }
+
+    .btn {
+      font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      border-radius: 12px; padding: 0.62rem 0.95rem;
+      border: 1px solid var(--line); background: var(--panel-2); color: var(--txt);
+      transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04121a; border-color: transparent; }
+    .btn-success { background: linear-gradient(135deg, var(--ok), #22c55e) !important; color: #04210f !important; }
+
+    .soft-hr { border: none; border-top: 1px solid var(--line); margin: 1rem 0; }
+
+    .config-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.2rem; }
+
+    #configList { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 0.8rem; }
+    .config-item {
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+      background: var(--panel-2); border: 1px solid var(--line);
+      border-radius: 12px; padding: 0.6rem 0.7rem;
+    }
+    .config-text {
+      flex: 1 1 180px; font-family: var(--font-dig); font-size: 0.72rem;
+      color: var(--muted); word-break: break-all; direction: ltr; text-align: left;
+    }
+    .badge-group { display: flex; gap: 0.3rem; }
+    .badge {
+      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em;
+      padding: 0.2rem 0.45rem; border-radius: 6px; color: #06121c;
+    }
+    .btn-qr {
+      font: inherit; font-size: 0.74rem; font-weight: 700; cursor: pointer;
+      padding: 0.45rem 0.6rem; border-radius: 9px;
+      border: 1px solid var(--line); background: transparent; color: var(--txt);
+    }
+    .btn-qr:hover { border-color: var(--accent); }
+    .ping-result {
+      font-family: var(--font-dig); font-size: 0.7rem; font-weight: 700;
+      padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid var(--line);
+    }
+    .ping-result.good { color: var(--ok); border-color: rgba(52, 211, 153, 0.5); }
+    .ping-result.mid { color: var(--warn); border-color: rgba(245, 181, 68, 0.5); }
+    .ping-result.bad { color: var(--bad); border-color: rgba(255, 77, 94, 0.5); }
+    .ping-result.testing { color: var(--muted); }
+    .ping-bar { margin-top: 0.9rem; display: flex; justify-content: center; }
+    .ping-btn { width: 100%; max-width: 320px; }
+    .ping-btn:disabled { opacity: 0.6; cursor: progress; }
+
+    /* ---------- apps download menu with platform tabs ---------- */
+    .apps-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
+    .apps-menu { margin-top: 0.9rem; }
+    .apps-menu[hidden] { display: none; }
+    .platform-tabs {
+      display: inline-flex; gap: 0.3rem; padding: 0.28rem;
+      background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px;
+    }
+    .ptab {
+      font: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      border: none; background: transparent; color: var(--muted);
+      padding: 0.45rem 0.9rem; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .ptab:hover { color: var(--txt); }
+    .ptab.active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04121a; }
+
+    .apps-grid {
+      margin-top: 0.9rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.6rem;
+    }
+    .app-card {
+      background: var(--panel-2); border: 1px solid var(--line);
+      border-radius: 16px; padding: 0.7rem 0.55rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.45rem; text-align: center;
+      transition: transform 0.15s ease, border-color 0.2s ease;
+    }
+    .app-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .app-icon { width: 46px; height: 46px; border-radius: 12px; object-fit: cover; background: rgba(255, 255, 255, 0.06); }
+    .app-name { font-size: 0.78rem; font-weight: 700; }
+    .app-download-btn {
+      font: inherit; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+      width: 100%; padding: 0.42rem 0.5rem; border-radius: 10px;
+      border: 1px solid transparent; color: #04121a;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+    .app-download-btn:hover { filter: brightness(1.08); }
+    .download-note { margin-top: 0.8rem; font-size: 0.72rem; color: var(--muted); text-align: center; }
+
+    /* ---------- modals ---------- */
+    .qr-overlay {
+      position: fixed; inset: 0; z-index: 50; display: none;
+      align-items: center; justify-content: center; padding: 1rem;
+      background: rgba(3, 6, 12, 0.78); backdrop-filter: blur(6px);
+    }
+    .qr-overlay.open { display: flex; }
+    .qr-box {
+      position: relative; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 20px; padding: 1.2rem; box-shadow: var(--shadow);
+      max-width: min(92vw, 380px); text-align: center;
+    }
+    .qr-label { font-size: 0.82rem; font-weight: 700; margin-bottom: 0.7rem; }
+    .qr-close {
+      position: absolute; top: 0.4rem; inset-inline-end: 0.6rem;
+      border: none; background: transparent; color: var(--muted);
+      font-size: 1.5rem; line-height: 1; cursor: pointer;
+    }
+    .qr-box img { width: min(70vw, 260px); height: auto; border-radius: 12px; background: #fff; padding: 0.4rem; }
+    .qr-url { margin-top: 0.7rem; font-family: var(--font-dig); font-size: 0.68rem; color: var(--muted); word-break: break-all; direction: ltr; }
+  </style>
+</head>
+
+<body>
+  <div class="background-effects" aria-hidden="true">
+    <span class="speed-line"></span>
+    <span class="speed-line"></span>
+    <span class="speed-line"></span>
+  </div>
+
+  <main class="container">
+    <!-- spinning logo (top-left) + driver HUD (corner) -->
+    <div class="topbar">
+      <span class="spin-logo" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <circle class="wheel-rim" cx="50" cy="50" r="44"></circle>
+          <circle class="wheel-inner" cx="50" cy="50" r="30"></circle>
+          <g class="wheel-spokes">
+            <line class="wheel-spoke" x1="50" y1="20" x2="50" y2="34"></line>
+            <line class="wheel-spoke" x1="50" y1="66" x2="50" y2="80"></line>
+            <line class="wheel-spoke" x1="20" y1="50" x2="34" y2="50"></line>
+            <line class="wheel-spoke" x1="66" y1="50" x2="80" y2="50"></line>
+            <line class="wheel-spoke" x1="29" y1="29" x2="39" y2="39"></line>
+            <line class="wheel-spoke" x1="61" y1="61" x2="71" y2="71"></line>
+          </g>
+          <circle class="wheel-hub" cx="50" cy="50" r="9"></circle>
+        </svg>
+      </span>
+
+      <div class="hud" id="hud">
+        <div class="hud-user">
+          <span class="hud-label" data-i18n="driver">کاربر</span>
+          <span class="hud-email">{{ index .emails 0 }}</span>
+        </div>
+        <div class="hud-status">
+          <span class="hud-label" data-i18n="serviceStatus">وضعیت سرویس</span>
+          <span id="statusBadge" class="status-badge badge-pending">در انتظار</span>
+          <span id="presence" class="presence offline"><i class="presence-dot" aria-hidden="true"></i><span id="presenceText">—</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- language + day/night controls, above the gauges -->
+    <div class="controls">
+      <button id="langToggle" class="ctrl-btn" type="button" onclick="toggleLang()" aria-label="Toggle language">
+        <span aria-hidden="true">🌐</span><span id="langLabel">EN</span>
+      </button>
+      <button id="themeToggle" class="ctrl-btn" type="button" onclick="toggleTheme()" aria-label="Toggle day mode">
+        <span id="themeIcon" aria-hidden="true">☀️</span><span data-i18n="dayMode">روز</span>
+      </button>
+    </div>
+
+    <div id="alertTime" class="alert">
+      <span aria-hidden="true">⏳</span>
+      <span class="alert-text" data-i18n="timeAlert">کمتر از یک روز تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید</span>
+    </div>
+
+    <div id="alertVol" class="alert">
+      <span aria-hidden="true">⚠️</span>
+      <span class="alert-text" data-i18n="alertVol">کمتر از یک گیگ تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید</span>
+    </div>
+
+    <!-- gauge cluster -->
+    <section class="cluster">
+      <div class="gauge-card">
+        <div class="card-head">
+          <span data-i18n="timeLeft">⏱️ زمان باقی‌مانده</span>
+          <span class="accent-dot" aria-hidden="true"></span>
+        </div>
+
+        <div class="gauge-wrap">
+          <div class="gauge" id="timeGauge" data-level="ok">
+            <svg class="gauge-svg" viewBox="0 0 220 220" aria-hidden="true">
+              <path class="gauge-track" id="timeTrack" d=""></path>
+              <path class="gauge-value" id="timeValuePath" d=""></path>
+              <g class="gauge-ticks" id="timeTicks"></g>
+              <g class="gauge-needle" id="timeNeedle">
+                <polygon class="needle-body" points="110,48 105.5,112 114.5,112"></polygon>
+              </g>
+              <circle class="needle-base" cx="110" cy="110" r="8"></circle>
+            </svg>
+
+            <div class="gauge-readout">
+              <strong class="readout-big" id="timeBig">00</strong>
+              <span class="readout-unit" data-i18n="unitDays">روز</span>
+              <span class="readout-sub" id="timeSub">00:00:00</span>
+              <span class="readout-cap" data-i18n="timeCap">زمان باقی‌مانده</span>
+            </div>
+          </div>
+
+          <div class="clock-badge" id="tehranClock">
+            <svg class="clock-face" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="clock-rim" cx="50" cy="50" r="47"></circle>
+              <g class="clock-ticks" id="clockTicks"></g>
+              <line class="clock-hand hour" id="clockHour" x1="50" y1="50" x2="50" y2="28"></line>
+              <line class="clock-hand minute" id="clockMin" x1="50" y1="50" x2="50" y2="18"></line>
+              <line class="clock-hand second" id="clockSec" x1="50" y1="50" x2="50" y2="15"></line>
+              <circle class="clock-hub" cx="50" cy="50" r="3"></circle>
+            </svg>
+            <div class="clock-digital" id="clockDigital">--:--</div>
+            <div class="clock-date" id="clockDate">—</div>
+            <div class="clock-event" id="clockEvent" hidden></div>
+          </div>
+        </div>
+
+        <div class="gauge-foot">
+          <span data-i18n="expireDate">تاریخ انقضا:</span> <strong id="expireDateText">—</strong>
+        </div>
+      </div>
+
+      <div class="gauge-card">
+        <div class="card-head">
+          <span data-i18n="dataUsage">📊 جزئیات مصرف</span>
+          <span class="accent-dot" aria-hidden="true"></span>
+        </div>
+
+        <div class="gauge-wrap">
+          <div class="gauge" id="usageGauge" data-level="ok">
+            <svg class="gauge-svg" viewBox="0 0 220 220" aria-hidden="true">
+              <path class="gauge-track" id="usageTrack" d=""></path>
+              <path class="gauge-value" id="usageValuePath" d=""></path>
+              <g class="gauge-ticks" id="usageTicks"></g>
+              <g class="gauge-needle" id="usageNeedle">
+                <polygon class="needle-body" points="110,48 105.5,112 114.5,112"></polygon>
+              </g>
+              <circle class="needle-base" cx="110" cy="110" r="8"></circle>
+            </svg>
+
+            <div class="gauge-readout">
+              <strong class="readout-big" id="usageBig">۰٪</strong>
+              <span class="readout-unit" data-i18n="usedShort">مصرف‌شده</span>
+              <span class="readout-sub" id="usageSub">—</span>
+              <span class="readout-cap" data-i18n="remainedCap">حجم باقی‌مانده</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="usage-details">
+          <div class="ud"><span data-i18n="totalQuota">حجم کل</span><b id="valTotal">—</b></div>
+          <div class="ud"><span data-i18n="used">حجم مصرف‌شده</span><b id="valUsed">—</b></div>
+          <div class="ud"><span data-i18n="remained">حجم باقی‌مانده</span><b id="valRemained">—</b></div>
+          <div class="ud"><span data-i18n="downloadLbl">📥 دانلود</span><b id="valDown">—</b></div>
+          <div class="ud"><span data-i18n="uploadLbl">📤 آپلود</span><b id="valUp">—</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- subscription link + configs -->
+    <section class="panel">
+      <div class="panel-title" data-i18n="subLinkTitle">🔗 لینک سابسکریپشن</div>
+
+      <div class="sub-link-box">
+        <div class="sub-link-wrapper">
+          <div class="sub-link-text" id="subLinkDisplay">{{ .subUrl }}</div>
+          <div class="btn-group">
+            <button class="btn btn-primary" type="button" data-copy="{{ .subUrl }}" onclick="copyFromButton(this)">
+              <span data-i18n="copy">📋 کپی</span>
+            </button>
+            <button class="btn" type="button" onclick="toggleQR()">▦ QR</button>
+          </div>
+        </div>
+      </div>
+
+      <hr class="soft-hr">
+
+      <div class="config-header">
+        <span class="panel-title" data-i18n="configsTitle">⚙️ کانفیگ‌ها</span>
+        <button class="btn btn-primary" type="button" onclick="copyAllConfigs(this)">
+          <span data-i18n="copyAll">📋 کپی همه</span>
+        </button>
+      </div>
+
+      <div id="configList">
+        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="نمایش QR">▦ QR</button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button></div>{{ end }}
+      </div>
+
+      <div class="ping-bar">
+        <button class="btn btn-primary ping-btn" type="button" id="pingBtn" onclick="runPingTest(this)">
+          <span data-i18n="pingBtn">📶 تست تأخیر کانفیگ‌ها</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- download apps menu with platform tabs -->
+    <section class="panel">
+      <div class="apps-head">
+        <span class="panel-title" data-i18n="downloadAppsTitle">⬇️ دانلود اپلیکیشن</span>
+        <button class="btn" type="button" id="appsMenuBtn" onclick="toggleAppsMenu()" aria-expanded="false">
+          <span data-i18n="appsMenuBtn">نمایش برنامه‌ها</span>
+        </button>
+      </div>
+
+      <div class="apps-menu" id="appsMenu" hidden>
+        <div class="platform-tabs" role="tablist" aria-label="Platform">
+          <button class="ptab" type="button" data-platform="android" onclick="setPlatformTab('android')">
+            <span aria-hidden="true">🤖</span><span data-i18n="androidName">اندروید</span>
+          </button>
+          <button class="ptab" type="button" data-platform="ios" onclick="setPlatformTab('ios')">
+            <span aria-hidden="true">🍎</span><span data-i18n="iosName">آیفون</span>
+          </button>
+          <button class="ptab" type="button" data-platform="windows" onclick="setPlatformTab('windows')">
+            <span aria-hidden="true">🪟</span><span data-i18n="windowsName">ویندوز</span>
+          </button>
+        </div>
+
+        <div class="apps-grid" id="appsGrid"></div>
+        <div class="download-note" data-i18n="downloadNote">برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="qr-overlay" id="qrModal">
+    <div class="qr-box">
+      <button class="qr-close" type="button" onclick="toggleQR()" aria-label="بستن">×</button>
+      <div class="qr-label" data-i18n="qrLabel">📱 QR کد اشتراک</div>
+      <img
+        src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&ecc=M&data={{ .subUrl | urlquery }}"
+        alt="QR Code"
+      >
+      <div class="qr-url">{{ .subUrl }}</div>
+    </div>
+  </div>
+
+  <div class="qr-overlay" id="configQRModal" onclick="if(event.target===this) closeConfigQR()">
+    <div class="qr-box">
+      <button class="qr-close" type="button" onclick="closeConfigQR()" aria-label="بستن">×</button>
+      <div class="qr-label" data-i18n="configQrLabel">📱 QR کد کانفیگ</div>
+      <img id="configQRImg" src="" alt="QR Code">
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       1. i18n dictionary
+       ============================================================ */
+    const I18N = {
+      fa: {
+        title: "اشتراک",
+        dir: "rtl",
+        driver: "کاربر",
+        serviceStatus: "وضعیت سرویس",
+        active: "🟢 فعال", inactive: "🔴 غیرفعال",
+        pending: "⏳ در انتظار فعال‌سازی",
+        online: "آنلاین", offline: "آفلاین",
+        timeLeft: "⏱️ زمان باقی‌مانده",
+        timeCap: "زمان باقی‌مانده",
+        expireDate: "تاریخ انقضا:",
+        dataUsage: "📊 جزئیات مصرف",
+        usedShort: "مصرف‌شده",
+        remainedCap: "حجم باقی‌مانده",
+        totalQuota: "حجم کل", used: "حجم مصرف‌شده", remained: "حجم باقی‌مانده",
+        downloadLbl: "📥 دانلود", uploadLbl: "📤 آپلود",
+        subLinkTitle: "🔗 لینک سابسکریپشن",
+        copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
+        configsTitle: "⚙️ کانفیگ‌ها",
+        pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
+        downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
+        downloadNote: "برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.",
+        appsMenuBtn: "نمایش برنامه‌ها",
+        downloadBtn: "⬇️ دانلود",
+        androidName: "اندروید", iosName: "آیفون", windowsName: "ویندوز",
+        qrLabel: "📱 QR کد اشتراک",
+        configQrLabel: "📱 QR کد کانفیگ",
+        dayMode: "روز", nightMode: "شب",
+        unlimited: "نامحدود", pct: "٪",
+        unitDays: "روز", unitHours: "ساعت", unitMinutes: "دقیقه", unitSeconds: "ثانیه",
+        timeAlert: "کمتر از یک روز تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید",
+        alertVol: "کمتر از یک گیگ تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید",
+        noSubLink: "❌ لینک اشتراک یافت نشد",
+        copyFailed: "❌ خطا در کپی"
+      },
+      en: {
+        title: "Subscription",
+        dir: "ltr",
+        driver: "Driver",
+        serviceStatus: "Service status",
+        active: "🟢 Active", inactive: "🔴 Inactive",
+        pending: "⏳ Pending activation",
+        online: "Online", offline: "Offline",
+        timeLeft: "⏱️ Time remaining",
+        timeCap: "Time remaining",
+        expireDate: "Expires:",
+        dataUsage: "📊 Data usage",
+        usedShort: "Used",
+        remainedCap: "Remaining",
+        totalQuota: "Total quota", used: "Used", remained: "Remaining",
+        downloadLbl: "📥 Download", uploadLbl: "📤 Upload",
+        subLinkTitle: "🔗 Subscription link",
+        copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
+        configsTitle: "⚙️ Configs",
+        pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
+        downloadAppsTitle: "⬇️ Download app",
+        downloadNote: "For each app, the download page of the latest version for your OS will open.",
+        appsMenuBtn: "Show apps",
+        downloadBtn: "⬇️ Download",
+        androidName: "Android", iosName: "iOS", windowsName: "Windows",
+        qrLabel: "📱 Subscription QR code",
+        configQrLabel: "📱 Config QR code",
+        dayMode: "Day", nightMode: "Night",
+        unlimited: "Unlimited", pct: "%",
+        unitDays: "days", unitHours: "hrs", unitMinutes: "min", unitSeconds: "sec",
+        timeAlert: "Less than one day remains until your subscription ends. Please renew.",
+        alertVol: "Less than 1 GB remains until your subscription ends. Please renew.",
+        noSubLink: "❌ Subscription link not found",
+        copyFailed: "❌ Copy failed"
+      }
+    };
+
+    /* ============================================================
+       2. Language (FA / EN)
+       ============================================================ */
+    let lang = "fa";
+
+    function t(key) {
+      return (I18N[lang] && I18N[lang][key]) || I18N.fa[key] || key;
+    }
+
+    function applyLang() {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = t("dir");
+      document.title = t("title");
+      document.body.classList.toggle("lang-en", lang === "en");
+      document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+      const langLabel = document.getElementById("langLabel");
+      if (langLabel) langLabel.textContent = lang === "fa" ? "EN" : "فا";
+      const langBtn = document.getElementById("langToggle");
+      if (langBtn) langBtn.classList.toggle("active-glow", lang === "en");
+      renderApps();
+      updateThemeBtn();
+      updateAll();
+      updateClock();
+      fitAllAlerts();
+    }
+
+    function toggleLang() {
+      lang = lang === "fa" ? "en" : "fa";
+      applyLang();
+    }
+
+    /* ============================================================
+       3. Day / night theme
+       ============================================================ */
+    function updateThemeBtn() {
+      const isDay = document.documentElement.classList.contains("day-mode");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.textContent = isDay ? "🌙" : "☀️";
+      const label = document.querySelector("#themeToggle [data-i18n]");
+      if (label) label.textContent = t(isDay ? "nightMode" : "dayMode");
+    }
+
+    function applyTheme(day) {
+      document.documentElement.classList.toggle("day-mode", day);
+      document.body.classList.toggle("day-mode", day);
+      updateThemeBtn();
+      const themeBtn = document.getElementById("themeToggle");
+      if (themeBtn) themeBtn.classList.toggle("active-glow", day);
+    }
+
+    function toggleTheme() {
+      applyTheme(!document.documentElement.classList.contains("day-mode"));
+    }
+
+    /* ============================================================
+       4. Panel data (injected by the Go template)
+       ============================================================ */
+    const sub = {
+      enabled: {{ .enabled }},
+      isOnline: {{ .isOnline }},
+      expireSec: {{ .expire }},
+      totalByte: {{ .totalByte }},
+      dlByte: {{ .downloadByte }},
+      upByte: {{ .uploadByte }},
+      total: "{{ .total }}",
+      used: "{{ .used }}",
+      remained: "{{ .remained }}",
+      download: "{{ .download }}",
+      upload: "{{ .upload }}"
+    };
+
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const ONE_GB_BYTES = 1024 * 1024 * 1024;
+    const TIME_BASELINE_KEY = "temp.speed.timeBaseline.v1";
+
+    let countdownInterval = null;
+    let isInactive = false;
+    /* حجم مشخص با مصرف صفر = «در انتظار فعال‌سازی» تا اولین اتصال */
+    let isPending = false;
+
+    function toPersianDigits(n) {
+      return String(n).replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+    }
+
+    /* مقیاس کامل گیج زمان: بیشترین زمان باقی‌مانده‌ای که تا حالا برای این
+       تاریخ انقضا دیده شده. با تمدید (انقضای جدید) گیج دوباره پر می‌شود. */
+    function timeBaseline(expireSec) {
+      const key = String(expireSec);
+      const nowRemain = Math.max(0, Number(expireSec) - Math.floor(Date.now() / 1000));
+      let prev = 0;
+      try {
+        const store = JSON.parse(localStorage.getItem(TIME_BASELINE_KEY) || "{}");
+        prev = Number(store && store[key]) || 0;
+      } catch (error) { prev = 0; }
+      const base = Math.max(prev, nowRemain);
+      try { localStorage.setItem(TIME_BASELINE_KEY, JSON.stringify({ [key]: base })); } catch (error) {}
+      return base > 0 ? base : nowRemain;
+    }
+
+    /* ============================================================
+       5. Gauge engine (SVG speedometer)
+       ============================================================ */
+    const G = { cx: 110, cy: 110, r: 90, start: -135, sweep: 270 };
+
+    function polar(deg, r) {
+      const a = deg * Math.PI / 180;
+      return [G.cx + r * Math.sin(a), G.cy - r * Math.cos(a)];
+    }
+
+    function arcPath(fromDeg, toDeg, r) {
+      const [x0, y0] = polar(fromDeg, r);
+      const [x1, y1] = polar(toDeg, r);
+      const large = Math.abs(toDeg - fromDeg) > 180 ? 1 : 0;
+      return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+    }
+
+    function buildTicks(group) {
+      if (!group) return;
+      let html = "";
+      const steps = 50;
+      for (let i = 0; i <= steps; i++) {
+        const deg = G.start + G.sweep * (i / steps);
+        const major = i % 5 === 0;
+        const [x1, y1] = polar(deg, 81);
+        const [x2, y2] = polar(deg, major ? 69 : 76);
+        html += `<line class="tick${major ? " major" : ""}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"></line>`;
+      }
+      group.innerHTML = html;
+    }
+
+    function initGauges() {
+      ["time", "usage"].forEach(prefix => {
+        const track = document.getElementById(prefix + "Track");
+        if (track) track.setAttribute("d", arcPath(G.start, G.start + G.sweep, G.r));
+        buildTicks(document.getElementById(prefix + "Ticks"));
+      });
+    }
+
+    function setGauge(prefix, fraction, level) {
+      const f = Math.max(0, Math.min(1, Number(fraction) || 0));
+      const valuePath = document.getElementById(prefix + "ValuePath");
+      const needle = document.getElementById(prefix + "Needle");
+      const gauge = document.getElementById(prefix + "Gauge");
+
+      if (valuePath) {
+        if (f <= 0.005) valuePath.setAttribute("d", "");
+        else valuePath.setAttribute("d", arcPath(G.start, G.start + G.sweep * f, G.r));
+      }
+      if (needle) needle.setAttribute("transform", `rotate(${(G.start + G.sweep * f).toFixed(2)} ${G.cx} ${G.cy})`);
+      if (gauge) gauge.dataset.level = level || "ok";
+    }
+
+    /* ============================================================
+       6. Renderers
+       ============================================================ */
+    function toLocalizedDate(date) {
+      return new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fa-IR", {
+        year: "numeric", month: "long", day: "numeric",
+        hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran"
+      }).format(date);
+    }
+
+    function renderStatus() {
+      const badge = document.getElementById("statusBadge");
+      const expireMs = Number(sub.expireSec) * 1000;
+      const expired = Number.isFinite(expireMs) && expireMs > 0 && expireMs <= Date.now();
+      const totalBytes = Number(sub.totalByte) || 0;
+      const usedBytes = (Number(sub.dlByte) || 0) + (Number(sub.upByte) || 0);
+
+      isPending = totalBytes > 0 && usedBytes === 0 && !expired;
+
+      if (!sub.enabled || expired) {
+        badge.textContent = t("inactive");
+        badge.className = "status-badge badge-inactive";
+        isInactive = true;
+      } else if (isPending) {
+        badge.textContent = t("pending");
+        badge.className = "status-badge badge-pending";
+        isInactive = true;
+      } else {
+        badge.textContent = t("active");
+        badge.className = "status-badge badge-active";
+        isInactive = false;
+      }
+
+      const presence = document.getElementById("presence");
+      const presenceText = document.getElementById("presenceText");
+      if (presence && presenceText) {
+        const online = Boolean(sub.enabled) && Boolean(sub.isOnline);
+        presence.classList.toggle("online", online);
+        presence.classList.toggle("offline", !online);
+        presenceText.textContent = t(online ? "online" : "offline");
+      }
+    }
+
+    function renderExpireDate() {
+      const el = document.getElementById("expireDateText");
+      if (!el) return;
+      if (isInactive || !sub.expireSec || Number(sub.expireSec) === 0) {
+        el.textContent = "-";
+        return;
+      }
+      el.textContent = toLocalizedDate(new Date(Number(sub.expireSec) * 1000));
+    }
+
+    function renderTimer() {
+      const alertTime = document.getElementById("alertTime");
+      const bigEl = document.getElementById("timeBig");
+      const subEl = document.getElementById("timeSub");
+      const expireMs = Number(sub.expireSec) * 1000;
+
+      if (isInactive || !sub.expireSec || Number(sub.expireSec) === 0) {
+        if (bigEl) bigEl.textContent = "00";
+        if (subEl) subEl.textContent = "00:00:00";
+        setGauge("time", 0, "bad");
+        alertTime.classList.remove("show");
+        if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+        renderExpireDate();
+        return;
+      }
+
+      const base = timeBaseline(Number(sub.expireSec));
+      const pad = n => String(n).padStart(2, "0");
+
+      function tick() {
+        const diff = expireMs - Date.now();
+
+        if (diff <= 0) {
+          if (bigEl) bigEl.textContent = "00";
+          if (subEl) subEl.textContent = "00:00:00";
+          setGauge("time", 0, "bad");
+          alertTime.classList.remove("show");
+          if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+          return;
+        }
+
+        const days = Math.floor(diff / ONE_DAY_MS);
+        const hours = Math.floor(diff / 3600000) % 24;
+        const minutes = Math.floor(diff / 60000) % 60;
+        const seconds = Math.floor(diff / 1000) % 60;
+
+        if (bigEl) bigEl.textContent = lang === "fa" ? toPersianDigits(days) : String(days);
+        if (subEl) subEl.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+        const frac = base > 0 ? (diff / 1000) / base : 0;
+        const level = diff < ONE_DAY_MS ? "bad" : (diff < 7 * ONE_DAY_MS ? "warn" : "ok");
+        setGauge("time", frac, level);
+
+        if (diff < ONE_DAY_MS) alertTime.classList.add("show");
+        else alertTime.classList.remove("show");
+
+        updateClock();
+      }
+
+      tick();
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownInterval = setInterval(tick, 1000);
+    }
+
+    function renderUsage() {
+      const total = Number(sub.totalByte) || 0;
+      const used = (Number(sub.dlByte) || 0) + (Number(sub.upByte) || 0);
+      const remained = Math.max(total - used, 0);
+
+      const totalText = total === 0 ? t("unlimited") : (sub.total || "0.00B");
+      const remainedText = total === 0 ? t("unlimited") : (sub.remained || "0.00B");
+
+      const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+      set("valTotal", totalText);
+      set("valUsed", sub.used || "0.00B");
+      set("valRemained", remainedText);
+      set("valDown", sub.download || "0.00B");
+      set("valUp", sub.upload || "0.00B");
+
+      let percent = 0;
+      if (total > 0) percent = Math.min((used / total) * 100, 100);
+
+      const level = percent >= 85 ? "bad" : (percent >= 60 ? "warn" : "ok");
+      setGauge("usage", percent / 100, level);
+
+      const pctText = Math.round(percent) + t("pct");
+      set("usageBig", lang === "fa" ? toPersianDigits(pctText) : pctText);
+      set("usageSub", remainedText);
+
+      const alertVol = document.getElementById("alertVol");
+      if (!isPending && total > 0 && remained < ONE_GB_BYTES) alertVol.classList.add("show");
+      else alertVol.classList.remove("show");
+    }
+
+    function updateAll() {
+      renderStatus();
+      renderExpireDate();
+      renderTimer();
+      renderUsage();
+      fitAllAlerts();
+    }
+
+    /* ---------- live online/offline presence ---------- */
+    async function refreshPresence() {
+      try {
+        const res = await fetch(window.location.pathname + "?format=info", { cache: "no-store" });
+        if (!res.ok) return;
+        const info = await res.json();
+        if (typeof info.isOnline === "boolean") sub.isOnline = info.isOnline;
+        renderStatus();
+      } catch (error) { /* page opened as a file / offline — stay silent */ }
+    }
+    setInterval(refreshPresence, 10000);
+
+    /* ---------- alerts: keep on one line ---------- */
+    function fitAlertText(alertEl) {
+      const span = alertEl.querySelector(".alert-text");
+      if (!span) return;
+      const icon = alertEl.querySelector("span:first-child");
+      const cs = getComputedStyle(alertEl);
+      const avail = alertEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+                    (icon ? icon.offsetWidth + 10 : 0);
+      if (avail <= 0) return;
+      span.style.fontSize = "";
+      let size = parseFloat(cs.fontSize);
+      span.style.fontSize = size + "px";
+      while (span.scrollWidth > avail && size > 9.5) {
+        size = Math.max(9, size - 0.5);
+        span.style.fontSize = size + "px";
+      }
+    }
+
+    function fitAllAlerts() {
+      ["alertTime", "alertVol"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.classList.contains("show")) fitAlertText(el);
+      });
+    }
+
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitAllAlerts, 150);
+    });
+
+    /* ============================================================
+       7. Tehran clock (round) + Iranian-calendar events
+       ============================================================ */
+    const JALALI_EVENTS = {
+      "1/1": "آغاز نوروز", "1/2": "عیدنوروز", "1/3": "عیدنوروز", "1/4": "عیدنوروز",
+      "1/12": "روز جمهوری اسلامی", "1/13": "روز طبیعت",
+      "3/14": "رحلت امام خمینی", "3/15": "قیام ۱۵ خرداد",
+      "11/22": "پیروزی انقلاب اسلامی", "12/29": "ملی شدن صنعت نفت",
+      "7/20": "سید و شهیدان (اربعین)", "7/28": "رحلت رسول اکرم و شهادت امام حسن",
+      "7/30": "شهادت امام رضا",
+      "9/4": "تولد حضرت فاطمه معصومه و روز دختران",
+      "6/31": "روز گفتوگوی تمدن‌ها",
+      "2/28": "روز صنعت و معدن",
+      "5/25": "روز بهرهوری",
+      "10/5": "روز ملی ایمنی", "10/16": "روز دانشجو",
+      "4/18": "روز ادبیات کودک", "8/24": "روز کتاب و کتابخوانی"
+    };
+
+    function toJalali(gy, gm, gd) {
+      const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+      let jy = gy <= 1600 ? 0 : 979;
+      gy -= gy <= 1600 ? 621 : 1600;
+      const gy2 = gm > 2 ? gy + 1 : gy;
+      let days = 365 * gy + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) +
+                 Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm - 1];
+      jy += 33 * Math.floor(days / 12053);
+      days %= 12053;
+      jy += 4 * Math.floor(days / 1461);
+      days %= 1461;
+      jy += Math.floor((days - 1) / 365);
+      days = (days - 1) % 365;
+      const jm = days < 186 ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+      const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
+      return [jy, jm, jd];
+    }
+
+    function jalaliEventOf(y, m, d) {
+      const [jy, jm, jd] = toJalali(y, m, d);
+      void jy;
+      return JALALI_EVENTS[jm + "/" + jd] || null;
+    }
+
+    function tehranYMD(date) {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit"
+      }).formatToParts(date).reduce((out, part) => {
+        if (part.type !== "literal") out[part.type] = part.value;
+        return out;
+      }, {});
+    }
+
+    function buildClockTicks() {
+      const group = document.getElementById("clockTicks");
+      if (!group) return;
+      let html = "";
+      for (let i = 0; i < 60; i++) {
+        const deg = i * 6;
+        const major = i % 5 === 0;
+        const a = deg * Math.PI / 180;
+        const rIn = major ? 38 : 42;
+        const x1 = 50 + rIn * Math.sin(a), y1 = 50 - rIn * Math.cos(a);
+        const x2 = 50 + 46 * Math.sin(a), y2 = 50 - 46 * Math.cos(a);
+        html += `<line class="ctick${major ? " major" : ""}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"></line>`;
+      }
+      group.innerHTML = html;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Tehran", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+      }).formatToParts(now).reduce((out, part) => {
+        if (part.type !== "literal") out[part.type] = part.value;
+        return out;
+      }, {});
+
+      const h = Number(parts.hour || 0);
+      const m = Number(parts.minute || 0);
+      const s = Number(parts.second || 0);
+
+      const hand = (id, deg) => {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute("transform", `rotate(${deg.toFixed(2)} 50 50)`);
+      };
+      hand("clockHour", (h % 12) * 30 + m * 0.5);
+      hand("clockMin", m * 6 + s * 0.1);
+      hand("clockSec", s * 6);
+
+      const pad = n => String(n).padStart(2, "0");
+      const dig = document.getElementById("clockDigital");
+      if (dig) {
+        const text = pad(h) + ":" + pad(m);
+        dig.textContent = lang === "fa" ? toPersianDigits(text) : text;
+      }
+
+      const locale = lang === "en" ? "en-GB" : "fa-IR";
+      const weekday = new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "Asia/Tehran" }).format(now);
+      const dateStr = new Intl.DateTimeFormat(locale, { year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Tehran" }).format(now);
+
+      const dateEl = document.getElementById("clockDate");
+      if (dateEl) dateEl.textContent = weekday + " · " + dateStr;
+
+      const evEl = document.getElementById("clockEvent");
+      if (evEl) {
+        const ymd = tehranYMD(now);
+        const ev = jalaliEventOf(Number(ymd.year), Number(ymd.month), Number(ymd.day));
+        if (ev) {
+          evEl.textContent = (lang === "en" ? "Iranian calendar: " : "مناسبت امروز: ") + ev;
+          evEl.hidden = false;
+        } else {
+          evEl.hidden = true;
+        }
+      }
+    }
+
+    let clockInterval = null;
+    function startTehranClock() {
+      updateClock();
+      if (clockInterval) clearInterval(clockInterval);
+      clockInterval = setInterval(updateClock, 1000);
+    }
+
+    /* ============================================================
+       8. Clipboard helpers
+       ============================================================ */
+    async function copyText(text, button) {
+      if (!text) return false;
+      let copied = false;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        }
+      } catch (error) {}
+
+      if (!copied) {
+        try {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          copied = document.execCommand("copy");
+          textarea.remove();
+        } catch (error) { copied = false; }
+      }
+
+      if (!button) return copied;
+
+      const originalText = button.textContent;
+      button.textContent = t(copied ? "copied" : "copyFailed");
+      button.classList.toggle("btn-success", copied);
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove("btn-success");
+      }, 1600);
+
+      return copied;
+    }
+
+    function copyFromButton(button) {
+      copyText(button.dataset.copy || "", button);
+    }
+
+    function copyAllConfigs(button) {
+      const configs = [...document.querySelectorAll(".config-item[data-link]")]
+        .map(item => item.dataset.link)
+        .filter(Boolean)
+        .join("\n");
+      copyText(configs, button);
+    }
+
+    function getSubLink() {
+      const el = document.getElementById("subLinkDisplay");
+      return el ? el.textContent.trim() : "";
+    }
+
+    /* ============================================================
+       9. Config latency test (browser-safe)
+       ============================================================ */
+    function decodeConfigPart(part) {
+      try {
+        const norm = part.replace(/-/g, "+").replace(/_/g, "/");
+        const padded = norm + "=".repeat((4 - (norm.length % 4)) % 4);
+        return decodeURIComponent(escape(atob(padded)));
+      } catch (error) { return null; }
+    }
+
+    function extractEndpoint(link) {
+      try {
+        if (!link) return null;
+        const scheme = (link.split("://")[0] || "").toLowerCase();
+
+        if (scheme === "vmess") {
+          const json = JSON.parse(decodeConfigPart(link.slice(8)) || "null");
+          if (!json || !json.add || !json.port) return null;
+          const net = String(json.net || "tcp").toLowerCase();
+          return { host: String(json.add), port: Number(json.port),
+            http: net === "ws" || net === "http" || net === "h2",
+            tls: String(json.tls || "").toLowerCase() === "tls",
+            path: json.path || "/" };
+        }
+
+        if (!link.includes("://")) return null;
+        const rest = link.slice(link.indexOf("://") + 3);
+        const authority = rest.split(/[/?#]/)[0];
+        const hostPart = authority.lastIndexOf("@") !== -1 ? authority.slice(authority.lastIndexOf("@") + 1) : authority;
+        const m = hostPart.match(/^(?:\[([^\]]+)\]|([^:]+)):(\d+)$/);
+        if (!m) return null;
+        const query = new URL(link).searchParams;
+        const type = (query.get("type") || query.get("net") || "tcp").toLowerCase();
+        const http = ["ws", "http", "h2", "xhttp", "grpc"].includes(type);
+        const tls = query.get("security") === "tls" || query.get("security") === "reality" || query.get("tls") === "1";
+        const rawPath = query.get("path") || "/";
+        return { host: m[1] || m[2], port: Number(m[3]), http, tls, kind: type, path: rawPath.startsWith("/") ? rawPath : "/" + rawPath };
+      } catch (error) { return null; }
+    }
+
+    function probeHttp(endpoint, timeoutMs) {
+      if (endpoint.kind === "grpc") {
+        return new Promise(resolve => {
+          const t0 = performance.now();
+          let done = false;
+          const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
+          const timer = setTimeout(() => finish("timeout"), timeoutMs);
+          const img = new Image();
+          img.onload = () => { clearTimeout(timer); finish("ok"); };
+          img.onerror = () => { clearTimeout(timer); finish(performance.now() - t0 > 100 ? "ok" : "err"); };
+          const separator = endpoint.path.includes("?") ? "&" : "?";
+          img.src = (endpoint.tls ? "https://" : "http://") + endpoint.host + ":" + endpoint.port + endpoint.path + separator + "latency=" + Date.now();
+        });
+      }
+      return new Promise(resolve => {
+        const t0 = performance.now();
+        let done = false;
+        const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
+        const timer = setTimeout(() => finish("timeout"), timeoutMs);
+        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
+        const base = endpoint.tls ? "https://" : "http://";
+        const separator = endpoint.path.includes("?") ? "&" : "?";
+        const probeUrl = base + endpoint.host + ":" + endpoint.port + endpoint.path + separator + "latency=" + Date.now();
+        fetch(probeUrl, { mode: "no-cors", cache: "no-store", signal })
+          .then(() => finish("ok"))
+          .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
+          .finally(() => clearTimeout(timer));
+      });
+    }
+
+    function probePortOnce(base, host, port, timeoutMs) {
+      return new Promise(resolve => {
+        const t0 = performance.now();
+        let done = false;
+        const finish = k => { if (!done) { done = true; resolve({ k, ms: Math.round(performance.now() - t0) }); } };
+        const timer = setTimeout(() => finish("timeout"), timeoutMs);
+        const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined;
+        fetch(base + host + ":" + port + "/", { mode: "no-cors", cache: "no-store", signal })
+          .then(() => finish("ok"))
+          .catch(e => finish(e && e.name === "TimeoutError" ? "timeout" : "err"))
+          .finally(() => clearTimeout(timer));
+      });
+    }
+
+    async function legacyPortCheck(endpoint, timeoutMs) {
+      const probes = [];
+      const round = async () => {
+        probes.push(await probePortOnce("https://", endpoint.host, endpoint.port, timeoutMs));
+        probes.push(await probePortOnce("http://", endpoint.host, endpoint.port, timeoutMs));
+      };
+      await round();
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (probes.some(x => x.k === "ok")) return true;
+        const errs = probes.filter(x => x.k === "err").map(x => x.ms).sort((a, b) => a - b);
+        if (errs.length >= 2 && errs[1] < 2500 && errs[0] < 1000) return true;
+        if (attempt < 2) await round();
+      }
+      return false;
+    }
+
+    async function measureLatency(endpoint, timeoutMs) {
+      if (!endpoint || !endpoint.http) return null;
+      const samples = [await probeHttp(endpoint, timeoutMs), await probeHttp(endpoint, timeoutMs)];
+      const ok = samples.filter(x => x.k === "ok").map(x => x.ms);
+      return ok.length ? { status: "ok", ms: Math.min(...ok) } : { status: "fail", ms: -1 };
+    }
+
+    async function runPingTest(btn) {
+      const items = [...document.querySelectorAll(".config-item[data-link]")];
+      if (!items.length) return;
+      btn.disabled = true;
+
+      try {
+        for (const [index, item] of items.entries()) {
+          const chip = item.querySelector(".ping-result");
+          const endpoint = extractEndpoint(item.dataset.link);
+          if (!endpoint) continue;
+
+          const statusOnly = index >= Math.max(0, items.length - 3);
+          if (statusOnly) {
+            if (chip) {
+              chip.hidden = false;
+              chip.className = "ping-result testing";
+              chip.textContent = t("pingTesting");
+            }
+            const live = await legacyPortCheck(endpoint, 3500);
+            if (chip) {
+              chip.className = "ping-result " + (live ? "good" : "bad");
+              chip.textContent = live ? t("pingOk") : t("pingFail");
+            }
+            continue;
+          }
+
+          if (!endpoint.http) continue;
+
+          if (chip) {
+            chip.hidden = false;
+            chip.className = "ping-result testing";
+            chip.textContent = t("pingTesting");
+          }
+
+          const probeTimeout = endpoint.kind === "xhttp" && endpoint.tls ? 8000 : 3500;
+          const result = await measureLatency(endpoint, probeTimeout);
+          const ms = result.ms;
+
+          if (chip) {
+            chip.className = "ping-result " + (ms < 0 ? "bad" : ms < 300 ? "good" : ms < 800 ? "mid" : "bad");
+            const num = lang === "fa" ? toPersianDigits(ms) : String(ms);
+            chip.textContent = ms < 0 ? t("pingFail") : num + " " + t("pingUnit");
+          }
+        }
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    /* ============================================================
+       10. Apps: platform tabs, logos & downloads
+       ============================================================ */
+    const PLATFORMS = ["android", "ios", "windows"];
+
+    const APPS = [
+      {
+        id: "v2rayng",
+        name: "v2rayNG",
+        icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png",
+        platforms: { android: "https://github.com/2dust/v2rayNG/releases/latest" },
+        directApk: { repo: "2dust/v2rayNG", arch: true, fileName: (ver, arch) => `v2rayNG_${ver}_${arch}.apk` }
+      },
+      {
+        id: "pattng",
+        name: "PattNG",
+        icon: "https://raw.githubusercontent.com/patterniha/PattNG/my-releases/fastlane/metadata/android/en-US/images/icon.png",
+        platforms: { android: "https://github.com/patterniha/PattNG/releases/latest" },
+        directApk: { repo: "patterniha/PattNG", arch: false, fileName: (ver) => `PattNG_${ver}_universal.apk` }
+      },
+      {
+        id: "v2box",
+        name: "v2Box",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fe/03/f8/fe03f855-940a-a28c-ceb8-4b8e61b720d8/V2BoxIcon-0-0-1x_U007epad-0-1-P3-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box",
+          ios: "https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690"
+        }
+      },
+      {
+        id: "incy",
+        name: "INCY",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/63/88/8a/63888a12-aca0-97a8-8b0f-30ba2459730c/AppIcon-0-0-1x_U007epad-0-11-0-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=llc.itdev.incy",
+          ios: "https://apps.apple.com/app/incy/id6756943388",
+          windows: { directAsset: () => "incy-windows-setup.exe" }
+        },
+        directApk: { repo: "INCY-DEV/incy-platforms", arch: false, fileName: () => "Incy.apk", tagPrefix: "desktop-v" }
+      },
+      {
+        id: "npvtunnel",
+        name: "NPV Tunnel",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c5/1a/b9/c51ab906-a25c-35c6-1f6d-8261ead56e82/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv",
+          ios: "https://apps.apple.com/us/app/npv-tunnel/id1629465476"
+        }
+      },
+      {
+        id: "hiddify",
+        name: "Hiddify",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/70/5e/2f/705e2fce-cacd-28c0-05bb-946667dbc03a/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=app.hiddify.com",
+          ios: "https://apps.apple.com/us/app/hiddify-proxy-vpn/id6596777532",
+          windows: { directAsset: () => "Hiddify-Windows-Setup-x64.exe" }
+        },
+        directApk: { repo: "hiddify/hiddify-app", arch: false, fileName: () => `Hiddify-Android-universal.apk`, tagPrefix: "v" }
+      },
+      {
+        id: "shadowrocket",
+        name: "Shadowrocket",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/64/24/2d/64242de2-a763-914f-c686-8777445b83a3/AppIcon-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg",
+        platforms: { ios: "https://apps.apple.com/us/app/shadowrocket/id932747118" }
+      },
+      {
+        id: "happ",
+        name: "Happ",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e0/11/af/e011af74-2151-a47d-d4a2-86eea7854f2a/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.happproxy",
+          ios: "https://apps.apple.com/us/app/happ-proxy-utility/id6504287215",
+          windows: "https://www.happ.su/main"
+        }
+      }
+    ];
+
+    function detectOS() {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      if (/android/i.test(ua)) return "android";
+      if (/iphone|ipad|ipod/i.test(ua)) return "ios";
+      if (/windows/i.test(ua)) return "windows";
+      return "android";
+    }
+
+    let platformTab = detectOS();
+    if (!PLATFORMS.includes(platformTab)) platformTab = "android";
+
+    function toggleAppsMenu() {
+      const menu = document.getElementById("appsMenu");
+      const btn = document.getElementById("appsMenuBtn");
+      if (!menu) return;
+      const open = menu.hidden;
+      menu.hidden = !open;
+      if (btn) btn.setAttribute("aria-expanded", String(open));
+    }
+
+    function setPlatformTab(platform) {
+      if (!PLATFORMS.includes(platform)) return;
+      platformTab = platform;
+      renderApps();
+    }
+
+    function renderApps() {
+      const grid = document.getElementById("appsGrid");
+      if (!grid) return;
+
+      const list = APPS.filter(app => app.platforms[platformTab]);
+      grid.innerHTML = list.map(app => `
+        <div class="app-card">
+          <img class="app-icon" src="${app.icon}" alt="${app.name}" loading="lazy" draggable="false">
+          <span class="app-name">${app.name}</span>
+          <button type="button" class="app-download-btn" onclick="startDownload('${app.id}','${platformTab}')">${t("downloadBtn")}</button>
+        </div>
+      `).join("");
+
+      document.querySelectorAll(".ptab[data-platform]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.platform === platformTab);
+      });
+    }
+
+    /* ---------- resolve latest stable release at runtime ---------- */
+    const directApkFallback = (repo) => `https://github.com/${repo}/releases/latest`;
+    const directApkCache = {};
+    const directApkPromises = {};
+    const versionCache = {};
+    const VERSION_CACHE_TTL = 10 * 60 * 1000;
+
+    function stripV(version) {
+      return String(version || "").replace(/^v/i, "").replace(/^([0-9][0-9A-Za-z.\-]*)[\s\S]*$/, "$1").trim();
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("http " + res.status);
+      return res.json();
+    }
+
+    function normalizeReleaseVersion(raw) {
+      const value = String(raw || "").trim();
+      const match = value.match(/(?:^|[-_])v?(\d+(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?)/i);
+      return match ? match[1] : stripV(value);
+    }
+
+    async function resolveLatestVersion(repo) {
+      const cached = versionCache[repo];
+      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.ver;
+
+      const sources = [
+        () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`).then(j => normalizeReleaseVersion(j.tag_name)),
+        () => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`).then(j => normalizeReleaseVersion(j.value))
+      ];
+
+      for (const src of sources) {
+        try {
+          const v = await src();
+          if (/^[0-9]/.test(v) && !/\s|\//.test(v)) {
+            versionCache[repo] = { ver: v, at: Date.now() };
+            return v;
+          }
+        } catch (e) { /* next source */ }
+      }
+      return null;
+    }
+
+    function preferredApkArch() {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      if (/\bx86\b|x86_64|i[3-6]86/.test(ua) && !/arm/.test(ua)) return "x86_64";
+      return "arm64-v8a";
+    }
+
+    async function getDirectApkUrl(app, fileOf) {
+      const cfg = app.directApk;
+      if (!cfg) return null;
+      const cacheKey = fileOf ? app.id + ":" + fileOf("", "") : app.id;
+      if (directApkCache[cacheKey]) return directApkCache[cacheKey];
+      if (directApkPromises[cacheKey]) return directApkPromises[cacheKey];
+
+      directApkPromises[cacheKey] = (async () => {
+        const ver = await resolveLatestVersion(cfg.repo);
+        if (ver) {
+          const arch = cfg.arch ? preferredApkArch() : null;
+          const file = fileOf ? fileOf(ver, arch) : cfg.fileName(ver, arch);
+          const tag = (cfg.tagPrefix || "") + ver;
+          return `https://github.com/${cfg.repo}/releases/download/${tag}/${file}`;
+        }
+        return directApkFallback(cfg.repo);
+      })();
+
+      const result = await directApkPromises[cacheKey];
+      if (result.includes("/releases/download/")) directApkCache[cacheKey] = result;
+      delete directApkPromises[cacheKey];
+      return result;
+    }
+
+    function openDirectApk(app, fileOf) {
+      getDirectApkUrl(app, fileOf)
+        .then(url => window.open(url, "_blank", "noopener"))
+        .catch(() => window.open(directApkFallback(app.directApk.repo), "_blank", "noopener"));
+    }
+
+    setTimeout(() => {
+      APPS.filter(a => a.directApk).forEach(a => getDirectApkUrl(a).catch(() => {}));
+    }, 1500);
+
+    function startDownload(appId, platform) {
+      const app = APPS.find(a => a.id === appId);
+      if (!app) return;
+
+      if (app.directApk && platform === "android") {
+        openDirectApk(app);
+        return;
+      }
+
+      const target = app.platforms[platform];
+
+      if (target && typeof target === "object" && app.directApk) {
+        openDirectApk(app, target.directAsset);
+        return;
+      }
+
+      if (typeof target === "string" && target) window.open(target, "_blank", "noopener");
+    }
+
+    /* ============================================================
+       11. Modals: QR codes
+       ============================================================ */
+    function toggleQR() {
+      document.getElementById("qrModal").classList.toggle("open");
+    }
+
+    function toggleConfigQR(btn) {
+      const modal = document.getElementById("configQRModal");
+      const img = document.getElementById("configQRImg");
+      if (!modal || !img) return;
+
+      const item = btn.closest(".config-item");
+      const link = (item && item.dataset.link) || "";
+      if (!link) { alert(t("noSubLink")); return; }
+
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=800x800&ecc=M&data=" + encodeURIComponent(link);
+      modal.classList.add("open");
+    }
+
+    function closeConfigQR() {
+      const modal = document.getElementById("configQRModal");
+      if (modal) modal.classList.remove("open");
+    }
+
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape") return;
+      const configQRModal = document.getElementById("configQRModal");
+      if (configQRModal && configQRModal.classList.contains("open")) closeConfigQR();
+      const qrModal = document.getElementById("qrModal");
+      if (qrModal && qrModal.classList.contains("open")) toggleQR();
+    });
+
+    /* ============================================================
+       12. Protocol badges on config items
+       ============================================================ */
+    function addBadges() {
+      document.querySelectorAll(".config-item[data-link]").forEach(item => {
+        const link = item.dataset.link || "";
+        const group = item.querySelector(".badge-group");
+        if (!group || !link) return;
+
+        try {
+          const protocol = link.split("://")[0].toUpperCase();
+          const badge = document.createElement("span");
+          badge.className = "badge";
+          badge.textContent = protocol || "CONFIG";
+
+          const colors = {
+            VLESS: "#77d4ff", VMESS: "#aa7cff", TROJAN: "#f6c85f",
+            SS: "#37d7a1", SSR: "#fb7185", HYSTERIA: "#56d5bb", HY2: "#56d5bb"
+          };
+          badge.style.background = colors[protocol] || "#94a3b8";
+          group.appendChild(badge);
+        } catch (error) {}
+      });
+    }
+
+    /* ============================================================
+       13. Init — Persian + night mode by default
+       ============================================================ */
+    initGauges();
+    buildClockTicks();
+    applyTheme(false);
+    applyLang();
+    addBadges();
+    startTehranClock();
+  </script>
+</body>
+</html>
