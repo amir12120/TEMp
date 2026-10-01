@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" id="themeColorMeta" content="#04060c">
+  <meta name="theme-color" id="themeColorMeta" content="#01030a">
   <title>اشتراک</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,36 +15,38 @@
        SPEED — sporty car-dashboard subscription page
        ============================================================ */
     :root {
-      --bg: #04060c;
-      --bg-2: #080d18;
-      --panel: rgba(14, 21, 35, 0.74);
-      --panel-2: rgba(20, 30, 48, 0.55);
-      --line: rgba(120, 150, 200, 0.14);
-      --txt: #e9eff8;
-      --muted: #8ea3c0;
+      /* night cockpit — deep, almost black asphalt */
+      --bg: #01030a;
+      --bg-2: #04070f;
+      --panel: rgba(9, 14, 25, 0.8);
+      --panel-2: rgba(13, 20, 34, 0.6);
+      --line: rgba(110, 145, 200, 0.13);
+      --txt: #e4ecf8;
+      --muted: #7f93b2;
       --accent: #22d3ee;
       --accent-2: #38bdf8;
       --ok: #34d399;
       --warn: #f5b544;
       --bad: #ff4d5e;
       --violet: #a78bfa;
-      --dial: rgba(9, 14, 24, 0.9);
+      --dial: rgba(4, 8, 15, 0.95);
       --needle: #ff4d5e;
-      --shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      --shadow: 0 26px 64px rgba(0, 0, 0, 0.7);
       --font-dig: "Orbitron", "Inter", monospace;
       --radius: 22px;
     }
 
+    /* day cockpit — cool light blue, like a clear morning drive */
     html.day-mode, body.day-mode {
-      --bg: #e8eef7;
-      --bg-2: #f4f7fc;
-      --panel: rgba(255, 255, 255, 0.92);
-      --panel-2: rgba(255, 255, 255, 0.72);
-      --line: rgba(20, 45, 90, 0.12);
-      --txt: #0c1727;
-      --muted: #5c6f8c;
-      --dial: rgba(244, 248, 253, 0.92);
-      --shadow: 0 20px 50px rgba(30, 60, 110, 0.16);
+      --bg: #d6e8fb;
+      --bg-2: #eef7ff;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-2: rgba(232, 243, 255, 0.9);
+      --line: rgba(30, 90, 160, 0.18);
+      --txt: #07223c;
+      --muted: #48688e;
+      --dial: rgba(240, 248, 255, 0.96);
+      --shadow: 0 20px 50px rgba(25, 70, 130, 0.2);
     }
 
     * { box-sizing: border-box; }
@@ -63,11 +65,19 @@
       font-family: "Inter", "Vazirmatn", system-ui, -apple-system, sans-serif;
       color: var(--txt);
       background:
-        radial-gradient(1200px 600px at 15% -10%, rgba(34, 211, 238, 0.12), transparent 60%),
-        radial-gradient(900px 500px at 100% 0%, rgba(167, 139, 250, 0.12), transparent 55%),
+        radial-gradient(1200px 600px at 15% -10%, rgba(34, 211, 238, 0.10), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(167, 139, 250, 0.10), transparent 55%),
         linear-gradient(180deg, var(--bg), var(--bg-2));
       overflow-x: hidden;
       transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    /* day mode leans blue instead of plain white */
+    body.day-mode {
+      background:
+        radial-gradient(1200px 620px at 12% -10%, rgba(56, 189, 248, 0.30), transparent 62%),
+        radial-gradient(900px 540px at 100% 0%, rgba(129, 212, 250, 0.34), transparent 58%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
     }
 
     body.lang-en { font-family: "Inter", system-ui, sans-serif; }
@@ -82,6 +92,7 @@
         repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 8px);
       opacity: 0.6;
     }
+    body.day-mode .background-effects::before { opacity: 0.28; }
     .speed-line {
       position: absolute; top: 0; bottom: 0; width: 2px;
       background: linear-gradient(to bottom, transparent, var(--accent), transparent);
@@ -351,15 +362,28 @@
       overflow: hidden;
       cursor: pointer;
       touch-action: manipulation;
+      display: flex; flex-direction: column;
       animation: fadeUp 0.6s ease both;
       transition: border-color 0.2s ease, box-shadow 0.25s ease;
     }
     @media (min-width: 760px) { .gauge-card { padding: 1rem 1rem 1.1rem; } }
     .gauge-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    /* the card keeps its own grid cell while it is open in the zoom stage */
     .gauge-card.zoomed {
-      grid-column: 1 / -1;
+      cursor: zoom-out;
       border-color: rgba(34, 211, 238, 0.45);
       box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25), var(--shadow);
+    }
+
+    /* once a card has been lifted into the zoom stage its entry animation must
+       not replay on the way back (it would re-offset the card for a moment) */
+    .gauge-card.anim-off { animation: none; }
+
+    /* invisible stand-in that holds the empty grid cell — nothing else moves */
+    .gauge-placeholder {
+      border-radius: var(--radius);
+      border: 1px dashed var(--line);
+      background: rgba(127, 160, 210, 0.05);
     }
 
     .zoom-hint {
@@ -386,7 +410,9 @@
     }
     .gauge-card.zoomed .card-head { font-size: 0.82rem; }
 
-    .gauge-wrap { position: relative; display: grid; place-items: center; }
+    /* the dial centres in the free space and the footer sticks to the bottom,
+       so the two cards stay balanced at equal height */
+    .gauge-wrap { position: relative; display: grid; place-items: center; flex: 1 1 auto; }
 
     .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; }
     .gauge-card.zoomed .gauge { width: min(100%, 460px); }
@@ -440,7 +466,7 @@
 
     .gauge-foot {
       position: relative; z-index: 2;
-      margin-top: 0.5rem; text-align: center;
+      margin-top: auto; padding-top: 0.5rem; text-align: center;
       font-size: clamp(0.64rem, 2.8vw, 0.8rem); color: var(--muted); line-height: 1.4;
     }
     .gauge-card.zoomed .gauge-foot { font-size: 0.84rem; }
@@ -563,10 +589,38 @@
       border-radius: 12px; padding: 0.6rem 0.7rem;
     }
     .config-text {
-      flex: 1 1 180px; font-family: var(--font-dig); font-size: 0.72rem;
+      flex: 1 1 180px; min-width: 0; font-family: var(--font-dig); font-size: 0.72rem;
       color: var(--muted); word-break: break-all; direction: ltr; text-align: left;
     }
+    .config-actions { display: flex; gap: 0.4rem; flex: 0 0 auto; }
     .badge-group { display: flex; gap: 0.3rem; }
+
+    /* phones: one line per config, with copy + QR stacked underneath */
+    @media (max-width: 560px) {
+      .config-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-areas:
+          "badge text"
+          "ping  ping"
+          "act   act";
+        gap: 0.4rem 0.5rem;
+        align-items: center;
+      }
+      .config-item .badge-group { grid-area: badge; }
+      .config-item .config-text {
+        grid-area: text;
+        flex: none;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .config-item .ping-result { grid-area: ping; justify-self: start; }
+      .config-item .config-actions {
+        grid-area: act;
+        display: flex; flex-direction: column; gap: 0.4rem;
+      }
+      .config-item .config-actions .btn,
+      .config-item .config-actions .btn-qr { width: 100%; }
+    }
     .badge {
       font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em;
       padding: 0.2rem 0.45rem; border-radius: 6px; color: #06121c;
@@ -647,6 +701,62 @@
     }
     .qr-box img { width: min(70vw, 260px); height: auto; border-radius: 12px; background: #fff; padding: 0.4rem; }
     .qr-url { margin-top: 0.7rem; font-family: var(--font-dig); font-size: 0.68rem; color: var(--muted); word-break: break-all; direction: ltr; }
+
+    /* ---------- gauge zoom stage ----------
+       The tapped card is lifted into this overlay, so it grows in place and the
+       dashboard behind it never reflows. */
+    /* the page behind stays scrollable on purpose: locking it would drop the
+       scrollbar and shift the whole dashboard sideways */
+    body.zoom-open .zoom-backdrop { touch-action: none; }
+
+    .zoom-stage {
+      position: fixed; inset: 0; z-index: 60;
+      display: flex; align-items: center; justify-content: center;
+      padding: calc(0.8rem + env(safe-area-inset-top)) calc(0.8rem + env(safe-area-inset-right)) calc(0.8rem + env(safe-area-inset-bottom)) calc(0.8rem + env(safe-area-inset-left));
+    }
+    .zoom-stage[hidden] { display: none; }
+
+    .zoom-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(1, 3, 9, 0.78);
+      backdrop-filter: blur(5px);
+      animation: fadeIn 0.2s ease both;
+    }
+    body.day-mode .zoom-backdrop { background: rgba(150, 190, 230, 0.62); }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+
+    .zoom-panel {
+      position: relative; z-index: 1;
+      width: min(94vw, 520px);
+      max-height: 94vh;
+      overflow: auto;
+      border-radius: calc(var(--radius) + 2px);
+      animation: zoomIn 0.26s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    }
+
+    .zoom-panel .gauge-card {
+      padding: 1rem 1rem 1.15rem;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    }
+    .zoom-panel .gauge-card .gauge { width: min(100%, 430px); }
+    .zoom-panel .gauge-card .readout-big { font-size: clamp(2.1rem, 7vw, 3.1rem); }
+    .zoom-panel .gauge-card .readout-unit { font-size: 0.84rem; }
+    .zoom-panel .gauge-card .readout-sub { font-size: 1.05rem; }
+    .zoom-panel .gauge-card .readout-cap { font-size: 0.76rem; }
+    .zoom-panel .gauge-card .card-head { font-size: 0.84rem; }
+    .zoom-panel .gauge-card .gauge-foot { font-size: 0.86rem; }
+    .zoom-panel .gauge-card .ud span { font-size: 0.66rem; }
+    .zoom-panel .gauge-card .ud b { font-size: 0.98rem; }
+    .zoom-panel .clock-badge {
+      position: absolute; top: 0.5rem; inset-inline-end: 0.5rem;
+      width: 148px; margin: 0; padding: 0.6rem 0.6rem 0.7rem; border-radius: 18px;
+    }
+    .zoom-panel .clock-face { width: 88px; height: 88px; }
+    .zoom-panel .clock-digital { font-size: 1.15rem; }
+    .zoom-panel .clock-date { font-size: 0.7rem; }
+    .zoom-panel .clock-event { font-size: 0.68rem; }
   </style>
 </head>
 
@@ -817,7 +927,7 @@
       </div>
 
       <div id="configList">
-        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="نمایش QR">▦ QR</button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button></div>{{ end }}
+        {{ range $index, $link := .links }}<div class="config-item" data-link="{{ $link }}"><div class="config-text" title="{{ $link }}">{{ $link }}</div><span class="ping-result" hidden></span><div class="badge-group"></div><div class="config-actions"><button class="btn-qr" type="button" onclick="toggleConfigQR(this)" aria-label="نمایش QR">▦ QR</button><button class="btn btn-primary" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button></div></div>{{ end }}
       </div>
 
       <div class="ping-bar">
@@ -875,6 +985,12 @@
     </div>
   </div>
 
+  <!-- enlarged gauge: the tapped card moves in here, then moves back -->
+  <div class="zoom-stage" id="zoomStage" role="dialog" aria-modal="true" hidden>
+    <div class="zoom-backdrop" onclick="closeGaugeZoom()"></div>
+    <div class="zoom-panel" id="zoomPanel"></div>
+  </div>
+
   <script>
     /* ============================================================
        1. i18n dictionary
@@ -898,6 +1014,7 @@
         downloadLbl: "📥 دانلود", uploadLbl: "📤 آپلود",
         subLinkTitle: "🔗 لینک سابسکریپشن",
         copy: "📋 کپی", copied: "✓ کپی شد", copyAll: "📋 کپی همه",
+        zoomInHint: "برای بزرگ‌نمایی ضربه بزنید", zoomOutHint: "برای بازگشت ضربه بزنید",
         configsTitle: "⚙️ کانفیگ‌ها",
         pingBtn: "📶 تست تأخیر کانفیگ‌ها", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
         downloadAppsTitle: "⬇️ دانلود اپلیکیشن",
@@ -933,6 +1050,7 @@
         downloadLbl: "📥 Download", uploadLbl: "📤 Upload",
         subLinkTitle: "🔗 Subscription link",
         copy: "📋 Copy", copied: "✓ Copied", copyAll: "📋 Copy all",
+        zoomInHint: "Tap to enlarge", zoomOutHint: "Tap to shrink back",
         configsTitle: "⚙️ Configs",
         pingBtn: "📶 Test config latency", pingTesting: "…", pingFail: "✗", pingOk: "OK", pingUnit: "ms",
         downloadAppsTitle: "⬇️ Download app",
@@ -976,6 +1094,7 @@
       updateAll();
       updateClock();
       fitAllAlerts();
+      ["time", "usage"].forEach(p => setGaugeAria(p, Boolean(zoomSlot && zoomSlot.card === document.getElementById(p + "Card"))));
     }
 
     function toggleLang() {
@@ -1002,7 +1121,7 @@
       if (themeBtn) themeBtn.classList.toggle("active-glow", day);
       // keep the mobile browser chrome in sync with the dashboard
       const themeColor = document.getElementById("themeColorMeta");
-      if (themeColor) themeColor.setAttribute("content", day ? "#e8eef7" : "#04060c");
+      if (themeColor) themeColor.setAttribute("content", day ? "#d6e8fb" : "#01030a");
     }
 
     function toggleTheme() {
@@ -1107,8 +1226,12 @@
       if (gauge) gauge.dataset.level = level || "ok";
     }
 
-    /* Tap a gauge to blow it up for reading, tap again to slide it back into
-       its place next to the other one. */
+    /* ---------- tap a gauge to read it large ----------
+       The card is lifted into a fixed overlay while an invisible stand-in keeps
+       its grid cell, so it grows where it stands and the dashboard behind it
+       never reflows. Tap it again (or press Escape / tap outside) to put it back. */
+    let zoomSlot = null;
+
     function toggleGaugeZoom(prefix, event) {
       if (event && event.target && event.target.closest &&
           event.target.closest("button, a, select, input, textarea")) return;
@@ -1116,8 +1239,61 @@
       const card = document.getElementById(prefix + "Card");
       if (!card) return;
 
-      const zoomed = card.classList.toggle("zoomed");
-      card.setAttribute("aria-pressed", String(zoomed));
+      if (zoomSlot && zoomSlot.card === card) { closeGaugeZoom(); return; }
+      openGaugeZoom(card);
+    }
+
+    function gaugeCardPrefix(card) {
+      return card && card.id === "usageCard" ? "usage" : "time";
+    }
+
+    function setGaugeAria(prefix, zoomed) {
+      const card = document.getElementById(prefix + "Card");
+      if (!card) return;
+      const title = card.querySelector(".card-head span");
+      const name = title ? title.textContent.trim() : "";
+      card.setAttribute("aria-label", name + " — " + t(zoomed ? "zoomOutHint" : "zoomInHint"));
+    }
+
+    function openGaugeZoom(card) {
+      if (zoomSlot) closeGaugeZoom();
+
+      const panel = document.getElementById("zoomPanel");
+      const stage = document.getElementById("zoomStage");
+      const grid = card.parentElement;
+      if (!panel || !stage || !grid) return;
+
+      // reserve the card's cell so the other gauge does not move at all
+      const slot = document.createElement("div");
+      slot.className = "gauge-placeholder";
+      slot.style.minHeight = Math.round(card.getBoundingClientRect().height) + "px";
+      slot.setAttribute("aria-hidden", "true");
+      grid.insertBefore(slot, card);
+
+      panel.appendChild(card);
+      card.classList.add("anim-off", "zoomed");
+      card.setAttribute("aria-pressed", "true");
+      setGaugeAria(gaugeCardPrefix(card), true);
+
+      stage.hidden = false;
+      document.body.classList.add("zoom-open");
+      zoomSlot = { card, slot };
+    }
+
+    function closeGaugeZoom() {
+      if (!zoomSlot) return;
+      const { card, slot } = zoomSlot;
+      zoomSlot = null;
+
+      const prefix = gaugeCardPrefix(card);
+      slot.replaceWith(card);           // back into its own grid cell
+      card.classList.remove("zoomed");
+      card.setAttribute("aria-pressed", "false");
+      setGaugeAria(prefix, false);
+
+      document.getElementById("zoomStage").hidden = true;
+      document.body.classList.remove("zoom-open");
+      card.focus({ preventScroll: true });
     }
 
     function gaugeCardKey(event, prefix) {
@@ -1902,6 +2078,7 @@
 
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
+      if (zoomSlot) { closeGaugeZoom(); return; }
       const configQRModal = document.getElementById("configQRModal");
       if (configQRModal && configQRModal.classList.contains("open")) closeConfigQR();
       const qrModal = document.getElementById("qrModal");
