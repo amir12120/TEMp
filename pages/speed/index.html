@@ -2,7 +2,8 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" id="themeColorMeta" content="#04060c">
   <title>اشتراک</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,6 +51,13 @@
 
     html, body { margin: 0; padding: 0; }
 
+    /* mobile iOS/Android: no tap flash, no double-tap zoom delay */
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    button, a, .btn, .ptab, .gauge-card, .app-download-btn {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
     body {
       min-height: 100vh;
       font-family: "Inter", "Vazirmatn", system-ui, -apple-system, sans-serif;
@@ -87,24 +95,103 @@
     .container {
       position: relative; z-index: 1;
       max-width: 1060px; margin: 0 auto;
-      padding: 1.1rem 1rem 3rem;
-      display: flex; flex-direction: column; gap: 1rem;
+      /* safe-area padding keeps the layout clear of the notch / home bar */
+      padding: calc(0.7rem + env(safe-area-inset-top)) calc(0.6rem + env(safe-area-inset-right)) calc(2.4rem + env(safe-area-inset-bottom)) calc(0.6rem + env(safe-area-inset-left));
+      display: flex; flex-direction: column; gap: 0.85rem;
     }
 
-    /* ---------- top bar: spinning logo (left) + driver HUD (corner) ---------- */
-    .topbar { position: relative; min-height: 92px; display: flex; align-items: flex-start; }
-
-    .spin-logo {
-      position: absolute; top: 0; left: 0;
-      width: 78px; height: 78px; display: grid; place-items: center;
-      filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.45));
+    /* ---------- top bar: spinning coin logo (top-left) + driver HUD (corner) ---------- */
+    .topbar {
+      position: relative;
+      display: flex; align-items: flex-start;
+      padding-left: 76px;   /* keep the corner clear for the coin logo */
+      min-height: 66px;
     }
-    .spin-logo svg { width: 100%; height: 100%; animation: wheelspin 3s linear infinite; }
-    @keyframes wheelspin { to { transform: rotate(360deg); } }
-    .wheel-rim { fill: none; stroke: var(--accent); stroke-width: 4; }
-    .wheel-inner { fill: none; stroke: var(--violet); stroke-width: 2; opacity: 0.75; }
-    .wheel-spoke { stroke: var(--txt); stroke-width: 3; stroke-linecap: round; opacity: 0.85; }
-    .wheel-hub { fill: var(--accent); }
+
+    /* spinning coin logo — same artwork as the modern theme */
+    .coin-logo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      perspective: 160px;
+      transform: rotateY(0deg);
+      transform-style: preserve-3d;
+      isolation: isolate;
+      will-change: transform;
+      animation: coin-spin 12s ease-in-out infinite;
+      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.28));
+      border: 1px solid #a8323d;
+      box-shadow:
+        0 0 0 1px rgba(255, 112, 122, 0.38),
+        0 8px 22px rgba(0, 0, 0, 0.4),
+        0 0 22px rgba(168, 50, 61, 0.32);
+      transition: border-color 0.6s ease, box-shadow 0.6s ease;
+    }
+
+    .coin-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid #a8323d;
+      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
+      box-shadow: inset 0 0 10px rgba(255, 112, 122, 0.28), inset 0 -3px 4px rgba(80, 12, 20, 0.4);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .coin-face.front { transform: translateZ(4px); }
+
+    .coin-face.back { transform: rotateY(180deg) translateZ(4px); }
+
+    /* steady light sheen on the coin (does not spin, keeps the lighting feel) */
+    .coin-logo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.48), transparent 30%, transparent 58%, rgba(255, 255, 255, 0.08));
+      transform: translateZ(9px);
+      animation: coin-shine 12s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes coin-spin {
+      0%, 100% {
+        transform: rotateX(0deg) rotateY(0deg) scale(1);
+        box-shadow: 0 0 0 1px rgba(255, 112, 122, 0.38), 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 22px rgba(168, 50, 61, 0.32);
+      }
+      25% {
+        transform: rotateX(8deg) rotateY(90deg) scale(1.035);
+        box-shadow: 0 0 0 1px rgba(255, 155, 163, 0.58), 10px 10px 25px rgba(0, 0, 0, 0.42), 0 0 34px rgba(168, 50, 61, 0.48);
+      }
+      50% {
+        transform: rotateX(0deg) rotateY(180deg) scale(1);
+        box-shadow: 0 0 0 1px rgba(255, 112, 122, 0.38), 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 22px rgba(168, 50, 61, 0.32);
+      }
+      75% {
+        transform: rotateX(-8deg) rotateY(270deg) scale(1.035);
+        box-shadow: 0 0 0 1px rgba(255, 155, 163, 0.58), -10px 10px 25px rgba(0, 0, 0, 0.42), 0 0 34px rgba(168, 50, 61, 0.48);
+      }
+    }
+
+    @keyframes coin-shine {
+      0%, 100% { opacity: 0.72; transform: translateZ(9px) rotate(0deg); }
+      50% { opacity: 0.34; transform: translateZ(9px) rotate(18deg); }
+    }
+
+    html.day-mode .coin-logo {
+      box-shadow:
+        0 0 0 1px rgba(255, 112, 122, 0.45),
+        0 6px 18px rgba(80, 12, 20, 0.28);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .coin-logo, .coin-logo::after { animation: none; }
+    }
 
     .hud {
       margin-left: auto;
@@ -147,23 +234,92 @@
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-    /* ---------- controls (language + theme) above the gauges ---------- */
-    .controls { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
-    .ctrl-btn {
-      display: inline-flex; align-items: center; gap: 0.45rem;
-      font: inherit; font-size: 0.84rem; font-weight: 700; color: var(--txt);
-      background: var(--panel); border: 1px solid var(--line);
-      border-radius: 999px; padding: 0.5rem 1rem; cursor: pointer;
-      backdrop-filter: blur(10px); transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    /* ---------- dashboard control switches (language + day/night) ---------- */
+    .controls {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;
+      padding: 0.4rem;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.6), rgba(10, 16, 27, 0.6));
+      border: 1px solid var(--line);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 26px rgba(0, 0, 0, 0.35);
     }
-    .ctrl-btn:hover { transform: translateY(-1px); border-color: var(--accent); }
-    .ctrl-btn.active-glow { border-color: var(--accent); box-shadow: 0 0 18px rgba(34, 211, 238, 0.35); }
+    html.day-mode .controls {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(226, 234, 245, 0.95));
+      box-shadow: inset 0 1px 0 #fff, 0 10px 24px rgba(30, 60, 110, 0.14);
+    }
+
+    /* every control looks like a physical dashboard rocker switch */
+    .ctrl-btn {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font: inherit; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.05em;
+      color: var(--txt); cursor: pointer; user-select: none;
+      padding: 0.5rem 0.7rem;
+      border-radius: 13px;
+      border: 1px solid rgba(140, 170, 220, 0.22);
+      background: linear-gradient(180deg, #1e2a3d, #0c1420);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.12s ease;
+    }
+    html.day-mode .ctrl-btn {
+      background: linear-gradient(180deg, #ffffff, #d9e3f0);
+      border-color: rgba(20, 45, 90, 0.16);
+      box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(30, 60, 110, 0.12), 0 4px 12px rgba(30, 60, 110, 0.14);
+    }
+    .ctrl-btn:active { transform: translateY(1px); }
+    .ctrl-btn.active-glow {
+      border-color: rgba(34, 211, 238, 0.65);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+        0 0 16px rgba(34, 211, 238, 0.35);
+    }
+    .ctrl-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* tell-tale indicator light */
+    .ctrl-led {
+      width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto;
+      background: #2a3446; box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.8);
+      transition: background 0.25s ease, box-shadow 0.25s ease;
+    }
+    .ctrl-btn.active-glow .ctrl-led {
+      background: var(--accent);
+      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.9), 0 0 10px var(--accent);
+    }
+    .ctrl-label { display: inline-flex; align-items: center; gap: 0.32rem; }
+    .ctrl-icon { font-size: 0.9rem; line-height: 1; }
+
+    /* rocker knob */
+    .ctrl-switch {
+      position: relative; width: 34px; height: 18px; border-radius: 999px; flex: 0 0 auto;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(140, 170, 220, 0.2);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.7);
+    }
+    html.day-mode .ctrl-switch {
+      background: rgba(30, 60, 110, 0.14);
+      box-shadow: inset 0 2px 4px rgba(30, 60, 110, 0.2);
+    }
+    .ctrl-knob {
+      position: absolute; top: 1.5px; left: 2px;
+      width: 13px; height: 13px; border-radius: 50%;
+      background: linear-gradient(180deg, #eaf3ff, #8ea3bf);
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
+      transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.2, 1), background 0.25s ease;
+    }
+    .ctrl-btn.active-glow .ctrl-knob {
+      transform: translateX(16px);
+      background: linear-gradient(180deg, #cdf6ff, var(--accent));
+    }
 
     /* ---------- alerts (dashboard warning lights) ---------- */
     .alert {
       display: none; align-items: center; gap: 0.6rem;
-      padding: 0.7rem 1rem; border-radius: 14px;
-      font-size: 0.85rem; font-weight: 600;
+      padding: 0.6rem 0.8rem; border-radius: 14px;
+      font-size: clamp(0.7rem, 2.8vw, 0.85rem); font-weight: 600;
       border: 1px solid rgba(255, 77, 94, 0.45);
       background: linear-gradient(90deg, rgba(255, 77, 94, 0.18), rgba(255, 77, 94, 0.06));
       color: #ffd9de;
@@ -173,21 +329,48 @@
     .alert-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ---------- gauge cluster ---------- */
+    /* the two gauges always sit side by side — on phones too. Tap one to
+       blow it up for reading, tap again to put it back in its place. */
     .cluster {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+      align-items: stretch;
     }
-    @media (max-width: 760px) { .cluster { grid-template-columns: 1fr; } }
+    @media (min-width: 760px) { .cluster { gap: 1rem; } }
 
     .gauge-card {
       position: relative;
+      min-width: 0;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
-      padding: 1rem 1rem 1.1rem;
+      padding: 0.65rem 0.6rem 0.8rem;
       overflow: hidden;
+      cursor: pointer;
+      touch-action: manipulation;
       animation: fadeUp 0.6s ease both;
+      transition: border-color 0.2s ease, box-shadow 0.25s ease;
+    }
+    @media (min-width: 760px) { .gauge-card { padding: 1rem 1rem 1.1rem; } }
+    .gauge-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .gauge-card.zoomed {
+      grid-column: 1 / -1;
+      border-color: rgba(34, 211, 238, 0.45);
+      box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25), var(--shadow);
+    }
+
+    .zoom-hint {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 7px;
+      border: 1px solid var(--line); color: var(--muted);
+      font-size: 0.72rem; line-height: 1;
+      transition: transform 0.25s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .gauge-card.zoomed .zoom-hint {
+      transform: rotate(180deg); color: var(--accent); border-color: var(--accent);
     }
     .gauge-card::after {
       content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -195,16 +378,18 @@
     }
     .card-head {
       position: relative; z-index: 2;
-      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
-      font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em;
+      display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
+      font-size: clamp(0.58rem, 2.7vw, 0.78rem); font-weight: 800; letter-spacing: 0.06em;
       color: var(--muted); text-transform: uppercase;
       margin-bottom: 0.4rem;
+      line-height: 1.25;
     }
-    .card-head .accent-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    .gauge-card.zoomed .card-head { font-size: 0.82rem; }
 
     .gauge-wrap { position: relative; display: grid; place-items: center; }
 
     .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; }
+    .gauge-card.zoomed .gauge { width: min(100%, 460px); }
     .gauge-svg { width: 100%; height: 100%; overflow: visible; }
     .gauge-track { fill: none; stroke: var(--line); stroke-width: 12; stroke-linecap: round; }
     .gauge-value { fill: none; stroke: var(--ok); stroke-width: 12; stroke-linecap: round; transition: d 0.5s ease; filter: drop-shadow(0 0 8px currentColor); }
@@ -221,23 +406,44 @@
     .needle-base { fill: #0b1220; stroke: var(--txt); stroke-width: 2; }
 
     .gauge-readout {
-      position: absolute; left: 50%; top: 60%; transform: translate(-50%, 0);
+      position: absolute; left: 50%; top: 62%; transform: translate(-50%, 0);
       display: flex; flex-direction: column; align-items: center; gap: 0.05rem;
       text-align: center; pointer-events: none; width: 78%;
     }
     .readout-big {
-      font-family: var(--font-dig); font-size: clamp(1.7rem, 5vw, 2.2rem);
+      font-family: var(--font-dig); font-size: clamp(1rem, 4.6vw, 2.2rem);
       font-weight: 800; line-height: 1; letter-spacing: 0.02em;
-      color: var(--txt); text-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+      color: var(--txt);
+      /* halo keeps the digits readable when the needle sweeps over them */
+      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg), 0 0 20px rgba(34, 211, 238, 0.35);
     }
-    .readout-unit { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-    .readout-sub { font-family: var(--font-dig); font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-top: 0.15rem; }
-    .readout-cap { font-size: 0.66rem; color: var(--muted); margin-top: 0.2rem; }
+    .readout-unit {
+      font-size: clamp(0.5rem, 2.2vw, 0.72rem); font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
+    }
+    .readout-sub {
+      font-family: var(--font-dig); font-size: clamp(0.56rem, 2.7vw, 0.82rem);
+      font-weight: 600; color: var(--accent); margin-top: 0.15rem;
+      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
+    }
+    .readout-cap {
+      font-size: clamp(0.54rem, 2.2vw, 0.66rem); color: var(--muted); margin-top: 0.2rem;
+      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
+    }
+
+    /* the readout scales up when the gauge is blown up */
+    .gauge-card.zoomed .readout-big { font-size: clamp(2rem, 6.5vw, 3rem); }
+    .gauge-card.zoomed .readout-unit { font-size: 0.82rem; }
+    .gauge-card.zoomed .readout-sub { font-size: 1rem; }
+    .gauge-card.zoomed .readout-cap { font-size: 0.74rem; }
 
     .gauge-foot {
       position: relative; z-index: 2;
-      margin-top: 0.5rem; text-align: center; font-size: 0.8rem; color: var(--muted);
+      margin-top: 0.5rem; text-align: center;
+      font-size: clamp(0.64rem, 2.8vw, 0.8rem); color: var(--muted); line-height: 1.4;
     }
+    .gauge-card.zoomed .gauge-foot { font-size: 0.84rem; }
     .gauge-foot strong { color: var(--txt); font-weight: 700; }
 
     /* ---------- round Tehran clock (corner of the time gauge) ---------- */
@@ -253,7 +459,6 @@
       z-index: 3;
       animation: fadeUp 0.7s ease both;
     }
-    @media (max-width: 520px) { .clock-badge { position: static; margin: 0 auto; } }
     .clock-face { width: 74px; height: 74px; }
     .clock-rim { fill: none; stroke: var(--line); stroke-width: 2.5; }
     .ctick { stroke: var(--muted); stroke-width: 1; opacity: 0.4; }
@@ -269,6 +474,29 @@
       font-size: 0.6rem; color: var(--warn); text-align: center; line-height: 1.35;
       border-top: 1px dashed var(--line); padding-top: 0.2rem; margin-top: 0.1rem;
     }
+    .clock-info { display: flex; flex-direction: column; align-items: center; gap: 0.12rem; min-width: 0; }
+
+    /* narrow cards (phones): the clock drops under the dial so it stays readable */
+    @media (max-width: 720px) {
+      .clock-badge {
+        position: static; width: 100%; margin-top: 0.4rem;
+        padding: 0.45rem 0.35rem 0.5rem; border-radius: 14px;
+      }
+      .clock-face { width: 56px; height: 56px; }
+      .clock-digital { font-size: 0.9rem; }
+      .clock-date { font-size: 0.6rem; }
+      .clock-event { font-size: 0.58rem; }
+    }
+
+    /* zoomed gauge: the clock floats back into the corner, larger */
+    .gauge-card.zoomed .clock-badge {
+      position: absolute; top: 0.4rem; inset-inline-end: 0.4rem;
+      width: 140px; margin: 0; padding: 0.6rem 0.6rem 0.7rem; border-radius: 18px;
+    }
+    .gauge-card.zoomed .clock-face { width: 84px; height: 84px; }
+    .gauge-card.zoomed .clock-digital { font-size: 1.1rem; }
+    .gauge-card.zoomed .clock-date { font-size: 0.68rem; }
+    .gauge-card.zoomed .clock-event { font-size: 0.66rem; }
 
     /* ---------- usage detail grid ---------- */
     .usage-details {
@@ -276,22 +504,25 @@
       margin-top: 0.6rem;
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem;
     }
-    @media (max-width: 420px) { .usage-details { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .usage-details { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem; } }
     .ud {
       background: var(--panel-2); border: 1px solid var(--line);
-      border-radius: 12px; padding: 0.45rem 0.5rem;
-      display: flex; flex-direction: column; gap: 0.15rem; text-align: center;
+      border-radius: 12px; padding: 0.4rem 0.35rem;
+      display: flex; flex-direction: column; gap: 0.12rem; text-align: center; min-width: 0;
     }
-    .ud span { font-size: 0.62rem; color: var(--muted); }
-    .ud b { font-family: var(--font-dig); font-size: 0.82rem; font-weight: 700; }
+    .ud span { font-size: clamp(0.48rem, 2vw, 0.62rem); color: var(--muted); line-height: 1.2; }
+    .ud b { font-family: var(--font-dig); font-size: clamp(0.56rem, 2.8vw, 0.82rem); font-weight: 700; word-break: break-all; }
+    .gauge-card.zoomed .ud span { font-size: 0.64rem; }
+    .gauge-card.zoomed .ud b { font-size: 0.95rem; }
 
     /* ---------- generic panels ---------- */
     .panel {
       background: var(--panel); border: 1px solid var(--line);
       border-radius: var(--radius); box-shadow: var(--shadow);
-      backdrop-filter: blur(12px); padding: 1rem;
+      backdrop-filter: blur(12px); padding: 0.85rem;
       animation: fadeUp 0.6s ease both;
     }
+    @media (min-width: 760px) { .panel { padding: 1rem; } }
     .panel-title {
       display: flex; align-items: center; gap: 0.5rem;
       font-size: 0.82rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
@@ -313,8 +544,12 @@
       border: 1px solid var(--line); background: var(--panel-2); color: var(--txt);
       transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
     }
-    .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
     .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04121a; border-color: transparent; }
+    @media (hover: hover) {
+      .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+      .app-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+      .ptab:hover { color: var(--txt); }
+    }
     .btn-success { background: linear-gradient(135deg, var(--ok), #22c55e) !important; color: #04210f !important; }
 
     .soft-hr { border: none; border-top: 1px solid var(--line); margin: 1rem 0; }
@@ -369,12 +604,11 @@
       display: inline-flex; align-items: center; gap: 0.35rem;
       transition: background 0.2s ease, color 0.2s ease;
     }
-    .ptab:hover { color: var(--txt); }
     .ptab.active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04121a; }
 
     .apps-grid {
       margin-top: 0.9rem;
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.6rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr)); gap: 0.6rem;
     }
     .app-card {
       background: var(--panel-2); border: 1px solid var(--line);
@@ -382,7 +616,6 @@
       display: flex; flex-direction: column; align-items: center; gap: 0.45rem; text-align: center;
       transition: transform 0.15s ease, border-color 0.2s ease;
     }
-    .app-card:hover { transform: translateY(-2px); border-color: var(--accent); }
     .app-icon { width: 46px; height: 46px; border-radius: 12px; object-fit: cover; background: rgba(255, 255, 255, 0.06); }
     .app-name { font-size: 0.78rem; font-weight: 700; }
     .app-download-btn {
@@ -425,22 +658,25 @@
   </div>
 
   <main class="container">
-    <!-- spinning logo (top-left) + driver HUD (corner) -->
+    <!-- language + day/night dashboard switches — above everything -->
+    <div class="controls">
+      <button id="langToggle" class="ctrl-btn" type="button" onclick="toggleLang()" aria-label="Toggle language">
+        <span class="ctrl-led" aria-hidden="true"></span>
+        <span class="ctrl-label"><span class="ctrl-icon" aria-hidden="true">🌐</span><span id="langLabel">EN</span></span>
+        <span class="ctrl-switch" aria-hidden="true"><span class="ctrl-knob"></span></span>
+      </button>
+      <button id="themeToggle" class="ctrl-btn" type="button" onclick="toggleTheme()" aria-label="Toggle day mode">
+        <span class="ctrl-led" aria-hidden="true"></span>
+        <span class="ctrl-label"><span class="ctrl-icon" id="themeIcon" aria-hidden="true">☀️</span><span data-i18n="dayMode">روز</span></span>
+        <span class="ctrl-switch" aria-hidden="true"><span class="ctrl-knob"></span></span>
+      </button>
+    </div>
+
+    <!-- spinning coin logo (top-left) + driver HUD (corner) -->
     <div class="topbar">
-      <span class="spin-logo" aria-hidden="true">
-        <svg viewBox="0 0 100 100">
-          <circle class="wheel-rim" cx="50" cy="50" r="44"></circle>
-          <circle class="wheel-inner" cx="50" cy="50" r="30"></circle>
-          <g class="wheel-spokes">
-            <line class="wheel-spoke" x1="50" y1="20" x2="50" y2="34"></line>
-            <line class="wheel-spoke" x1="50" y1="66" x2="50" y2="80"></line>
-            <line class="wheel-spoke" x1="20" y1="50" x2="34" y2="50"></line>
-            <line class="wheel-spoke" x1="66" y1="50" x2="80" y2="50"></line>
-            <line class="wheel-spoke" x1="29" y1="29" x2="39" y2="39"></line>
-            <line class="wheel-spoke" x1="61" y1="61" x2="71" y2="71"></line>
-          </g>
-          <circle class="wheel-hub" cx="50" cy="50" r="9"></circle>
-        </svg>
+      <span class="coin-logo" aria-hidden="true">
+        <span class="coin-face front"></span>
+        <span class="coin-face back"></span>
       </span>
 
       <div class="hud" id="hud">
@@ -456,16 +692,6 @@
       </div>
     </div>
 
-    <!-- language + day/night controls, above the gauges -->
-    <div class="controls">
-      <button id="langToggle" class="ctrl-btn" type="button" onclick="toggleLang()" aria-label="Toggle language">
-        <span aria-hidden="true">🌐</span><span id="langLabel">EN</span>
-      </button>
-      <button id="themeToggle" class="ctrl-btn" type="button" onclick="toggleTheme()" aria-label="Toggle day mode">
-        <span id="themeIcon" aria-hidden="true">☀️</span><span data-i18n="dayMode">روز</span>
-      </button>
-    </div>
-
     <div id="alertTime" class="alert">
       <span aria-hidden="true">⏳</span>
       <span class="alert-text" data-i18n="timeAlert">کمتر از یک روز تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید</span>
@@ -478,10 +704,11 @@
 
     <!-- gauge cluster -->
     <section class="cluster">
-      <div class="gauge-card">
+      <div class="gauge-card" id="timeCard" role="button" tabindex="0" aria-pressed="false"
+           onclick="toggleGaugeZoom('time', event)" onkeydown="gaugeCardKey(event, 'time')">
         <div class="card-head">
           <span data-i18n="timeLeft">⏱️ زمان باقی‌مانده</span>
-          <span class="accent-dot" aria-hidden="true"></span>
+          <span class="zoom-hint" aria-hidden="true">⤢</span>
         </div>
 
         <div class="gauge-wrap">
@@ -513,9 +740,11 @@
               <line class="clock-hand second" id="clockSec" x1="50" y1="50" x2="50" y2="15"></line>
               <circle class="clock-hub" cx="50" cy="50" r="3"></circle>
             </svg>
-            <div class="clock-digital" id="clockDigital">--:--</div>
-            <div class="clock-date" id="clockDate">—</div>
-            <div class="clock-event" id="clockEvent" hidden></div>
+            <div class="clock-info">
+              <div class="clock-digital" id="clockDigital">--:--</div>
+              <div class="clock-date" id="clockDate">—</div>
+              <div class="clock-event" id="clockEvent" hidden></div>
+            </div>
           </div>
         </div>
 
@@ -524,10 +753,11 @@
         </div>
       </div>
 
-      <div class="gauge-card">
+      <div class="gauge-card" id="usageCard" role="button" tabindex="0" aria-pressed="false"
+           onclick="toggleGaugeZoom('usage', event)" onkeydown="gaugeCardKey(event, 'usage')">
         <div class="card-head">
           <span data-i18n="dataUsage">📊 جزئیات مصرف</span>
-          <span class="accent-dot" aria-hidden="true"></span>
+          <span class="zoom-hint" aria-hidden="true">⤢</span>
         </div>
 
         <div class="gauge-wrap">
@@ -770,6 +1000,9 @@
       updateThemeBtn();
       const themeBtn = document.getElementById("themeToggle");
       if (themeBtn) themeBtn.classList.toggle("active-glow", day);
+      // keep the mobile browser chrome in sync with the dashboard
+      const themeColor = document.getElementById("themeColorMeta");
+      if (themeColor) themeColor.setAttribute("content", day ? "#e8eef7" : "#04060c");
     }
 
     function toggleTheme() {
@@ -872,6 +1105,25 @@
       }
       if (needle) needle.setAttribute("transform", `rotate(${(G.start + G.sweep * f).toFixed(2)} ${G.cx} ${G.cy})`);
       if (gauge) gauge.dataset.level = level || "ok";
+    }
+
+    /* Tap a gauge to blow it up for reading, tap again to slide it back into
+       its place next to the other one. */
+    function toggleGaugeZoom(prefix, event) {
+      if (event && event.target && event.target.closest &&
+          event.target.closest("button, a, select, input, textarea")) return;
+
+      const card = document.getElementById(prefix + "Card");
+      if (!card) return;
+
+      const zoomed = card.classList.toggle("zoomed");
+      card.setAttribute("aria-pressed", String(zoomed));
+    }
+
+    function gaugeCardKey(event, prefix) {
+      if (event.key !== "Enter" && event.key !== " " && event.key !== "Spacebar") return;
+      event.preventDefault();
+      toggleGaugeZoom(prefix);
     }
 
     /* ============================================================
