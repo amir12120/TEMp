@@ -256,8 +256,8 @@
     .presence.online .presence-dot { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18); animation: pulse 1.8s ease infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     @keyframes remained-blink {
-      0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
-      50% { opacity: 0.35; transform: translateX(-50%) scale(0.94); }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.94); }
     }
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -502,16 +502,27 @@
     .gauge-card.zoomed .readout-sub { font-size: 1rem; }
     .gauge-card.zoomed .readout-cap { font-size: 0.74rem; }
 
-    /* حجم باقی‌مانده روی صفحهٔ گیج، بالای عقربه: قرمز و چشمک‌زن مثل تمپلیت modern */
+    /* حجم باقی‌مانده روی صفحهٔ گیج: برچسب «باقی‌مانده» + مقدار قرمز چشمک‌زن،
+       وسط نیمهٔ بالایی دایره — هم‌فاصله از مرکز دایره و نشانگرِ ۱۲ ساعت */
+    .gauge-remained-wrap {
+      position: absolute; z-index: 2; left: 50%; top: 29.2%; transform: translate(-50%, -50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.14rem;
+      text-align: center; white-space: nowrap; pointer-events: none;
+    }
+    .gauge-remained-cap {
+      font-size: clamp(0.5rem, 2.4vw, 0.64rem); font-weight: 800; letter-spacing: 0.05em;
+      color: var(--muted);
+      text-shadow: 0 0 8px var(--bg), 0 0 12px var(--bg);
+    }
     .gauge-remained {
-      position: absolute; z-index: 2; left: 50%; top: 19.5%; transform: translateX(-50%);
-      direction: ltr; white-space: nowrap; pointer-events: none;
+      direction: ltr;
       font-family: var(--font-dig); font-size: clamp(0.66rem, 3.2vw, 0.86rem);
       font-weight: 900; color: var(--bad); line-height: 1;
       text-shadow: 0 0 8px var(--bg), 0 0 14px rgba(255, 77, 94, 0.6);
       animation: remained-blink 1.25s ease-in-out infinite;
     }
-    .gauge-card.zoomed .gauge-remained { top: 19%; font-size: 1.02rem; }
+    .gauge-card.zoomed .gauge-remained { font-size: 1.02rem; }
+    .gauge-card.zoomed .gauge-remained-cap { font-size: 0.74rem; }
 
     .gauge-foot {
       position: relative; z-index: 2;
@@ -972,7 +983,10 @@
               <circle class="needle-base" cx="110" cy="110" r="8"></circle>
             </svg>
 
-            <strong class="gauge-remained" id="usageRemained">—</strong>
+            <div class="gauge-remained-wrap">
+              <span class="gauge-remained-cap" data-i18n="remainingShort">باقی‌مانده</span>
+              <strong class="gauge-remained" id="usageRemained">—</strong>
+            </div>
 
             <div class="gauge-readout">
               <strong class="readout-big" id="usageBig">۰٪</strong>
@@ -1095,6 +1109,7 @@
         dataUsage: "📊 جزئیات مصرف",
         usedShort: "مصرف‌شده",
         remainedCap: "حجم باقی‌مانده",
+        remainingShort: "باقی‌مانده",
         totalQuota: "حجم کل", used: "حجم مصرف‌شده", remained: "حجم باقی‌مانده",
         downloadLbl: "📥 دانلود", uploadLbl: "📤 آپلود",
         subLinkTitle: "🔗 لینک سابسکریپشن",
@@ -1136,6 +1151,7 @@
         dataUsage: "📊 Data usage",
         usedShort: "Used",
         remainedCap: "Remaining",
+        remainingShort: "Remaining",
         totalQuota: "Total quota", used: "Used", remained: "Remaining",
         downloadLbl: "📥 Download", uploadLbl: "📤 Upload",
         subLinkTitle: "🔗 Subscription link",
