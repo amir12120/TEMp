@@ -64,6 +64,8 @@ jobs:
           test -s pages/speed/index.html
           grep -q 'id="timeGauge"' pages/speed/index.html
           grep -q 'id="usageGauge"' pages/speed/index.html
+          grep -q 'id="usageRemained"' pages/speed/index.html
+          grep -q 'TIME_SCALE_SEC' pages/speed/index.html
           grep -q 'id="clockDigital"' pages/speed/index.html
           grep -q 'id="configQRModal"' pages/speed/index.html
           grep -q 'id="osSelect"' pages/speed/index.html

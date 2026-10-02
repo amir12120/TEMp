@@ -214,6 +214,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .coin-logo, .coin-logo::after { animation: none; }
+      .gauge-remained { animation: none; }
     }
 
     .hud {
@@ -254,6 +255,10 @@
     .presence-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
     .presence.online .presence-dot { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18); animation: pulse 1.8s ease infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes remained-blink {
+      0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+      50% { opacity: 0.35; transform: translateX(-50%) scale(0.94); }
+    }
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
@@ -497,12 +502,23 @@
     .gauge-card.zoomed .readout-sub { font-size: 1rem; }
     .gauge-card.zoomed .readout-cap { font-size: 0.74rem; }
 
+    /* حجم باقی‌مانده روی صفحهٔ گیج، بالای عقربه: قرمز و چشمک‌زن مثل تمپلیت modern */
+    .gauge-remained {
+      position: absolute; z-index: 2; left: 50%; top: 19.5%; transform: translateX(-50%);
+      direction: ltr; white-space: nowrap; pointer-events: none;
+      font-family: var(--font-dig); font-size: clamp(0.66rem, 3.2vw, 0.86rem);
+      font-weight: 900; color: var(--bad); line-height: 1;
+      text-shadow: 0 0 8px var(--bg), 0 0 14px rgba(255, 77, 94, 0.6);
+      animation: remained-blink 1.25s ease-in-out infinite;
+    }
+    .gauge-card.zoomed .gauge-remained { top: 19%; font-size: 1.02rem; }
+
     .gauge-foot {
       position: relative; z-index: 2;
       margin-top: auto; padding-top: 0.5rem; text-align: center;
       font-size: clamp(0.64rem, 2.8vw, 0.8rem); color: var(--muted); line-height: 1.4;
     }
-    .gauge-card.zoomed .gauge-foot { font-size: 0.84rem; }
+    .gauge-card.zoomed .gauge-foot { font-size: 0.98rem; padding-top: 0.85rem; }
     .gauge-foot strong { color: var(--txt); font-weight: 700; }
 
     /* ---------- round Tehran clock (corner of the time gauge) ---------- */
@@ -547,15 +563,8 @@
       .clock-event { font-size: 0.58rem; }
     }
 
-    /* zoomed gauge: the clock floats back into the corner, larger */
-    .gauge-card.zoomed .clock-badge {
-      position: absolute; top: 0.4rem; inset-inline-end: 0.4rem;
-      width: 140px; margin: 0; padding: 0.6rem 0.6rem 0.7rem; border-radius: 18px;
-    }
-    .gauge-card.zoomed .clock-face { width: 84px; height: 84px; }
-    .gauge-card.zoomed .clock-digital { font-size: 1.1rem; }
-    .gauge-card.zoomed .clock-date { font-size: 0.68rem; }
-    .gauge-card.zoomed .clock-event { font-size: 0.66rem; }
+    /* zoomed gauge: clock off — the expiry date under the dial says it all */
+    .gauge-card.zoomed .clock-badge { display: none; }
 
     /* ---------- usage detail grid ---------- */
     .usage-details {
@@ -648,29 +657,19 @@
     .config-actions { display: flex; gap: 0.4rem; flex: 0 0 auto; }
     .badge-group { display: flex; gap: 0.3rem; }
 
-    /* phones: one line per config, with copy + QR stacked underneath */
+    /* موبایل: هر کانفیگ در یک خط مثل تمپلیت modern — متن کوتاه می‌شود و
+       کلیدهای QR و کپی کنار هم در انتهای همان خط می‌مانند */
     @media (max-width: 560px) {
-      .config-item {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        grid-template-areas:
-          "badge text"
-          "act   act";
-        gap: 0.4rem 0.5rem;
-        align-items: center;
-      }
-      .config-item .badge-group { grid-area: badge; }
+      .config-item { flex-wrap: nowrap; gap: 0.35rem; padding: 0.5rem 0.55rem; }
+      .config-item .badge-group { display: none; }
       .config-item .config-text {
-        grid-area: text;
-        flex: none;
+        flex: 1 1 auto; min-width: 0; word-break: normal;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        font-size: 0.64rem;
       }
-      .config-item .config-actions {
-        grid-area: act;
-        display: flex; flex-direction: column; gap: 0.4rem;
-      }
-      .config-item .config-actions .btn,
-      .config-item .config-actions .btn-qr { width: 100%; }
+      .config-item .config-actions { flex: 0 0 auto; gap: 0.3rem; }
+      .config-item .config-actions .btn { padding: 0.36rem 0.5rem; font-size: 0.66rem; }
+      .config-item .config-actions .btn-qr { padding: 0.3rem 0.42rem; font-size: 0.64rem; }
     }
     .badge {
       font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em;
@@ -845,17 +844,9 @@
     .zoom-panel .gauge-card .readout-sub { font-size: 1.05rem; }
     .zoom-panel .gauge-card .readout-cap { font-size: 0.76rem; }
     .zoom-panel .gauge-card .card-head { font-size: 0.84rem; }
-    .zoom-panel .gauge-card .gauge-foot { font-size: 0.86rem; }
+    .zoom-panel .gauge-card .gauge-foot { font-size: 1rem; padding-top: 0.9rem; }
     .zoom-panel .gauge-card .ud span { font-size: 0.66rem; }
     .zoom-panel .gauge-card .ud b { font-size: 0.98rem; }
-    .zoom-panel .clock-badge {
-      position: absolute; top: 0.5rem; inset-inline-end: 0.5rem;
-      width: 148px; margin: 0; padding: 0.6rem 0.6rem 0.7rem; border-radius: 18px;
-    }
-    .zoom-panel .clock-face { width: 88px; height: 88px; }
-    .zoom-panel .clock-digital { font-size: 1.15rem; }
-    .zoom-panel .clock-date { font-size: 0.7rem; }
-    .zoom-panel .clock-event { font-size: 0.68rem; }
   </style>
 </head>
 
@@ -980,6 +971,8 @@
               </g>
               <circle class="needle-base" cx="110" cy="110" r="8"></circle>
             </svg>
+
+            <strong class="gauge-remained" id="usageRemained">—</strong>
 
             <div class="gauge-readout">
               <strong class="readout-big" id="usageBig">۰٪</strong>
@@ -1249,7 +1242,9 @@
 
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
     const ONE_GB_BYTES = 1024 * 1024 * 1024;
-    const TIME_BASELINE_KEY = "temp.speed.timeBaseline.v1";
+    /* مقیاس گیج زمان: هر اکانت ۳۰ روزه فرض می‌شود؛ عقربه تا وقتی بیش از
+       ۳۰ روز باقی است روی «پر» می‌ماند و بعد کم‌کم به سمت صفر می‌آید. */
+    const TIME_SCALE_SEC = 30 * 24 * 60 * 60;
 
     let countdownInterval = null;
     let isInactive = false;
@@ -1258,21 +1253,6 @@
 
     function toPersianDigits(n) {
       return String(n).replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[+d]);
-    }
-
-    /* مقیاس کامل گیج زمان: بیشترین زمان باقی‌مانده‌ای که تا حالا برای این
-       تاریخ انقضا دیده شده. با تمدید (انقضای جدید) گیج دوباره پر می‌شود. */
-    function timeBaseline(expireSec) {
-      const key = String(expireSec);
-      const nowRemain = Math.max(0, Number(expireSec) - Math.floor(Date.now() / 1000));
-      let prev = 0;
-      try {
-        const store = JSON.parse(localStorage.getItem(TIME_BASELINE_KEY) || "{}");
-        prev = Number(store && store[key]) || 0;
-      } catch (error) { prev = 0; }
-      const base = Math.max(prev, nowRemain);
-      try { localStorage.setItem(TIME_BASELINE_KEY, JSON.stringify({ [key]: base })); } catch (error) {}
-      return base > 0 ? base : nowRemain;
     }
 
     /* ============================================================
@@ -1473,7 +1453,6 @@
         return;
       }
 
-      const base = timeBaseline(Number(sub.expireSec));
       const pad = n => String(n).padStart(2, "0");
 
       function tick() {
@@ -1488,7 +1467,9 @@
           return;
         }
 
-        const days = Math.floor(diff / ONE_DAY_MS);
+        /* روزهای باقی‌مانده را رو به بالا می‌شماریم تا اکانت ۳۰ روزه از همان
+           ابتدا «۳۰» نشان دهد و با عقربهٔ پرِ گیج هم‌خوان باشد */
+        const days = Math.ceil(diff / ONE_DAY_MS);
         const hours = Math.floor(diff / 3600000) % 24;
         const minutes = Math.floor(diff / 60000) % 60;
         const seconds = Math.floor(diff / 1000) % 60;
@@ -1496,8 +1477,9 @@
         if (bigEl) bigEl.textContent = lang === "fa" ? toPersianDigits(days) : String(days);
         if (subEl) subEl.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
-        const frac = base > 0 ? (diff / 1000) / base : 0;
-        const level = diff < ONE_DAY_MS ? "bad" : (diff < 7 * ONE_DAY_MS ? "warn" : "ok");
+        const frac = Math.min(1, (diff / 1000) / TIME_SCALE_SEC);
+        const daysLeft = diff / ONE_DAY_MS;
+        const level = daysLeft < 3 ? "bad" : (daysLeft < 7 ? "warn" : "ok");
         setGauge("time", frac, level);
 
         if (diff < ONE_DAY_MS) alertTime.classList.add("show");
@@ -1535,6 +1517,7 @@
       const pctText = Math.round(percent) + t("pct");
       set("usageBig", lang === "fa" ? toPersianDigits(pctText) : pctText);
       set("usageSub", remainedText);
+      set("usageRemained", remainedText);
 
       const alertVol = document.getElementById("alertVol");
       if (!isPending && total > 0 && remained < ONE_GB_BYTES) alertVol.classList.add("show");
