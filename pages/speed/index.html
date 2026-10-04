@@ -1794,6 +1794,23 @@
         directApk: { repo: "patterniha/PattNG", arch: false, fileName: (ver) => `PattNG_${ver}_universal.apk` }
       },
       {
+        id: "zedsecure",
+        name: "ZedSecure",
+        icon: "https://raw.githubusercontent.com/CluvexStudio/ZedSecure/main/desktop/icons/zedsecure.png",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.zedsecure.vpn",
+          // Desktop installer comes from the same release; the file name carries the version
+          windows: { directAsset: (ver) => `ZedSecure-${ver}-x86_64.msi` }
+        },
+        directApk: {
+          repo: "CluvexStudio/ZedSecure",
+          arch: true,              // assets are per-ABI: ZedSecure-{ver}-arm64-v8a.apk / -x86_64.apk
+          includePrerelease: true, // always the newest release, even if it is flagged pre-release
+          fileName: (ver, arch) => `ZedSecure-${ver}-${arch}.apk`,
+          tagPrefix: "v"            // tags carry a v prefix (e.g. v3.1.4)
+        }
+      },
+      {
         id: "v2box",
         name: "v2Box",
         icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fe/03/f8/fe03f855-940a-a28c-ceb8-4b8e61b720d8/V2BoxIcon-0-0-1x_U007epad-0-1-P3-85-220.png/512x512bb.jpg",

@@ -3065,6 +3065,29 @@
         }
       },
       {
+        id: "zedsecure",
+        name: "ZedSecure",
+        icon: "https://raw.githubusercontent.com/CluvexStudio/ZedSecure/main/desktop/icons/zedsecure.png",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.zedsecure.vpn",
+          // Desktop installers come from the same release; the file name carries the version
+          windows: { directAsset: (ver) => `ZedSecure-${ver}-x86_64.msi` },
+          macos: { directAsset: (ver) => `ZedSecure-${ver}-macos-${/Intel|x86_64|Mac OS X 10[._]15/i.test(navigator.userAgent) ? "x86_64" : "arm64"}.dmg` },
+          linux: { directAsset: (ver) => `ZedSecure-${ver}-x86_64.AppImage` }
+        },
+        directApk: {
+          repo: "CluvexStudio/ZedSecure",
+          arch: true,              // assets are per-ABI: ZedSecure-{ver}-arm64-v8a.apk / -x86_64.apk
+          includePrerelease: true, // always the newest release, even if it is flagged pre-release
+          fileName: (ver, arch) => `ZedSecure-${ver}-${arch}.apk`,
+          tagPrefix: "v"            // tags carry a v prefix (e.g. v3.1.4)
+        },
+        deeplink(subLink) {
+          // Its own scheme; the app's DeepLinkParser reads install-sub?url=&name=
+          return "zedsecure://install-sub?url=" + encodeURIComponent(subLink) + "&name=Subscription";
+        }
+      },
+      {
         id: "v2box",
         name: "v2Box",
         icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fe/03/f8/fe03f855-940a-a28c-ceb8-4b8e61b720d8/V2BoxIcon-0-0-1x_U007epad-0-1-P3-85-220.png/512x512bb.jpg",

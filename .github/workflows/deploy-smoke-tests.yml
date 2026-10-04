@@ -57,6 +57,12 @@ jobs:
           grep -q 'function toggleConfigQR' pages/modern/index.html
           grep -q 'function runPingTest' pages/modern/index.html
           grep -q 'api.github.com/repos/' pages/modern/index.html
+          # ZedSecure: newest-release APK per ABI, desktop installers, and the
+          # deep-link that adds the subscription straight from the import box.
+          grep -q 'CluvexStudio/ZedSecure' pages/modern/index.html
+          grep -q 'ZedSecure-${ver}-${arch}.apk' pages/modern/index.html
+          grep -q 'zedsecure://install-sub?url=' pages/modern/index.html
+          grep -q 'id: "zedsecure"' pages/modern/index.html
 
       - name: Validate speed page features
         shell: bash
@@ -75,6 +81,10 @@ jobs:
           grep -q 'function toggleConfigQR' pages/speed/index.html
           grep -q 'function startDownload' pages/speed/index.html
           grep -q 'api.github.com/repos/' pages/speed/index.html
+          # ZedSecure: newest-release APK per ABI plus the Windows installer.
+          grep -q 'CluvexStudio/ZedSecure' pages/speed/index.html
+          grep -q 'ZedSecure-${ver}-${arch}.apk' pages/speed/index.html
+          grep -q 'id: "zedsecure"' pages/speed/index.html
           ! grep -q 'importAppSelect' pages/speed/index.html
           # the speed theme deliberately ships without the latency test
           ! grep -q -e 'runPingTest' -e 'ping-result' -e 'pingBtn' pages/speed/index.html
