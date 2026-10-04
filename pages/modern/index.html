@@ -3027,18 +3027,21 @@
 
     // هر برنامه: آیکون رسمی، لینک دانلود هر سیستمعامل
     // و deep-link مخصوص وارد کردن سابسکریپشن (اگر اپلیکیشن از آن پشتیبانی کند)
-    // برای برنامههای GitHub نسخهٔ آخرین رلیز پایدار در زمان اجرا پیدا و فایل APK مستقیماً دانلود میشود
+    // برای برنامههای GitHub نسخهٔ آخرین رلیز در زمان اجرا پیدا و فایل APK مستقیماً دانلود میشود
+    // (برنامههایی که includePrerelease دارند حتی نسخههای pre-release را هم میگیرند)
     const APPS = [
       {
         id: "v2rayng",
         name: "v2rayNG",
         icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png",
         platforms: {
-          android: "https://github.com/2dust/v2rayNG/releases/latest"
+          // فهرست کامل رلیزها (جدیدترین اول) چون نسخههای جدید v2rayNG pre-release هستند
+          android: "https://github.com/2dust/v2rayNG/releases"
         },
         directApk: {
           repo: "2dust/v2rayNG",
           arch: true, // نسخهٔ universal ندارد؛ معماری مناسب بهطور خودکار انتخاب میشود
+          includePrerelease: true, // همیشه جدیدترین نسخه، حتی اگر pre-release باشد
           fileName: (ver, arch) => `v2rayNG_${ver}_${arch}.apk`
         },
         deeplink(subLink) {
@@ -3498,15 +3501,19 @@
       modal.classList.add("open");
     }
 
-    /* ---------- دانلود مستقیم APK آخرین نسخهٔ پایدار (برنامههای GitHub) ----------
-       نسخهٔ پایدار در زمان اجرا از GitHub Releases API رسمی گرفته میشود؛
+    /* ---------- دانلود مستقیم APK آخرین نسخه (برنامههای GitHub) ----------
+       نسخه در زمان اجرا از GitHub Releases API رسمی گرفته میشود؛
+       برنامههایی که includePrerelease دارند حتی pre-release را هم میگیرند؛
        کاربر بدون دانستن معماری گوشی، فایل درست را مستقیم دانلود میکند.
        برنامههایی که فایل universal دارند (مثل PattNG) همان را میدهند؛
        بقیه (مثل v2rayNG) نسخهٔ سازگار با گوشی را خودکار انتخاب میکنند. */
-    const directApkFallback = (repo) => `https://github.com/${repo}/releases/latest`;
+    // مسیر پشتیبان وقتی نسخه قابل حل نیست: برنامههای pre-releaseدار فهرست کامل
+    // رلیزها را نشان میدهند، بقیه فقط صفحهٔ آخرین نسخهٔ پایدار
+    const directApkFallback = (repo, includePrerelease) =>
+      `https://github.com/${repo}/releases${includePrerelease ? "" : "/latest"}`;
     const directApkCache = {};   // appId -> URL مستقیم فایل نصبی بعد از حلِ نسخه
     const directApkPromises = {};
-    const versionCache = {};     // repo -> { ver, at }
+    const versionCache = {};     // repo[+#prerelease] -> { info: { ver, tag }, at }
     const VERSION_CACHE_TTL = 10 * 60 * 1000; // اعتبار کش نسخه: ۱۰ دقیقه
 
     function stripV(version) {
@@ -3519,7 +3526,7 @@
       return res.json();
     }
 
-    // آخرین نسخهٔ پایدار هر ریپازیتوری گیت‌هاب؛ API رسمی منبع اصلی است و
+    // آخرین نسخهٔ هر ریپازیتوری گیت‌هاب؛ API رسمی منبع اصلی است و
     // Shields.io فقط در صورت محدودیت/خطای API به‌عنوان fallback استفاده می‌شود.
     function normalizeReleaseVersion(raw) {
       const value = String(raw || "").trim();
@@ -3527,20 +3534,43 @@
       return match ? match[1] : stripV(value);
     }
 
-    async function resolveLatestVersion(repo) {
-      const cached = versionCache[repo];
-      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.ver;
+    // تگ دقیق رلیز بدون دستکاری، تا لینک دانلود pre-releaseها با نام فایل واقعی بخواند
+    function releaseTag(release) {
+      return String((release && release.tag_name) || "").trim();
+    }
 
-      const sources = [
-        () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`).then(j => normalizeReleaseVersion(j.tag_name)),
-        () => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`).then(j => normalizeReleaseVersion(j.value))
-      ];
+    // includePrerelease=true یعنی «همیشه جدیدترین»، حتی اگر رلیز pre-release علامت خورده باشد.
+    // v2rayNG از این دسته است: نسخههای 2.3.x آن pre-release هستند و /releases/latest
+    // آخرین نسخهٔ پایدار (2.2.6) را برمیگرداند، نه جدیدترین را.
+    async function resolveLatestVersion(repo, includePrerelease) {
+      const cacheKey = includePrerelease ? repo + "#prerelease" : repo;
+      const cached = versionCache[cacheKey];
+      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.info;
+
+      const latest = () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`)
+        .then(j => ({ ver: normalizeReleaseVersion(j.tag_name), tag: releaseTag(j) }));
+
+      const sources = includePrerelease
+        ? [
+            // فهرست رلیزها از جدید به قدیم است؛ اولین رلیز منتشرشده حتی pre-release هم درست است
+            () => fetchJson(`https://api.github.com/repos/${repo}/releases?per_page=10`)
+              .then(list => {
+                const first = (Array.isArray(list) ? list : []).find(x => x && !x.draft && releaseTag(x));
+                return first ? { ver: normalizeReleaseVersion(first.tag_name), tag: releaseTag(first) } : null;
+              }),
+            latest
+          ]
+        : [latest];
+
+      sources.push(() => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`)
+        .then(j => ({ ver: normalizeReleaseVersion(j.value), tag: "" })));
+
       for (const src of sources) {
         try {
-          const v = await src();
-          if (/^[0-9]/.test(v) && !/\s|\//.test(v)) {
-            versionCache[repo] = { ver: v, at: Date.now() };
-            return v; // تگ عددی/نسخهای معتبر
+          const info = await src();
+          if (info && /^[0-9]/.test(info.ver) && !/\s|\//.test(info.ver)) {
+            versionCache[cacheKey] = { info, at: Date.now() };
+            return info; // تگ عددی/نسخهای معتبر
           }
         } catch (e) { /* منبع بعدی */ }
       }
@@ -3563,17 +3593,17 @@
       if (directApkPromises[cacheKey]) return directApkPromises[cacheKey];
 
       directApkPromises[cacheKey] = (async () => {
-        const ver = await resolveLatestVersion(cfg.repo);
+        const info = await resolveLatestVersion(cfg.repo, cfg.includePrerelease);
 
         // نامگذاری فایلها در رلیزها ثابت است: {نام}_{نسخه}[_{معماری}].apk
-        if (ver) {
+        if (info) {
           const arch = cfg.arch ? preferredApkArch() : null;
-          const file = fileOf ? fileOf(ver, arch) : cfg.fileName(ver, arch);
-          const tag = (cfg.tagPrefix || "") + ver; // برخی ریپوها تگ با پیشوند v دارند
+          const file = fileOf ? fileOf(info.ver, arch) : cfg.fileName(info.ver, arch);
+          const tag = info.tag || (cfg.tagPrefix || "") + info.ver; // برخی ریپوها تگ با پیشوند v دارند
           return `https://github.com/${cfg.repo}/releases/download/${tag}/${file}`;
         }
 
-        return directApkFallback(cfg.repo); // بدون اینترنت/منبع: صفحهٔ رلیزها (همیشه درست)
+        return directApkFallback(cfg.repo, cfg.includePrerelease); // بدون اینترنت/منبع: صفحهٔ رلیزها (همیشه درست)
       })();
 
       const result = await directApkPromises[cacheKey];
@@ -3586,7 +3616,7 @@
     function openDirectApk(app, fileOf) {
       getDirectApkUrl(app, fileOf)
         .then(url => window.open(url, "_blank", "noopener"))
-        .catch(() => window.open(directApkFallback(app.directApk.repo), "_blank", "noopener"));
+        .catch(() => window.open(directApkFallback(app.directApk.repo, app.directApk.includePrerelease), "_blank", "noopener"));
     }
 
     // پیشبارگیری نسخه در پسزمینه تا کلیک کاربر بدون تأخیر باشد
@@ -3598,7 +3628,7 @@
       const app = APPS.find(a => a.id === appId);
       if (!app) return;
 
-      // برنامههای تکپلتفرم GitHub اندروید: مستقیماً APK آخرین نسخهٔ پایدار (بدون صفحهٔ رلیز)
+      // برنامههای تکپلتفرم GitHub اندروید: مستقیماً APK آخرین نسخه (بدون صفحهٔ رلیز)
       if (app.directApk && detectOS() === "android") {
         openDirectApk(app);
         return;
@@ -3613,7 +3643,7 @@
       if (!app) return;
 
       if (app.directApk && platform === "android") {
-        openDirectApk(app); // APK مستقیم آخرین نسخهٔ پایدار
+        openDirectApk(app); // APK مستقیم آخرین نسخه
         return;
       }
 

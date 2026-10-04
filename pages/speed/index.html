@@ -1782,8 +1782,9 @@
         id: "v2rayng",
         name: "v2rayNG",
         icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png",
-        platforms: { android: "https://github.com/2dust/v2rayNG/releases/latest" },
-        directApk: { repo: "2dust/v2rayNG", arch: true, fileName: (ver, arch) => `v2rayNG_${ver}_${arch}.apk` }
+        // releases list (newest first): the latest 2.3.x v2rayNG builds are pre-releases
+        platforms: { android: "https://github.com/2dust/v2rayNG/releases" },
+        directApk: { repo: "2dust/v2rayNG", arch: true, includePrerelease: true, fileName: (ver, arch) => `v2rayNG_${ver}_${arch}.apk` }
       },
       {
         id: "pattng",
@@ -1936,8 +1937,9 @@
       `).join("");
     }
 
-    /* ---------- resolve latest stable release at runtime ---------- */
-    const directApkFallback = (repo) => `https://github.com/${repo}/releases/latest`;
+    /* ---------- resolve the latest release at runtime (includePrerelease => newest, even pre-release) ---------- */
+    const directApkFallback = (repo, includePrerelease) =>
+      `https://github.com/${repo}/releases${includePrerelease ? "" : "/latest"}`;
     const directApkCache = {};
     const directApkPromises = {};
     const versionCache = {};
@@ -1959,21 +1961,41 @@
       return match ? match[1] : stripV(value);
     }
 
-    async function resolveLatestVersion(repo) {
-      const cached = versionCache[repo];
-      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.ver;
+    function releaseTag(release) {
+      return String((release && release.tag_name) || "").trim();
+    }
 
-      const sources = [
-        () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`).then(j => normalizeReleaseVersion(j.tag_name)),
-        () => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`).then(j => normalizeReleaseVersion(j.value))
-      ];
+    // includePrerelease=true => always the newest release, even one flagged pre-release.
+    // v2rayNG needs it: its 2.3.x tags are pre-releases, so /releases/latest returns 2.2.6.
+    async function resolveLatestVersion(repo, includePrerelease) {
+      const cacheKey = includePrerelease ? repo + "#prerelease" : repo;
+      const cached = versionCache[cacheKey];
+      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.info;
+
+      const latest = () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`)
+        .then(j => ({ ver: normalizeReleaseVersion(j.tag_name), tag: releaseTag(j) }));
+
+      const sources = includePrerelease
+        ? [
+            // the releases list is newest-first; the first published release may be a pre-release
+            () => fetchJson(`https://api.github.com/repos/${repo}/releases?per_page=10`)
+              .then(list => {
+                const first = (Array.isArray(list) ? list : []).find(x => x && !x.draft && releaseTag(x));
+                return first ? { ver: normalizeReleaseVersion(first.tag_name), tag: releaseTag(first) } : null;
+              }),
+            latest
+          ]
+        : [latest];
+
+      sources.push(() => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`)
+        .then(j => ({ ver: normalizeReleaseVersion(j.value), tag: "" })));
 
       for (const src of sources) {
         try {
-          const v = await src();
-          if (/^[0-9]/.test(v) && !/\s|\//.test(v)) {
-            versionCache[repo] = { ver: v, at: Date.now() };
-            return v;
+          const info = await src();
+          if (info && /^[0-9]/.test(info.ver) && !/\s|\//.test(info.ver)) {
+            versionCache[cacheKey] = { info, at: Date.now() };
+            return info;
           }
         } catch (e) { /* next source */ }
       }
@@ -1994,14 +2016,14 @@
       if (directApkPromises[cacheKey]) return directApkPromises[cacheKey];
 
       directApkPromises[cacheKey] = (async () => {
-        const ver = await resolveLatestVersion(cfg.repo);
-        if (ver) {
+        const info = await resolveLatestVersion(cfg.repo, cfg.includePrerelease);
+        if (info) {
           const arch = cfg.arch ? preferredApkArch() : null;
-          const file = fileOf ? fileOf(ver, arch) : cfg.fileName(ver, arch);
-          const tag = (cfg.tagPrefix || "") + ver;
+          const file = fileOf ? fileOf(info.ver, arch) : cfg.fileName(info.ver, arch);
+          const tag = info.tag || (cfg.tagPrefix || "") + info.ver;
           return `https://github.com/${cfg.repo}/releases/download/${tag}/${file}`;
         }
-        return directApkFallback(cfg.repo);
+        return directApkFallback(cfg.repo, cfg.includePrerelease);
       })();
 
       const result = await directApkPromises[cacheKey];
@@ -2013,7 +2035,7 @@
     function openDirectApk(app, fileOf) {
       getDirectApkUrl(app, fileOf)
         .then(url => window.open(url, "_blank", "noopener"))
-        .catch(() => window.open(directApkFallback(app.directApk.repo), "_blank", "noopener"));
+        .catch(() => window.open(directApkFallback(app.directApk.repo, app.directApk.includePrerelease), "_blank", "noopener"));
     }
 
     setTimeout(() => {
