@@ -9,6 +9,10 @@
 #      bash <(curl -sL https://raw.githubusercontent.com/amir12120/TEMp/main/install.sh) modern      # direct
 #      bash install.sh list                                                                          # list only
 #
+#  The first install also drops a `temp` command into /usr/local/bin, so from then on
+#  you just type  temp  (or  temp speed  /  temp list) — no need to paste the
+#  curl command again every time you want to switch theme.
+#
 #  Adding a new page later: create  pages/<name>/index.html  in the repo.
 #  It automatically appears in the menu of this script — no script change needed.
 # ============================================================================
@@ -16,10 +20,14 @@ set -euo pipefail
 
 REPO="amir12120/TEMp"
 BRANCH="main"
-BASE_RAW="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
-TARGET_DIR="/etc/3x-ui/templates/my-theme"
+# Paths are overridable so the flow can be rehearsed outside a real panel.
+BASE_RAW="${TEMP_BASE_RAW:-https://raw.githubusercontent.com/${REPO}/${BRANCH}}"
+TARGET_DIR="${TEMP_TARGET_DIR:-/etc/3x-ui/templates/my-theme}"
 TARGET_FILE="${TARGET_DIR}/index.html"
 PAGES_INDEX="pages.txt"
+BIN_PATH="${TEMP_BIN_PATH:-/usr/local/bin/temp}"
+STATE_DIR="${TEMP_STATE_DIR:-/var/lib/temp-theme}"
+STATE_FILE="${STATE_DIR}/active"
 
 # ---------- helpers ---------------------------------------------------------
 C_G="\033[1;32m"; C_Y="\033[1;33m"; C_R="\033[1;31m"; C_B="\033[1;36m"; C_0="\033[0m"
@@ -62,6 +70,80 @@ list_pages() {
   curl -fsSL "$api" 2>/dev/null | grep -o '"name": *"[^"]*"' | sed 's/.*"name": *"\(.*\)"/\1/'
 }
 
+# ---------- active theme ----------------------------------------------------
+active_page() {  # name of the theme currently on disk, empty when unknown
+  [ -f "$STATE_FILE" ] || return 0
+  local name
+  name="$(tr -d '\r\n' < "$STATE_FILE" 2>/dev/null || true)"
+  [[ "$name" =~ ^[A-Za-z0-9_-]+$ ]] && printf '%s' "$name"
+}
+
+remember_page() {  # record what we just installed so the menu can mark it
+  mkdir -p "$STATE_DIR" 2>/dev/null || return 0
+  printf '%s\n' "$1" > "$STATE_FILE" 2>/dev/null || warn "Could not record the active theme."
+}
+
+# ---------- the `temp` command ---------------------------------------------
+# Installed on first run so later switches are just `temp` + a menu. It always
+# re-fetches the installer, so a theme added to the repo shows up without
+# touching this file; a cached copy keeps it working when GitHub is unreachable.
+install_command() {
+  local dir tmpbin
+  dir="$(dirname "$BIN_PATH")"
+  mkdir -p "$dir" 2>/dev/null || true
+  [ -w "$dir" ] || return 0   # not fatal: the page itself is already installed
+  tmpbin="${BIN_PATH}.new.$$"
+
+  cat > "$tmpbin" <<'LAUNCHER' || { rm -f "$tmpbin"; return 0; }
+#!/usr/bin/env bash
+# temp — switch the 3x-ui subscription theme. Installed by TEMp/install.sh.
+set -uo pipefail
+
+RAW_URL="${TEMP_LAUNCHER_URL:-__RAW__}"
+CACHE_DIR="${TEMP_LAUNCHER_CACHE_DIR:-__STATE_DIR__}"
+CACHED="${CACHE_DIR}/install.sh"
+TARGET_DIR="__TARGET_DIR__"
+
+# Check what we actually need — write access to the theme folder — rather than
+# the uid, so this also works under sudo, in containers, or as a non-root user
+# who has been granted access.
+if ! mkdir -p "$TARGET_DIR" 2>/dev/null || [ ! -w "$TARGET_DIR" ]; then
+  printf 'temp needs write access to %s — try:\n  sudo temp %s\n' \
+    "$TARGET_DIR" "$*" >&2
+  exit 1
+fi
+
+mkdir -p "$CACHE_DIR" 2>/dev/null || true
+tmp="$(mktemp)" || exit 1
+trap 'rm -f "$tmp"' EXIT
+
+script=""
+if curl -fsSL -o "$tmp" "$RAW_URL" 2>/dev/null && [ -s "$tmp" ]; then
+  script="$tmp"
+  cp -f "$tmp" "$CACHED" 2>/dev/null || true   # keep a copy for offline runs
+elif [ -s "$CACHED" ]; then
+  script="$CACHED"
+  printf ':: GitHub unreachable — using the cached installer.\n' >&2
+else
+  printf ':: Could not download the installer and no cached copy exists.\n' >&2
+  exit 1
+fi
+
+bash "$script" "$@"
+LAUNCHER
+
+  # substitute the placeholders (quoted heredoc above kept them literal)
+  sed -i \
+    -e "s|__RAW__|${BASE_RAW}/install.sh|g" \
+    -e "s|__STATE_DIR__|${STATE_DIR}|g" \
+    -e "s|__TARGET_DIR__|${TARGET_DIR}|g" \
+    "$tmpbin"
+  chmod 755 "$tmpbin" 2>/dev/null || true
+  # atomic replace, so refreshing the launcher never truncates a `temp`
+  # that happens to be running right now
+  mv -f "$tmpbin" "$BIN_PATH" 2>/dev/null || rm -f "$tmpbin"
+}
+
 # ---------- install ---------------------------------------------------------
 install_page() {
   local page="$1" tmp
@@ -85,6 +167,7 @@ install_page() {
   chmod 644 "${TARGET_FILE}.new"
   mv -f "${TARGET_FILE}.new" "$TARGET_FILE"
 
+  remember_page "$page"
   ok "Installed '${page}' -> ${TARGET_FILE}"
   say "Restarting 3x-ui panel to apply the new theme..."
   if command -v x-ui >/dev/null 2>&1; then
@@ -96,6 +179,11 @@ install_page() {
   fi
   echo
   ok "Done. Open the panel subscription page to see the new theme."
+  if [ -x "$BIN_PATH" ]; then
+    echo
+    say "From now on, switch themes any time with:"
+    printf "     ${C_G}%s${C_0}   (or: %s <page>)\n" "$BIN_PATH" "$BIN_PATH"
+  fi
 }
 
 # ---------- main ------------------------------------------------------------
@@ -119,11 +207,16 @@ main() {
     printf "%b\n" "${C_B}==============================================${C_0}"
     echo
     say "Available pages:"
-    local i=0 names=()
+    local i=0 names=() active
+    active="$(active_page)"
     while IFS= read -r p; do
       [ -n "$p" ] || continue
       names+=("$p"); i=$((i+1))
-      printf "  ${C_G}%d)${C_0} %s\n" "$i" "$p"
+      if [ -n "$active" ] && [ "$p" = "$active" ]; then
+        printf "  ${C_G}%d)${C_0} %s ${C_Y}* active${C_0}\n" "$i" "$p"
+      else
+        printf "  ${C_G}%d)${C_0} %s\n" "$i" "$p"
+      fi
     done <<< "$pages"
     echo
     printf "%s" "Select page number [1-${#names[@]}]: "
@@ -135,6 +228,9 @@ main() {
     pick="${names[$((n-1))]}"
   fi
 
+  # Create the `temp` command before installing, so the confirmation at the end
+  # of install_page can point the user at it.
+  install_command
   install_page "$pick"
 }
 

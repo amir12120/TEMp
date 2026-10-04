@@ -29,6 +29,71 @@ jobs:
         shell: bash
         run: bash -n install.sh
 
+      - name: Validate the `temp` command wiring
+        shell: bash
+        run: |
+          grep -q 'TEMP_BIN_PATH' install.sh
+          grep -q '/usr/local/bin/temp' install.sh
+          grep -q 'TEMP_STATE_DIR' install.sh
+          grep -q '^STATE_FILE=' install.sh
+          grep -q 'install_command()' install.sh
+          grep -q 'remember_page' install.sh
+          grep -q '\* active' install.sh
+          grep -q 'install_command$' install.sh
+
+      - name: Functional test of the `temp` command (no root needed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # serve the checkout so the whole step tests the code in this commit
+          # instead of whatever happens to be published on main
+          py=python3
+          "$py" -c 'import sys' >/dev/null 2>&1 || py=python
+          "$py" -m http.server 8943 --bind 127.0.0.1 --directory . >/dev/null 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for _ in $(seq 1 15); do
+            curl -fsS -o /dev/null "http://127.0.0.1:8943/pages.txt" && break
+            sleep 0.5
+          done
+          curl -fsS -o /dev/null "http://127.0.0.1:8943/pages.txt"
+
+          work="$(mktemp -d)"
+          export FAKE_ROOT=1
+          export TEMP_TARGET_DIR="$work/theme"
+          export TEMP_BIN_PATH="$work/bin/temp"
+          export TEMP_STATE_DIR="$work/state"
+          export TEMP_BASE_RAW="http://127.0.0.1:8943"
+          export TEMP_LAUNCHER_URL="http://127.0.0.1:8943/install.sh"
+
+          # first run through the one-liner: theme installed, state recorded,
+          # and the `temp` command created
+          bash install.sh modern
+          test -s "$TEMP_TARGET_DIR/index.html"
+          grep -q 'id="pingBtn"' "$TEMP_TARGET_DIR/index.html"
+          test -x "$TEMP_BIN_PATH"
+          test "$(cat "$TEMP_STATE_DIR/active")" = modern
+          test -z "$(find "$work/theme" -name '*.bak.*' -print -quit)"
+
+          # the menu shows which theme is active, and the direct form works
+          printf '1\n' | bash install.sh > "$work/menu.log" 2>&1
+          grep -q '\* active' "$work/menu.log"
+          bash install.sh speed
+          grep -q 'id="timeGauge"' "$TEMP_TARGET_DIR/index.html"
+          test -n "$(find "$work/theme" -name '*.bak.*' -print -quit)"
+
+          # `temp list` goes through the generated command
+          bash "$TEMP_BIN_PATH" list > "$work/list.log"
+          grep -qx 'modern' "$work/list.log"
+          grep -qx 'speed' "$work/list.log"
+
+          # `temp speed` switches the theme, and the offline cache keeps it working
+          TEMP_LAUNCHER_URL="https://127.0.0.1:9/install.sh" bash "$TEMP_BIN_PATH" modern \
+            > "$work/offline.log" 2>&1
+          grep -q 'cached installer' "$work/offline.log"
+          grep -q 'id="pingBtn"' "$TEMP_TARGET_DIR/index.html"
+          test "$(cat "$TEMP_STATE_DIR/active")" = modern
+
       - name: Validate page JavaScript syntax
         shell: bash
         run: |

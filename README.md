@@ -30,6 +30,25 @@ Select theme number [1-2]:
 
 عدد تم موردنظر را وارد کنید — همان تم با نام `index.html` در مسیر `/etc/3x-ui/templates/my-theme/` قرار می‌گیرد، پنل ری‌استارت می‌شود و کار تمام است.
 
+همان بار اول، نصاب علاوه بر نصب تم، دستور `temp` را هم می‌سازد. یعنی از این به بعد **برای تعویض تم نیازی نیست دوباره کد نصب را وارد کنید** — کافی است `temp` را بنویسید.
+
+## 🔁 تعویض تم با دستور `temp`
+
+```bash
+temp            # منوی تم‌ها را باز می‌کند؛ تم فعال با «* active» مشخص است
+temp speed      # مستقیم یک تم را نصب و فعال می‌کند
+temp list       # فقط لیست تم‌ها را نشان می‌دهد
+sudo temp speed # اگر به پوشهٔ قالب دسترسی نوشتن ندارید
+```
+
+نکته‌ها:
+
+- تم انتخابی مثل بار اول بکاپ زمان‌دار می‌گیرد، اتمی جایگزین می‌شود و پنل ری‌استارت می‌شود.
+- هر بار که `temp` را اجرا می‌کنید، آخرین نسخهٔ `install.sh` از گیت‌هاب گرفته می‌شود؛ پس **تم جدیدی که بعداً به ریپو اضافه شود خودکار در منو ظاهر می‌شود**.
+- اگر اینترنت نباشد، از نسخهٔ کش‌شدهٔ نصاب استفاده می‌شود.
+- اگر `/usr/local/bin` قابل نوشتن نباشد (مثلاً بدون `sudo` نصب کرده باشید)، نصب تم انجام می‌شود ولی دستور `temp` ساخته نمی‌شود؛ در آن صورت همان دستور نصب را یک‌بار با `sudo` اجرا کنید.
+- مسیر پوشهٔ قالب و محل ساخت دستور قابل تغییر است: `TEMP_TARGET_DIR`، `TEMP_BIN_PATH`، `TEMP_STATE_DIR`.
+
 ## ⚙️ نکته مهم — تنظیم پنل سنایی (بعد از نصب الزامی است)
 
 برای اینکه پنل قالب جدید را بشناسد، در خود پنل سنایی مسیر قالب را معرفی کنید:
@@ -56,6 +75,8 @@ Select theme number [1-2]:
 4. اگر از قبل `index.html` وجود داشته باشد، از آن **بکاپ زمان‌دار** می‌گیرد (فایل `.bak`) — پس برگشت به تم قبلی همیشه ممکن است.
 5. فایل جدید را به‌صورت اتمی جایگزین `index.html` می‌کند.
 6. پنل 3x-ui را ری‌استارت می‌کند.
+7. نام تم فعال را در `/var/lib/temp-theme/active` ذخیره می‌کند تا در منو با «* active» علامت بخورد.
+8. دستور `temp` را در `/usr/local/bin/temp` می‌سازد تا از این به بعد تعویض تم بدون وارد کردن دوبارهٔ کد نصب انجام شود.
 
 ## صفحه‌های موجود
 
@@ -74,7 +95,7 @@ Select theme number [1-2]:
 
 ```
 TEMp/
-├── install.sh          # نصاب با منوی تعاملی
+├── install.sh          # نصاب با منوی تعاملی + ساخت دستور temp
 ├── pages.txt           # لیست تم‌های موجود (هر نام یک خط: modern، speed)
 └── pages/
     ├── modern/
@@ -105,6 +126,22 @@ The installer:
 3. Creates `/etc/3x-ui/templates/my-theme/` if missing.
 4. **Backs up** any existing `index.html` (timestamped `.bak`) — the previous theme is never lost.
 5. Atomically replaces `index.html` and restarts the 3x-ui panel.
+6. Records the active theme in `/var/lib/temp-theme/active` so the menu can mark it with `* active`.
+7. Installs a `temp` command at `/usr/local/bin/temp`.
+
+### Switching themes later — the `temp` command
+
+```bash
+temp            # opens the theme menu; the active theme is marked with * active
+temp speed      # installs that theme directly, no menu
+temp list       # just prints the available theme names
+sudo temp speed # if you lack write access to the theme folder
+```
+
+- The chosen theme is backed up, atomically swapped in and the panel is restarted, exactly like the one-liner install.
+- `temp` always re-fetches the newest `install.sh` from GitHub, so **themes added to the repo later show up in the menu automatically**; when GitHub is unreachable it falls back to a cached copy.
+- If `/usr/local/bin` is not writable (e.g. you installed without `sudo`) the theme is still installed but the `temp` command is skipped — run the one-liner install once with `sudo` to get it.
+- Overridable via env vars: `TEMP_TARGET_DIR`, `TEMP_BIN_PATH`, `TEMP_STATE_DIR`.
 
 ### Required panel setting (after install)
 
