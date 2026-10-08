@@ -94,13 +94,33 @@ jobs:
           grep -q 'id="pingBtn"' "$TEMP_TARGET_DIR/index.html"
           test "$(cat "$TEMP_STATE_DIR/active")" = modern
 
+      - name: Validate theme screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          # every theme in pages.txt must ship a real PNG plus the cropped
+          # version the README shows, and the README must link both
+          while read -r theme; do
+            theme="${theme%$'\r'}"   # pages.txt may carry CRLF line endings
+            [ -n "$theme" ] || continue
+            full="screenshots/$theme.png"
+            top="screenshots/$theme-top.png"
+            test -s "$full"
+            test -s "$top"
+            head -c 8 "$full" | od -An -tx1 | tr -d " \n" | grep -q "^89504e470d0a1a0a$"
+            head -c 8 "$top"  | od -An -tx1 | tr -d " \n" | grep -q "^89504e470d0a1a0a$"
+            grep -q "($full)" README.md
+            grep -q "($top)" README.md
+          done < pages.txt
+
       - name: Validate page JavaScript syntax
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
-          for name in ("modern", "speed"):
+          themes = [line.strip() for line in Path("pages.txt").read_text(encoding="utf-8").splitlines()]
+          for name in [theme for theme in themes if theme]:
               source = Path(f"pages/{name}/index.html").read_text(encoding="utf-8")
               scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", source, re.S)
               if len(scripts) != 1:
@@ -110,6 +130,7 @@ jobs:
           PY
           node --check /tmp/modern-rendered.js
           node --check /tmp/speed-rendered.js
+          node --check /tmp/electronics-rendered.js
 
       - name: Validate required page features
         shell: bash
@@ -156,6 +177,51 @@ jobs:
           # day mode + Persian are the defaults
           grep -q 'class="day-mode"' pages/speed/index.html
           grep -q 'applyTheme(true)' pages/speed/index.html
+
+      - name: Validate electronics page features
+        shell: bash
+        run: |
+          test -s pages/electronics/index.html
+          # seven-segment desk clock with the Iranian calendar + occasion
+          grep -q 'id="segClock"' pages/electronics/index.html
+          grep -q 'function toJalali' pages/electronics/index.html
+          grep -q 'JALALI_EVENTS' pages/electronics/index.html
+          grep -q 'id="clockDate"' pages/electronics/index.html
+          grep -q 'id="clockEvent"' pages/electronics/index.html
+          # the two multimeter dials always sit side by side
+          grep -q 'id="timeGauge"' pages/electronics/index.html
+          grep -q 'id="usageGauge"' pages/electronics/index.html
+          grep -q 'id="usageRemained"' pages/electronics/index.html
+          grep -q 'data-i18n="remainingShort"' pages/electronics/index.html
+          grep -q 'class="meter-remained-value"' pages/electronics/index.html
+          grep -q 'remained-blink' pages/electronics/index.html
+          # the time dial is printed 0-30 days and waits at full above that
+          grep -q 'TIME_SCALE_SEC = 30 \* 24 \* 60 \* 60' pages/electronics/index.html
+          grep -q 'Math.min(1, secLeft / TIME_SCALE_SEC)' pages/electronics/index.html
+          # hourly / daily / weekly usage charts under the dials
+          grep -q 'id="chartHourly"' pages/electronics/index.html
+          grep -q 'id="chartDaily"' pages/electronics/index.html
+          grep -q 'id="chartWeekly"' pages/electronics/index.html
+          grep -q 'function bucketUsage' pages/electronics/index.html
+          # renewal warnings under one day / under one gigabyte
+          grep -q 'id="alertTime"' pages/electronics/index.html
+          grep -q 'id="alertVol"' pages/electronics/index.html
+          grep -q 'ONE_GB_BYTES' pages/electronics/index.html
+          # subscription link, per-config QR + copy, copy-all, OS detection
+          grep -q 'id="configQRModal"' pages/electronics/index.html
+          grep -q 'id="osSelect"' pages/electronics/index.html
+          grep -q 'data-platform="android"' pages/electronics/index.html
+          grep -q 'function toggleConfigQR' pages/electronics/index.html
+          grep -q 'function startDownload' pages/electronics/index.html
+          grep -q 'function copyAllConfigs' pages/electronics/index.html
+          grep -q 'api.github.com/repos/' pages/electronics/index.html
+          # ZedSecure: newest-release APK per ABI plus the Windows installer
+          grep -q 'CluvexStudio/ZedSecure' pages/electronics/index.html
+          grep -q 'ZedSecure-${ver}-${arch}.apk' pages/electronics/index.html
+          grep -q 'id: "zedsecure"' pages/electronics/index.html
+          # day mode (red bench theme) + Persian are the defaults
+          grep -q 'class="day-mode"' pages/electronics/index.html
+          grep -q 'applyTheme(true)' pages/electronics/index.html
 
       - name: Run deployed-page smoke tests
         if: ${{ env.DEPLOY_URL != '' }}
