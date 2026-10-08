@@ -198,10 +198,13 @@ jobs:
           # the time dial is printed 0-30 days and waits at full above that
           grep -q 'TIME_SCALE_SEC = 30 \* 24 \* 60 \* 60' pages/electronics/index.html
           grep -q 'Math.min(1, secLeft / TIME_SCALE_SEC)' pages/electronics/index.html
-          # hourly / daily / weekly usage charts under the dials
-          grep -q 'id="chartHourly"' pages/electronics/index.html
-          grep -q 'id="chartDaily"' pages/electronics/index.html
-          grep -q 'id="chartWeekly"' pages/electronics/index.html
+          # usage chart under the dials: one instrument, the window comes from
+          # the dropdown (hourly / daily / weekly / monthly)
+          grep -q 'id="chartPeriod"' pages/electronics/index.html
+          grep -q 'id="chartSvg"' pages/electronics/index.html
+          grep -q 'value="monthly"' pages/electronics/index.html
+          grep -q 'function setChartPeriod' pages/electronics/index.html
+          grep -q 'chartMonthly' pages/electronics/index.html
           grep -q 'function bucketUsage' pages/electronics/index.html
           # renewal warnings under one day / under one gigabyte
           grep -q 'id="alertTime"' pages/electronics/index.html

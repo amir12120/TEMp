@@ -29,7 +29,9 @@
  * CHROME_PATH if the browser lives somewhere unusual.
  *
  * Note: themes are Go templates for the 3x-ui "Senai" subscription page. The
- * screenshots use dummy data — no real panel is involved.
+ * screenshots use dummy data — no real panel is involved, and themes that draw
+ * history (electronics samples the quota counter into localStorage) get a seeded
+ * sample history so their chart is not photographed empty.
  */
 import { spawn } from "node:child_process";
 import { readFileSync, existsSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
@@ -59,6 +61,42 @@ const SAMPLE = {
     "vmess://eyJ2IjoiMiIsInBzIjoiR2VybWFueS0wMiIsImFkZCI6IjE5NS4yMDEuMC4yIiwicG9ydCI6IjQ0MyJ9",
     "trojan://pass1234@195.201.0.3:443?security=tls&sni=cdn.example.com#Germany-03",
   ],
+};
+
+/* ------------------------------------------------------------------ sample state
+   A few themes draw history the visitor has to build up over time (the
+   electronics theme samples the panel counter into localStorage). For the
+   screenshot that history is seeded with sample samples that grow from zero to
+   the SAMPLE usage above over the last 30 days, so the chart shows a real
+   window instead of an empty first visit. Keyed by theme name. */
+const SAMPLE_STATE = {
+  electronics: `(() => {
+    const total = ${SAMPLE.downloadByte + SAMPLE.uploadByte};   // ends exactly at the sample usage
+    const steps = 30 * 288;                                     // 30 days of 5-minute samples
+    const now = Date.now();
+    /* a believable rhythm: quiet overnight, busy at noon and in the evening,
+       lighter on the weekend, so day/week/month bars are not all identical */
+    const weekendFactor = [1.06, 0.98, 1.0, 1.02, 1.12, 0.86, 0.78]; // Sun … Sat
+    const weight = (hour, dow) => weekendFactor[dow] *
+      (0.35 + 0.65 * Math.exp(-((hour - 21) * (hour - 21)) / 18) +
+              0.18 * Math.exp(-((hour - 13) * (hour - 13)) / 20));
+    let weightSum = 0;
+    const weights = [];
+    for (let i = 0; i <= steps; i++) {
+      const at = new Date(now - (steps - i) * 5 * 60000);
+      weights.push(weight(at.getHours(), at.getDay()));
+      weightSum += weights[i];
+    }
+    const perUnit = total / weightSum;
+    let acc = 0;
+    const samples = [];
+    for (let i = 0; i <= steps; i++) {
+      acc += weights[i] * perUnit;
+      samples.push({ t: now - (steps - i) * 5 * 60000, used: Math.round(acc) });
+    }
+    try { localStorage.setItem("temp.electronics.usage.v1", JSON.stringify(samples)); } catch (error) {}
+    if (typeof renderCharts === "function") renderCharts();
+  })()`,
 };
 
 /* ------------------------------------------------------------------ template → static HTML */
@@ -215,7 +253,7 @@ async function sectionBottoms(send) {
   return out?.result?.value ?? [];
 }
 
-async function screenshot(htmlPath, outPng, { width, scale, day, clipHeight, autoClip }) {
+async function screenshot(htmlPath, outPng, { width, scale, day, clipHeight, autoClip, seedState }) {
   const port = 9500 + Math.floor(Math.random() * 400);
   const profile = join(os.tmpdir(), `temp-shot-${Date.now()}-${port}`);
   const child = spawn(
@@ -260,6 +298,12 @@ async function screenshot(htmlPath, outPng, { width, scale, day, clipHeight, aut
       await send("Runtime.evaluate", { expression: `applyTheme(${day})` });
     }
     await sleep(2500); // let clocks and gauge needles settle
+    if (seedState) {
+      try {
+        await send("Runtime.evaluate", { expression: seedState, awaitPromise: false });
+        await sleep(300);
+      } catch {}
+    }
     /* Freeze every animation right where it is before shooting: a spinning coin
        or a blinking value would otherwise be caught mid-frame (thin sliver,
        half-faded digits). Themes already support this state through their
@@ -374,6 +418,7 @@ for (const theme of themes) {
         day,
         clipHeight: shot.clipHeight ? Number(shot.clipHeight) : undefined,
         autoClip: shot.autoClip ? Number(shot.autoClip) : undefined,
+        seedState: SAMPLE_STATE[theme],
       });
       console.log(
         `✓ ${theme} → ${resolve(shot.out)}  (${info.width}px wide, ${info.height}px tall, ` +

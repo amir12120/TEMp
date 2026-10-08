@@ -486,9 +486,11 @@
     .zoom-panel .gauge-card .meter { width: 100%; }
     body.zoom-open { overflow: hidden; }
 
-    /* ---------- usage analyser: hourly / daily / weekly charts ---------- */
-    .chart-grid { display: grid; gap: 0.6rem; margin-top: 0.7rem; }
-    @media (min-width: 760px) { .chart-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; } }
+    /* ---------- usage analyser: one chart, period chosen from a dropdown ---------- */
+    .chart-picker { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.15rem; }
+    .chart-picker .os-select-wrap { min-width: 8.5rem; }
+    .chart-grid { display: grid; gap: 0.6rem; margin-top: 0.55rem; }
+    @media (min-width: 760px) { .chart-grid { grid-template-columns: minmax(0, 1fr); gap: 0.8rem; } }
     .chart-card {
       position: relative; padding: 0.6rem 0.6rem 0.55rem;
       border-radius: 15px;
@@ -720,7 +722,7 @@
       <div class="clock-head">
         <span class="part-title">
           <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><circle class="stroke" cx="12" cy="12" r="9"></circle><path class="stroke" d="M12 7v5l3.5 2"></path></svg>
-          <span data-i18n="clockTitle">ساعت دیجیتال رومیزی</span>
+          <span data-i18n="clockTitle">ساعت و تاریخ</span>
         </span>
         <span class="power-led"><i aria-hidden="true"></i>PWR</span>
       </div>
@@ -869,41 +871,32 @@
         <span class="silk">USAGE ANALYSER</span>
       </div>
 
+      <!-- one instrument at a time: the dropdown chooses the window, so the
+           panel never has to keep four charts open on the page -->
+      <div class="chart-picker">
+        <span class="os-picker-title" id="chartPickerTitle" data-i18n="chartPickTitle">بازهٔ نمودار را انتخاب کنید</span>
+        <label class="os-select-wrap" for="chartPeriod">
+          <select class="os-select" id="chartPeriod" aria-labelledby="chartPickerTitle" onchange="setChartPeriod(this.value)">
+            <option value="hourly" data-i18n="chartHourly">ساعتی</option>
+            <option value="daily" data-i18n="chartDaily">روزانه</option>
+            <option value="weekly" data-i18n="chartWeekly">هفتگی</option>
+            <option value="monthly" data-i18n="chartMonthly">ماهانه</option>
+          </select>
+          <span class="os-caret" aria-hidden="true"></span>
+        </label>
+      </div>
+
       <div class="chart-grid">
         <div class="chart-card">
           <div class="chart-head">
             <span class="chart-name">
-              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><circle class="stroke" cx="12" cy="12" r="8.5"></circle><path class="stroke" d="M12 7.5V12l3 2"></path></svg>
-              <span data-i18n="chartHourly">ساعتی</span>
-            </span>
-            <span class="chart-total" id="totalHourly">—</span>
-          </div>
-          <svg class="chart-svg" id="chartHourly" viewBox="0 0 240 96" role="img" aria-label="hourly usage"></svg>
-          <div class="chart-note" data-i18n="chartHourlyNote">۲۴ ساعت گذشته</div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-head">
-            <span class="chart-name">
-              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><rect class="stroke" x="3" y="5" width="18" height="16" rx="2.5"></rect><path class="stroke" d="M3 10h18M8 3v4M16 3v4"></path></svg>
-              <span data-i18n="chartDaily">روزانه</span>
-            </span>
-            <span class="chart-total" id="totalDaily">—</span>
-          </div>
-          <svg class="chart-svg" id="chartDaily" viewBox="0 0 240 96" role="img" aria-label="daily usage"></svg>
-          <div class="chart-note" data-i18n="chartDailyNote">۷ روز گذشته</div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-head">
-            <span class="chart-name">
               <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path class="stroke" d="M3 19V7M3 12h7l3-5 3 9 3-4h3"></path></svg>
-              <span data-i18n="chartWeekly">هفتگی</span>
+              <span id="chartPeriodName">روزانه</span>
             </span>
-            <span class="chart-total" id="totalWeekly">—</span>
+            <span class="chart-total" id="chartTotal">—</span>
           </div>
-          <svg class="chart-svg" id="chartWeekly" viewBox="0 0 240 96" role="img" aria-label="weekly usage"></svg>
-          <div class="chart-note" data-i18n="chartWeeklyNote">۴ هفتهٔ گذشته</div>
+          <svg class="chart-svg" id="chartSvg" viewBox="0 0 240 96" role="img" aria-label="usage chart"></svg>
+          <div class="chart-note" id="chartNote">۷ روز گذشته</div>
         </div>
       </div>
     </section>
@@ -964,7 +957,7 @@
       </div>
 
       <div class="os-picker">
-        <span class="os-picker-title" id="osPickerTitle" data-i18n="osPickTitle">نوع دستگاه خودتون رو مشخص کنید</span>
+        <span class="os-picker-title" id="osPickerTitle" data-i18n="osPickTitle">نوع دستگاه را انتخاب کنید</span>
         <label class="os-select-wrap" for="osSelect">
           <select class="os-select" id="osSelect" aria-labelledby="osPickerTitle" onchange="setPlatformTab(this.value)">
             <option value="android" data-platform="android">🤖 اندروید</option>
@@ -1020,7 +1013,7 @@
         active: "🟢 فعال", inactive: "🔴 غیرفعال",
         pending: "⏳ در انتظار فعال‌سازی",
         online: "آنلاین", offline: "آفلاین",
-        clockTitle: "ساعت دیجیتال رومیزی",
+        clockTitle: "ساعت و تاریخ",
         clockScale: "تهران",
         timeLeft: "زمان باقی‌مانده",
         timeCap: "زمان باقی‌مانده",
@@ -1039,10 +1032,10 @@
         installTitle: "نصب و راه‌اندازی",
         downloadAppsTitle: "دانلود برنامه‌ها",
         downloadNote: "برای هر برنامه، لینک آخرین نسخهٔ مناسب سیستمتان باز می‌شود.",
-        osPickTitle: "نوع دستگاه خودتون رو مشخص کنید",
-        leadDetected: "✅ برنامه‌های مناسب سیستم‌عامل شما اینا هستند:",
+        osPickTitle: "نوع دستگاه را انتخاب کنید",
+        leadDetected: "✅ برنامه‌های مناسب سیستم‌عامل شما:",
         leadChosen: "برنامه‌های مناسب این دستگاه:",
-        leadUnknown: "👇 نوع دستگاه خودتون رو مشخص کنید تا برنامه‌های مناسبش رو ببینید.",
+        leadUnknown: "نوع دستگاه را انتخاب کنید تا برنامه‌های مناسب آن نمایش داده شود.",
         detectedHint: "تشخیص خودکار",
         downloadBtn: "⬇️ دانلود",
         androidName: "اندروید", iosName: "آیفون", windowsName: "ویندوز",
@@ -1056,8 +1049,9 @@
         alertVol: "کمتر از یک گیگ تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید",
         qTotal: "کل", qUsed: "مصرف", qRemained: "باقی", qDown: "دانلود", qUp: "آپلود",
         analyzerTitle: "نمودار میزان مصرف",
-        chartHourly: "ساعتی", chartDaily: "روزانه", chartWeekly: "هفتگی",
-        chartHourlyNote: "۲۴ ساعت گذشته", chartDailyNote: "۷ روز گذشته", chartWeeklyNote: "۴ هفتهٔ گذشته",
+        chartHourly: "ساعتی", chartDaily: "روزانه", chartWeekly: "هفتگی", chartMonthly: "ماهانه",
+        chartPickTitle: "بازهٔ نمودار را انتخاب کنید",
+        chartHourlyNote: "۲۴ ساعت گذشته", chartDailyNote: "۷ روز گذشته", chartWeeklyNote: "۴ هفتهٔ گذشته", chartMonthlyNote: "۳۰ روز گذشته",
         chartNoData: "هنوز داده‌ای ثبت نشده",
         chartSoon: "با باز ماندن این صفحه، مصرف شما ثبت و نمودارها کامل می‌شوند.",
         noSubLink: "❌ لینک اشتراک یافت نشد",
@@ -1071,7 +1065,7 @@
         active: "🟢 Active", inactive: "🔴 Inactive",
         pending: "⏳ Pending activation",
         online: "Online", offline: "Offline",
-        clockTitle: "Desk digital clock",
+        clockTitle: "Clock & date",
         clockScale: "Tehran",
         timeLeft: "Time remaining",
         timeCap: "Time remaining",
@@ -1090,10 +1084,10 @@
         installTitle: "Install & setup",
         downloadAppsTitle: "Download apps",
         downloadNote: "For each app, the download page of the latest version for your OS will open.",
-        osPickTitle: "Pick your device type",
-        leadDetected: "✅ These are the apps for your operating system:",
+        osPickTitle: "Choose your device type",
+        leadDetected: "✅ Apps for your operating system:",
         leadChosen: "Apps for this platform:",
-        leadUnknown: "👇 Pick your device type to see the matching apps.",
+        leadUnknown: "Pick your device type to see the matching apps.",
         detectedHint: "Auto-detected",
         downloadBtn: "⬇️ Download",
         androidName: "Android", iosName: "iOS", windowsName: "Windows",
@@ -1107,8 +1101,9 @@
         alertVol: "Less than 1 GB remains until your subscription ends. Please renew.",
         qTotal: "Total", qUsed: "Used", qRemained: "Left", qDown: "Down", qUp: "Up",
         analyzerTitle: "Usage charts",
-        chartHourly: "Hourly", chartDaily: "Daily", chartWeekly: "Weekly",
-        chartHourlyNote: "last 24 hours", chartDailyNote: "last 7 days", chartWeeklyNote: "last 4 weeks",
+        chartHourly: "Hourly", chartDaily: "Daily", chartWeekly: "Weekly", chartMonthly: "Monthly",
+        chartPickTitle: "Pick the chart range",
+        chartHourlyNote: "last 24 hours", chartDailyNote: "last 7 days", chartWeeklyNote: "last 4 weeks", chartMonthlyNote: "last 30 days",
         chartNoData: "no data recorded yet",
         chartSoon: "Keep this page open now and then — your usage gets logged and the charts fill up.",
         noSubLink: "❌ Subscription link not found",
@@ -2091,13 +2086,15 @@
     });
 
     /* ============================================================
-       11. Usage history + hourly / daily / weekly LED bargraphs
+       11. Usage history + the LED bargraph instrument
            Samples of the panel counter are kept in localStorage; the
            difference between two samples is credited to the hour/day/week
-           it ended in, which is what the three charts draw.
+           it ended in, which is what the chart draws for whichever window
+           the dropdown selects (hourly / daily / weekly / monthly).
        ============================================================ */
     const HISTORY_KEY = "temp.electronics.usage.v1";
-    const HISTORY_MAX = 600;
+    /* a month of 5-minute samples still fits comfortably in localStorage */
+    const HISTORY_MAX = 9000;
     const HOUR_MS = 3600 * 1000;
 
     function usedBytesNow() {
@@ -2195,31 +2192,65 @@
       svg.innerHTML = html;
     }
 
-    function renderCharts() {
-      const hourly = bucketUsage(HOUR_MS, 24);
-      const daily = bucketUsage(24 * HOUR_MS, 7);
-      const weekly = bucketUsage(7 * 24 * HOUR_MS, 4);
+    /* the four windows the analyser offers — only the chosen one is drawn, so
+       the panel stays short and the dropdown decides what the dial shows */
+    const CHART_PERIODS = {
+      hourly: { buckets: 24, bucketMs: HOUR_MS, labelKey: "chartHourly", noteKey: "chartHourlyNote", labelEvery: 4 },
+      daily: { buckets: 7, bucketMs: 24 * HOUR_MS, labelKey: "chartDaily", noteKey: "chartDailyNote", labelEvery: 1 },
+      weekly: { buckets: 4, bucketMs: 7 * 24 * HOUR_MS, labelKey: "chartWeekly", noteKey: "chartWeeklyNote", labelEvery: 1 },
+      monthly: { buckets: 30, bucketMs: 24 * HOUR_MS, labelKey: "chartMonthly", noteKey: "chartMonthlyNote", labelEvery: 5 }
+    };
+    const CHART_KEY = "temp.electronics.chart.v1";
+    let chartPeriod = "daily";
 
+    function loadChartPeriod() {
+      try {
+        const saved = localStorage.getItem(CHART_KEY);
+        if (saved && CHART_PERIODS[saved]) chartPeriod = saved;
+      } catch (error) {}
+    }
+
+    function chartLabels(period, count) {
       const now = Date.now();
-      const hourFmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hour12: false, timeZone: "Asia/Tehran" });
-      const dayFmt = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fa-IR", { weekday: "short", timeZone: "Asia/Tehran" });
+      if (period === "hourly") {
+        const hourFmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hour12: false, timeZone: "Asia/Tehran" });
+        return Array.from({ length: count }, (_, i) => {
+          const label = hourFmt.format(new Date(now - (count - 1 - i) * HOUR_MS));
+          return lang === "fa" ? toPersianDigits(label) : label;
+        });
+      }
+      if (period === "daily" || period === "monthly") {
+        const dayFmt = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fa-IR", { day: "numeric", month: "numeric", timeZone: "Asia/Tehran" });
+        return Array.from({ length: count }, (_, i) => dayFmt.format(new Date(now - (count - 1 - i) * 24 * HOUR_MS)));
+      }
+      return lang === "fa" ? ["۳ هفته پیش", "۲ هفته پیش", "هفتهٔ پیش", "اکنون"] : ["-3w", "-2w", "-1w", "now"];
+    }
 
-      const hourlyLabels = hourly.map((_, i) => {
-        const label = hourFmt.format(new Date(now - (23 - i) * HOUR_MS));
-        return lang === "fa" ? toPersianDigits(label) : label;
-      });
-      const dailyLabels = daily.map((_, i) => dayFmt.format(new Date(now - (6 - i) * 24 * HOUR_MS)));
-      const weeklyLabels = lang === "fa" ? ["۳−", "۲−", "۱−", "اکنون"] : ["-3w", "-2w", "-1w", "now"];
+    function renderCharts() {
+      const config = CHART_PERIODS[chartPeriod] || CHART_PERIODS.daily;
+      const buckets = bucketUsage(config.bucketMs, config.buckets);
+      const svg = document.getElementById("chartSvg");
 
-      renderChart(document.getElementById("chartHourly"), hourly, hourlyLabels, 4);
-      renderChart(document.getElementById("chartDaily"), daily, dailyLabels, 1);
-      renderChart(document.getElementById("chartWeekly"), weekly, weeklyLabels, 1);
+      renderChart(svg, buckets, chartLabels(chartPeriod, config.buckets), config.labelEvery);
 
-      const sum = list => list.reduce((a, b) => a + b, 0);
+      const total = buckets.reduce((a, b) => a + b, 0);
       const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-      set("totalHourly", formatBytesShort(sum(hourly)));
-      set("totalDaily", formatBytesShort(sum(daily)));
-      set("totalWeekly", formatBytesShort(sum(weekly)));
+      set("chartTotal", formatBytesShort(total));
+      set("chartPeriodName", t(config.labelKey));
+
+      const note = document.getElementById("chartNote");
+      if (note) note.textContent = t(config.noteKey);
+      if (svg) svg.setAttribute("aria-label", t(config.labelKey) + " — " + t(config.noteKey));
+
+      const select = document.getElementById("chartPeriod");
+      if (select && select.value !== chartPeriod) select.value = chartPeriod;
+    }
+
+    function setChartPeriod(period) {
+      if (!CHART_PERIODS[period]) return;
+      chartPeriod = period;
+      try { localStorage.setItem(CHART_KEY, period); } catch (error) {}
+      renderCharts();
     }
 
     /* ============================================================
@@ -2250,6 +2281,7 @@
     /* ============================================================
        13. Init — Persian + red day mode by default
        ============================================================ */
+    loadChartPeriod();
     buildSegmentDigits();
     initGauges();
     applyTheme(true);
