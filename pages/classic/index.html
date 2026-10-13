@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" id="themeColorMeta" content="#dce9f7">
+  <title>اشتراک کلاسیک</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1a120e;
+      --bg-2: #2a1c14;
+      --card: #2e2118;
+      --text: #f3e6d8;
+      --muted: #c4a888;
+      --accent: #8b5a2b;
+      --accent-2: #c47a3a;
+      --edge: #5c3d28;
+      --hi: #4a3224;
+      --good: #3cb371;
+      --bad: #e23d3d;
+      --shadow: 10px 12px 0 #0d0806, 0 18px 36px rgba(0,0,0,.55);
+      --inset: inset 0 2px 0 rgba(255,220,180,.18), inset 0 -4px 8px rgba(0,0,0,.35);
+      --wave: rgba(196,122,58,.22);
+      --font: "Vazirmatn", "Inter", sans-serif;
+    }
+    html.day-mode, body.day-mode {
+      --bg: #dce9f7;
+      --bg-2: #c9dcf0;
+      --card: #eef5fc;
+      --text: #16324f;
+      --muted: #4a6d8c;
+      --accent: #2f6fad;
+      --accent-2: #4a8fd4;
+      --edge: #7aa3c7;
+      --hi: #ffffff;
+      --good: #1f9d5a;
+      --bad: #d12626;
+      --shadow: 8px 10px 0 #8fb0d0, 0 16px 28px rgba(47,111,173,.22);
+      --inset: inset 0 2px 0 #fff, inset 0 -4px 8px rgba(47,111,173,.18);
+      --wave: rgba(47,111,173,.18);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+    body { padding: 1rem; overflow-x: hidden; transition: background .4s, color .4s; }
+    body.lang-en { font-family: Inter, Vazirmatn, sans-serif; }
+
+    .wave {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .wave::before {
+      content: "";
+      position: absolute; width: 180%; height: 80px;
+      top: -40px; left: -40%;
+      background: linear-gradient(115deg, transparent 0%, var(--wave) 40%, transparent 70%);
+      transform: rotate(28deg);
+      animation: waveSweep 7s linear infinite;
+    }
+    @keyframes waveSweep {
+      0% { transform: rotate(28deg) translate(-20%, -40%); }
+      100% { transform: rotate(28deg) translate(40%, 220%); }
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; }
+
+    .btn3d {
+      display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
+      border: 2px solid var(--edge); background: linear-gradient(180deg, var(--hi), var(--card));
+      color: var(--text); border-radius: 12px; padding: .4rem .7rem; cursor: pointer;
+      font-family: inherit; font-weight: 700; box-shadow: var(--shadow), var(--inset);
+      transform: translateY(-2px); transition: transform .12s, box-shadow .12s;
+    }
+    .btn3d:hover { transform: translateY(-4px); }
+    .btn3d:active { transform: translateY(2px); box-shadow: 2px 2px 0 var(--edge); }
+    .btn3d.active { outline: 2px solid var(--accent-2); }
+
+    .card3d {
+      background: linear-gradient(180deg, var(--hi), var(--card));
+      border: 2px solid var(--edge); border-radius: 18px;
+      box-shadow: var(--shadow), var(--inset);
+      padding: .9rem 1rem; margin-bottom: .9rem;
+    }
+
+    .top-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+    .top-btns { display: flex; gap: .45rem; }
+
+    .coin-logo {
+      width: 46px; height: 46px; perspective: 240px; display: inline-block;
+    }
+    .coin-inner {
+      width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+      animation: spinCoin 4.5s linear infinite;
+    }
+    .coin-face {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center/cover no-repeat;
+      border: 3px solid var(--accent-2); backface-visibility: hidden;
+      box-shadow: 0 6px 0 var(--edge);
+    }
+    .coin-face.back { transform: rotateY(180deg); }
+    @keyframes spinCoin { to { transform: rotateY(360deg); } }
+
+    .user-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+    .user-name { font-weight: 800; font-size: 1.05rem; }
+    .pills { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .pill {
+      border: 2px solid var(--edge); border-radius: 999px; padding: .15rem .6rem;
+      font-size: .78rem; font-weight: 700; box-shadow: 3px 4px 0 var(--edge);
+    }
+    .pill.ok { background: color-mix(in srgb, var(--good) 22%, var(--card)); }
+    .pill.bad { background: color-mix(in srgb, var(--bad) 22%, var(--card)); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-inline-end: .25rem; }
+    .online .dot { background: var(--good); box-shadow: 0 0 8px var(--good); }
+    .offline .dot { background: var(--bad); }
+
+    .clock-box { text-align: center; }
+    .clock-time { font-size: 1.7rem; font-weight: 800; letter-spacing: .04em; }
+    .clock-date { color: var(--muted); margin-top: .15rem; }
+    .clock-event { margin-top: .35rem; font-weight: 700; color: var(--accent-2); }
+
+    .alert-box {
+      display: none; text-align: center; font-weight: 800; color: var(--bad);
+      padding: .8rem; border: 2px dashed var(--bad); border-radius: 14px;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .alert-box.show { display: block; }
+    @keyframes pulse { 50% { opacity: .55; } }
+
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .9rem;
+    }
+    .tab { flex: 1 1 140px; min-height: 44px; font-size: .82rem; }
+    .tab.on { background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: #fff; }
+
+    .panel { display: none; }
+    .panel.on { display: block; }
+
+    .bar-track {
+      height: 22px; border-radius: 999px; border: 2px solid var(--edge);
+      background: var(--bg-2); overflow: hidden; box-shadow: inset 0 4px 8px rgba(0,0,0,.25);
+    }
+    .bar-fill { height: 100%; width: 0; border-radius: inherit; transition: width .5s ease; }
+    .bar-meta { display: flex; justify-content: space-between; margin: .5rem 0 .35rem; font-weight: 700; }
+    .expire { margin-top: .7rem; color: var(--muted); }
+    .blink-big {
+      text-align: center; font-size: 1.8rem; font-weight: 900; color: var(--bad);
+      margin-top: .8rem; animation: pulse .9s ease-in-out infinite;
+    }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .5rem; }
+    .stat {
+      border: 2px solid var(--edge); border-radius: 12px; padding: .6rem;
+      box-shadow: 4px 5px 0 var(--edge); background: var(--card);
+    }
+    .stat b { display: block; font-size: 1.05rem; margin-top: .2rem; }
+
+    .row-line {
+      display: flex; align-items: center; gap: .4rem; margin-bottom: .55rem;
+    }
+    .link-text {
+      flex: 1; min-width: 0; direction: ltr; text-align: left;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-size: .78rem; padding: .4rem .5rem; border-radius: 10px;
+      border: 2px solid var(--edge); background: var(--bg-2);
+    }
+    .cfg-list { display: flex; flex-direction: column; gap: .45rem; }
+    .cfg-item .row-line { margin-bottom: 0; }
+
+    .qr-overlay {
+      position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.86);
+      display: none; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .qr-overlay.open { display: flex; }
+    .qr-overlay img { width: min(86vw, 86vh); height: min(86vw, 86vh); background: #fff; border-radius: 12px; }
+
+    .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .55rem; }
+    .app-card { text-align: center; padding: .6rem; }
+    .app-card img { width: 48px; height: 48px; border-radius: 12px; }
+    .app-name { display: block; font-size: .8rem; font-weight: 700; margin: .35rem 0; }
+    .os-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .7rem; }
+    select.os {
+      font-family: inherit; font-weight: 700; padding: .35rem .5rem; border-radius: 10px;
+      border: 2px solid var(--edge); background: var(--card); color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="wave" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="card3d top-row">
+      <div class="top-btns">
+        <button class="btn3d" id="themeToggle" type="button" onclick="toggleTheme()">
+          <span id="themeIcon">🌙</span> <span data-i18n="nightMode">شب</span>
+        </button>
+        <button class="btn3d" id="langToggle" type="button" onclick="toggleLang()">
+          🌐 <span id="langLabel">EN</span>
+        </button>
+      </div>
+      <span class="coin-logo" aria-hidden="true"><span class="coin-inner"><span class="coin-face front"></span><span class="coin-face back"></span></span></span>
+    </div>
+
+    <div class="card3d user-row">
+      <div class="user-name">{{ index .emails 0 }}</div>
+      <div class="pills">
+        <span id="statusBadge" class="pill">—</span>
+        <span id="presence" class="pill offline"><i class="dot"></i><span id="presenceText">آفلاین</span></span>
+      </div>
+    </div>
+
+    <div class="card3d clock-box" id="clockCard">
+      <div class="clock-time" id="clockTime">—</div>
+      <div class="clock-date" id="clockDate">—</div>
+      <div class="clock-event" id="clockEvent" hidden></div>
+    </div>
+    <div class="card3d alert-box" id="alertBox"></div>
+
+    <div class="tabs">
+      <button class="btn3d tab on" type="button" data-tab="time" onclick="showTab('time')"><span data-i18n="tabTime">زمان باقیمانده</span></button>
+      <button class="btn3d tab" type="button" data-tab="usage" onclick="showTab('usage')"><span data-i18n="tabUsage">جزییات مصرف</span></button>
+      <button class="btn3d tab" type="button" data-tab="chart" onclick="showTab('chart')"><span data-i18n="tabChart">نمودار مصرف</span></button>
+      <button class="btn3d tab" type="button" data-tab="links" onclick="showTab('links')"><span data-i18n="tabLinks">لینک ساب و کانفیگها</span></button>
+      <button class="btn3d tab" type="button" data-tab="apps" onclick="showTab('apps')"><span data-i18n="tabApps">نصب و راه اندازی</span></button>
+    </div>
+
+    <section class="card3d panel on" id="panel-time">
+      <div class="bar-meta">
+        <span data-i18n="remainTime">زمان باقی‌مانده</span>
+        <span id="timePct">—</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="timeBar"></div></div>
+      <div class="expire"><span data-i18n="expireDate">تاریخ انقضا:</span> <strong id="expireDateText">—</strong></div>
+      <div id="timeRemainLabel" style="margin-top:.5rem;font-weight:800"></div>
+    </section>
+
+    <section class="card3d panel" id="panel-usage">
+      <div class="bar-meta">
+        <span data-i18n="remainTraffic">ترافیک باقی‌مانده</span>
+        <span id="usagePct">—</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="usageBar"></div></div>
+      <div class="blink-big" id="remainBlink">—</div>
+    </section>
+
+    <section class="card3d panel" id="panel-chart">
+      <div class="stat-grid">
+        <div class="stat"><span data-i18n="totalQuota">حجم کل</span><b id="valTotal">—</b></div>
+        <div class="stat"><span data-i18n="used">مصرف‌شده</span><b id="valUsed">—</b></div>
+        <div class="stat"><span data-i18n="remained">باقی‌مانده</span><b id="valRemained">—</b></div>
+        <div class="stat"><span data-i18n="downloadLbl">دانلود</span><b id="valDown">—</b></div>
+        <div class="stat"><span data-i18n="uploadLbl">آپلود</span><b id="valUp">—</b></div>
+      </div>
+    </section>
+
+    <section class="card3d panel" id="panel-links">
+      <div class="row-line">
+        <div class="link-text" id="subLinkDisplay">{{ .subUrl }}</div>
+        <button class="btn3d" type="button" data-copy="{{ .subUrl }}" onclick="copyFromButton(this)"><span data-i18n="copy">کپی</span></button>
+        <button class="btn3d" type="button" data-copy="{{ .subUrl }}" onclick="openQR(this.dataset.copy)">QR</button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin:.4rem 0">
+        <button class="btn3d" type="button" onclick="copyAllConfigs(this)"><span data-i18n="copyAll">کپی همه</span></button>
+      </div>
+      <div class="cfg-list">
+        {{ range $index, $link := .links }}
+        <div class="cfg-item card3d" data-link="{{ $link }}" style="margin:0;padding:.55rem">
+          <div class="row-line">
+            <div class="link-text">{{ $link }}</div>
+            <button class="btn3d" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">کپی</span></button>
+            <button class="btn3d" type="button" onclick="toggleConfigQR(this)">QR</button>
+            <button class="btn3d wg-dl" type="button" hidden onclick="downloadWg(this)" data-i18n="download">دانلود</button>
+          </div>
+        </div>
+        {{ end }}
+      </div>
+    </section>
+
+    <section class="card3d panel" id="panel-apps">
+      <div class="os-row">
+        <span data-i18n="selectOS">سیستم عامل:</span>
+        <select class="os" id="osSelect" onchange="setPlatformTab(this.value)">
+          <option value="android">Android</option>
+          <option value="ios">iOS</option>
+          <option value="windows">Windows</option>
+        </select>
+        <span id="osChip" hidden></span>
+      </div>
+      <div id="appsLead" style="margin-bottom:.6rem;color:var(--muted)"></div>
+      <div class="apps-grid" id="appsGrid"></div>
+    </section>
+  </div>
+
+  <div class="qr-overlay" id="qrModal" onclick="this.classList.remove('open')">
+    <img id="qrImg" alt="QR">
+  </div>
+
+  <script>
+    const I18N = {
+      fa: {
+        dir: "rtl", title: "اشتراک کلاسیک",
+        nightMode: "شب", dayMode: "روز",
+        active: "فعال", inactive: "غیرفعال", pending: "در انتظار",
+        online: "آنلاین", offline: "آفلاین",
+        tabTime: "زمان باقیمانده", tabUsage: "جزییات مصرف", tabChart: "نمودار مصرف",
+        tabLinks: "لینک ساب و کانفیگها", tabApps: "نصب و راه اندازی",
+        remainTime: "زمان باقی‌مانده", remainTraffic: "ترافیک باقی‌مانده",
+        expireDate: "تاریخ انقضا:", totalQuota: "حجم کل", used: "مصرف‌شده", remained: "باقی‌مانده",
+        downloadLbl: "دانلود", uploadLbl: "آپلود", copy: "کپی", copyAll: "کپی همه", download: "دانلود",
+        selectOS: "سیستم عامل:", tehranTime: "وقت تهران",
+        alertVol: "ترافیک باقیمانده شما کمتر از یک گیگ میباشد لطفا جهت تمدید سرویس خود اقدام فرمایید .",
+        alertTime: "زمان باقیمانده شما کمتر از یک روز میباشد لطفا جهت تمدید سرویس خود اقدام فرمایید",
+        days: "روز", hours: "ساعت",
+        androidName: "اندروید", iosName: "آیفون", windowsName: "ویندوز",
+        downloadBtn: "دانلود", detectedHint: "تشخیص داده شد",
+        leadDetected: "برنامه‌های مناسب دستگاه شما", leadChosen: "برنامه‌های سیستم‌عامل انتخابی", leadUnknown: "سیستم‌عامل را انتخاب کنید",
+        noSubLink: "لینک یافت نشد"
+      },
+      en: {
+        dir: "ltr", title: "Classic subscription",
+        nightMode: "Night", dayMode: "Day",
+        active: "Active", inactive: "Inactive", pending: "Pending",
+        online: "Online", offline: "Offline",
+        tabTime: "Remaining time", tabUsage: "Usage details", tabChart: "Usage chart",
+        tabLinks: "Sub link & configs", tabApps: "Setup",
+        remainTime: "Remaining time", remainTraffic: "Remaining traffic",
+        expireDate: "Expires:", totalQuota: "Total", used: "Used", remained: "Remaining",
+        downloadLbl: "Download", uploadLbl: "Upload", copy: "Copy", copyAll: "Copy all", download: "Download",
+        selectOS: "OS:", tehranTime: "Tehran time",
+        alertVol: "Less than 1 GB remains. Please renew your service.",
+        alertTime: "Less than one day remains. Please renew your service.",
+        days: "days", hours: "hours",
+        androidName: "Android", iosName: "iPhone", windowsName: "Windows",
+        downloadBtn: "Download", detectedHint: "Detected",
+        leadDetected: "Apps for your device", leadChosen: "Apps for selected OS", leadUnknown: "Choose an OS",
+        noSubLink: "No link found"
+      }
+    };
+
+    let lang = "fa";
+    function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.fa[k] || k; }
+
+    const sub = {
+      enabled: {{ .enabled }},
+      isOnline: {{ .isOnline }},
+      expireSec: {{ .expire }},
+      totalByte: {{ .totalByte }},
+      dlByte: {{ .downloadByte }},
+      upByte: {{ .uploadByte }},
+      total: "{{ .total }}",
+      used: "{{ .used }}",
+      remained: "{{ .remained }}",
+      download: "{{ .download }}",
+      upload: "{{ .upload }}"
+    };
+
+    const ONE_DAY = 86400000;
+    const ONE_GB = 1024 * 1024 * 1024;
+    const JALALI_EVENTS = {
+      "1/1": "آغاز نوروز", "1/2": "عیدنوروز", "1/3": "عیدنوروز", "1/4": "عیدنوروز",
+      "1/12": "روز جمهوری اسلامی", "1/13": "روز طبیعت",
+      "3/14": "رحلت امام خمینی", "3/15": "قیام ۱۵ خرداد",
+      "11/22": "پیروزی انقلاب اسلامی", "12/29": "ملی شدن صنعت نفت",
+      "10/16": "روز دانشجو", "8/24": "روز کتاب و کتابخوانی"
+    };
+
+    function toJalali(gy, gm, gd) {
+      const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+      let jy = gy <= 1600 ? 0 : 979;
+      gy -= gy <= 1600 ? 621 : 1600;
+      const gy2 = gm > 2 ? gy + 1 : gy;
+      let days = 365 * gy + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) +
+                 Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm - 1];
+      jy += 33 * Math.floor(days / 12053);
+      days %= 12053;
+      jy += 4 * Math.floor(days / 1461);
+      days %= 1461;
+      jy += Math.floor((days - 1) / 365);
+      days = (days - 1) % 365;
+      const jm = days < 186 ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+      const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
+      return [jy, jm, jd];
+    }
+
+    function mixColor(p) {
+      const g = [60, 179, 113], r = [226, 61, 61];
+      const t = 1 - Math.max(0, Math.min(1, p));
+      const c = g.map((v, i) => Math.round(v + (r[i] - v) * t));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+
+    function applyLang() {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = t("dir");
+      document.title = t("title");
+      document.body.classList.toggle("lang-en", lang === "en");
+      document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+      const langLabel = document.getElementById("langLabel");
+      if (langLabel) langLabel.textContent = lang === "fa" ? "EN" : "فا";
+      updateThemeBtn();
+      renderApps();
+      updateAll();
+    }
+    function toggleLang() { lang = lang === "fa" ? "en" : "fa"; applyLang(); }
+
+    function updateThemeBtn() {
+      const isDay = document.documentElement.classList.contains("day-mode");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.textContent = isDay ? "🌙" : "☀️";
+      const lab = document.querySelector("#themeToggle [data-i18n]");
+      if (lab) lab.textContent = t(isDay ? "nightMode" : "dayMode");
+    }
+    function applyTheme(day) {
+      document.documentElement.classList.toggle("day-mode", day);
+      document.body.classList.toggle("day-mode", day);
+      document.getElementById("themeColorMeta").setAttribute("content", day ? "#dce9f7" : "#1a120e");
+      updateThemeBtn();
+      renderBars();
+    }
+    function toggleTheme() { applyTheme(!document.documentElement.classList.contains("day-mode")); }
+
+    function showTab(id) {
+      document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.tab === id));
+      document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === "panel-" + id));
+    }
+
+    function remainingMs() {
+      const exp = Number(sub.expireSec) * 1000;
+      if (!exp) return 0;
+      return Math.max(0, exp - Date.now());
+    }
+    function usedBytes() { return (Number(sub.dlByte) || 0) + (Number(sub.upByte) || 0); }
+    function remainBytes() {
+      const total = Number(sub.totalByte) || 0;
+      if (!total) return Infinity;
+      return Math.max(0, total - usedBytes());
+    }
+
+    function renderStatus() {
+      const badge = document.getElementById("statusBadge");
+      const expired = remainingMs() === 0 && Number(sub.expireSec) > 0;
+      const pending = (Number(sub.totalByte) || 0) > 0 && usedBytes() === 0 && !expired;
+      if (!sub.enabled || expired) {
+        badge.textContent = t("inactive"); badge.className = "pill bad";
+      } else if (pending) {
+        badge.textContent = t("pending"); badge.className = "pill";
+      } else {
+        badge.textContent = t("active"); badge.className = "pill ok";
+      }
+      const online = Boolean(sub.enabled) && Boolean(sub.isOnline);
+      const p = document.getElementById("presence");
+      p.className = "pill " + (online ? "online" : "offline");
+      document.getElementById("presenceText").textContent = t(online ? "online" : "offline");
+    }
+
+    function renderClockAndAlert() {
+      const clock = document.getElementById("clockCard");
+      const alert = document.getElementById("alertBox");
+      const lowTime = remainingMs() > 0 && remainingMs() < ONE_DAY;
+      const remB = remainBytes();
+      const lowVol = remB !== Infinity && remB < ONE_GB;
+      if (lowTime || lowVol) {
+        clock.style.display = "none";
+        alert.classList.add("show");
+        alert.textContent = lowVol ? t("alertVol") : t("alertTime");
+        return;
+      }
+      clock.style.display = "";
+      alert.classList.remove("show");
+      const now = new Date();
+      const locale = lang === "en" ? "en-GB" : "fa-IR";
+      document.getElementById("clockTime").textContent =
+        new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "Asia/Tehran" }).format(now);
+      document.getElementById("clockDate").textContent =
+        new Intl.DateTimeFormat(locale, { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Tehran" }).format(now)
+        + " (" + t("tehranTime") + ")";
+      const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
+      const map = {}; parts.forEach(p => { if (p.type !== "literal") map[p.type] = p.value; });
+      const [jy, jm, jd] = toJalali(+map.year, +map.month, +map.day);
+      const ev = JALALI_EVENTS[jm + "/" + jd];
+      const evEl = document.getElementById("clockEvent");
+      if (ev) { evEl.hidden = false; evEl.textContent = (lang === "en" ? "Calendar: " : "مناسبت امروز: ") + ev; }
+      else evEl.hidden = true;
+    }
+
+    function renderBars() {
+      const days = remainingMs() / ONE_DAY;
+      const shown = Math.min(30, days);
+      const pTime = shown / 30;
+      const timeBar = document.getElementById("timeBar");
+      timeBar.style.width = (pTime * 100).toFixed(1) + "%";
+      timeBar.style.background = mixColor(pTime);
+      document.getElementById("timePct").textContent = Math.round(pTime * 100) + "%";
+      document.getElementById("timeRemainLabel").textContent =
+        (days >= 1 ? Math.floor(days) + " " + t("days") : Math.floor(days * 24) + " " + t("hours")) +
+        (days > 30 ? " (30+)" : "");
+      const exp = document.getElementById("expireDateText");
+      if (!sub.expireSec || Number(sub.expireSec) === 0) exp.textContent = "—";
+      else exp.textContent = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "fa-IR", {
+        year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran"
+      }).format(new Date(Number(sub.expireSec) * 1000));
+
+      const total = Number(sub.totalByte) || 0;
+      const rem = remainBytes();
+      const pUse = total ? rem / total : 1;
+      const usageBar = document.getElementById("usageBar");
+      usageBar.style.width = (Math.max(0, Math.min(1, pUse)) * 100).toFixed(1) + "%";
+      usageBar.style.background = mixColor(pUse);
+      document.getElementById("usagePct").textContent = total ? Math.round(pUse * 100) + "%" : "∞";
+      document.getElementById("remainBlink").textContent = sub.remained || "—";
+
+      document.getElementById("valTotal").textContent = sub.total || "—";
+      document.getElementById("valUsed").textContent = sub.used || "—";
+      document.getElementById("valRemained").textContent = sub.remained || "—";
+      document.getElementById("valDown").textContent = sub.download || "—";
+      document.getElementById("valUp").textContent = sub.upload || "—";
+    }
+
+    function updateAll() { renderStatus(); renderClockAndAlert(); renderBars(); }
+
+    function copyText(text, button) {
+      const done = () => {
+        if (!button) return;
+        const old = button.innerHTML;
+        button.innerHTML = "✓";
+        setTimeout(() => { button.innerHTML = old; }, 1100);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else fallbackCopy(text, done);
+    }
+    function fallbackCopy(text, done) {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    function copyFromButton(btn) { copyText(btn.dataset.copy || "", btn); }
+    function copyAllConfigs(btn) {
+      const texts = [...document.querySelectorAll(".cfg-item[data-link]")].map(i => i.dataset.link).filter(Boolean);
+      copyText(texts.join("\n"), btn);
+    }
+    function openQR(link) {
+      if (!link) { alert(t("noSubLink")); return; }
+      document.getElementById("qrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=800x800&ecc=M&data=" + encodeURIComponent(link);
+      document.getElementById("qrModal").classList.add("open");
+    }
+    function toggleConfigQR(btn) {
+      const item = btn.closest("[data-link]");
+      openQR(item && item.dataset.link);
+    }
+    function isWg(link) {
+      const s = (link || "").toLowerCase();
+      return s.startsWith("wireguard://") || s.includes("[interface]") || s.includes("privatekey=");
+    }
+    function downloadWg(btn) {
+      const item = btn.closest("[data-link]");
+      const link = item && item.dataset.link;
+      if (!link) return;
+      const blob = new Blob([link], { type: "application/x-wireguard-profile" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "wg.conf";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    const PLATFORMS = ["android", "ios", "windows"];
+    const APPS = [
+      { id: "v2rayng", name: "v2rayNG", icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png", platforms: { android: "https://github.com/2dust/v2rayNG/releases" } },
+      { id: "v2box", name: "v2Box", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fe/03/f8/fe03f855-940a-a28c-ceb8-4b8e61b720d8/V2BoxIcon-0-0-1x_U007epad-0-1-P3-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box", ios: "https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690" } },
+      { id: "hiddify", name: "Hiddify", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/70/5e/2f/705e2fce-cacd-28c0-05bb-946667dbc03a/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=app.hiddify.com", ios: "https://apps.apple.com/us/app/hiddify-proxy-vpn/id6596777532", windows: "https://github.com/hiddify/hiddify-app/releases" } },
+      { id: "happ", name: "Happ", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e0/11/af/e011af74-2151-a47d-d4a2-86eea7854f2a/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=com.happproxy", ios: "https://apps.apple.com/us/app/happ-proxy-utility/id6504287215", windows: "https://www.happ.su/main" } },
+      { id: "shadowrocket", name: "Shadowrocket", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/64/24/2d/64242de2-a763-914f-c686-8777445b83a3/AppIcon-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg", platforms: { ios: "https://apps.apple.com/us/app/shadowrocket/id932747118" } },
+      { id: "npvtunnel", name: "NPV Tunnel", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c5/1a/b9/c51ab906-a25c-35c6-1f6d-8261ead56e82/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv", ios: "https://apps.apple.com/us/app/npv-tunnel/id1629465476" } }
+    ];
+    function detectOS() {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      if (/android/i.test(ua)) return "android";
+      if (/iphone|ipod|ipad|ipados/i.test(ua)) return "ios";
+      if (/macintosh|mac os x/i.test(ua)) return (navigator.maxTouchPoints || 0) > 1 ? "ios" : null;
+      if (/windows|win32|win64|wow64/i.test(ua)) return "windows";
+      return null;
+    }
+    const detectedOS = detectOS();
+    let platformTab = PLATFORMS.includes(detectedOS) ? detectedOS : "android";
+    function setPlatformTab(p) { platformTab = p; renderApps(); }
+    function renderApps() {
+      const sel = document.getElementById("osSelect");
+      if (sel) sel.value = platformTab;
+      const chip = document.getElementById("osChip");
+      if (chip) {
+        chip.hidden = !detectedOS;
+        chip.textContent = detectedOS ? t("detectedHint") + ": " + t(detectedOS + "Name") : "";
+      }
+      const lead = document.getElementById("appsLead");
+      if (lead) lead.textContent = !detectedOS ? t("leadUnknown") : (platformTab === detectedOS ? t("leadDetected") : t("leadChosen"));
+      const grid = document.getElementById("appsGrid");
+      const list = APPS.filter(a => a.platforms[platformTab]);
+      grid.innerHTML = list.map(app => `
+        <div class="app-card card3d" style="margin:0">
+          <img src="${app.icon}" alt="${app.name}" loading="lazy">
+          <span class="app-name">${app.name}</span>
+          <button type="button" class="btn3d" onclick="window.open('${app.platforms[platformTab]}','_blank','noopener')">${t("downloadBtn")}</button>
+        </div>`).join("");
+    }
+
+    document.querySelectorAll(".cfg-item[data-link]").forEach(item => {
+      if (isWg(item.dataset.link)) {
+        const b = item.querySelector(".wg-dl");
+        if (b) b.hidden = false;
+      }
+    });
+
+    applyTheme(true);
+    applyLang();
+    setInterval(updateAll, 1000);
+  </script>
+</body>
+</html>
