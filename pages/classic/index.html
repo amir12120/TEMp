@@ -167,6 +167,12 @@
     }
     .cfg-list { display: flex; flex-direction: column; gap: .45rem; }
     .cfg-item .row-line { margin-bottom: 0; }
+    .sep-line {
+      height: 0; border: 0; border-top: 2px dashed var(--edge);
+      margin: .85rem 0 .75rem;
+    }
+    .sec-title { font-weight: 800; margin-bottom: .55rem; }
+    .copy-all-row { display: flex; justify-content: flex-end; margin: 0 0 .55rem; }
 
     .qr-overlay {
       position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.86);
@@ -202,7 +208,7 @@
     </div>
 
     <div class="card3d user-row">
-      <div class="user-name">{{ index .emails 0 }}</div>
+      <div class="user-name">👤 {{ index .emails 0 }}</div>
       <div class="pills">
         <span id="statusBadge" class="pill">—</span>
         <span id="presence" class="pill offline"><i class="dot"></i><span id="presenceText">آفلاین</span></span>
@@ -210,33 +216,33 @@
     </div>
 
     <div class="card3d clock-box" id="clockCard">
-      <div class="clock-time" id="clockTime">—</div>
-      <div class="clock-date" id="clockDate">—</div>
+      <div class="clock-time" id="clockTime">🕐 —</div>
+      <div class="clock-date" id="clockDate">📅 —</div>
       <div class="clock-event" id="clockEvent" hidden></div>
     </div>
     <div class="card3d alert-box" id="alertBox"></div>
 
     <div class="tabs">
-      <button class="btn3d tab on" type="button" data-tab="time" onclick="showTab('time')"><span data-i18n="tabTime">زمان باقیمانده</span></button>
-      <button class="btn3d tab" type="button" data-tab="usage" onclick="showTab('usage')"><span data-i18n="tabUsage">جزییات مصرف</span></button>
-      <button class="btn3d tab" type="button" data-tab="chart" onclick="showTab('chart')"><span data-i18n="tabChart">نمودار مصرف</span></button>
-      <button class="btn3d tab" type="button" data-tab="links" onclick="showTab('links')"><span data-i18n="tabLinks">لینک ساب و کانفیگها</span></button>
-      <button class="btn3d tab" type="button" data-tab="apps" onclick="showTab('apps')"><span data-i18n="tabApps">نصب و راه اندازی</span></button>
+      <button class="btn3d tab on" type="button" data-tab="time" onclick="showTab('time')"><span data-i18n="tabTime">⏳ زمان باقیمانده</span></button>
+      <button class="btn3d tab" type="button" data-tab="usage" onclick="showTab('usage')"><span data-i18n="tabUsage">📊 جزییات مصرف</span></button>
+      <button class="btn3d tab" type="button" data-tab="chart" onclick="showTab('chart')"><span data-i18n="tabChart">📈 نمودار مصرف</span></button>
+      <button class="btn3d tab" type="button" data-tab="links" onclick="showTab('links')"><span data-i18n="tabLinks">🔗 لینک ساب و کانفیگها</span></button>
+      <button class="btn3d tab" type="button" data-tab="apps" onclick="showTab('apps')"><span data-i18n="tabApps">📱 نصب و راه اندازی</span></button>
     </div>
 
     <section class="card3d panel on" id="panel-time">
       <div class="bar-meta">
-        <span data-i18n="remainTime">زمان باقی‌مانده</span>
+        <span data-i18n="remainTime">⏳ زمان باقی‌مانده</span>
         <span id="timePct">—</span>
       </div>
       <div class="bar-track"><div class="bar-fill" id="timeBar"></div></div>
-      <div class="expire"><span data-i18n="expireDate">تاریخ انقضا:</span> <strong id="expireDateText">—</strong></div>
+      <div class="expire"><span data-i18n="expireDate">📆 تاریخ انقضا:</span> <strong id="expireDateText">—</strong></div>
       <div id="timeRemainLabel" style="margin-top:.5rem;font-weight:800"></div>
     </section>
 
     <section class="card3d panel" id="panel-usage">
       <div class="bar-meta">
-        <span data-i18n="remainTraffic">ترافیک باقی‌مانده</span>
+        <span data-i18n="remainTraffic">📶 ترافیک باقی‌مانده</span>
         <span id="usagePct">—</span>
       </div>
       <div class="bar-track"><div class="bar-fill" id="usageBar"></div></div>
@@ -245,31 +251,34 @@
 
     <section class="card3d panel" id="panel-chart">
       <div class="stat-grid">
-        <div class="stat"><span data-i18n="totalQuota">حجم کل</span><b id="valTotal">—</b></div>
-        <div class="stat"><span data-i18n="used">مصرف‌شده</span><b id="valUsed">—</b></div>
-        <div class="stat"><span data-i18n="remained">باقی‌مانده</span><b id="valRemained">—</b></div>
-        <div class="stat"><span data-i18n="downloadLbl">دانلود</span><b id="valDown">—</b></div>
-        <div class="stat"><span data-i18n="uploadLbl">آپلود</span><b id="valUp">—</b></div>
+        <div class="stat"><span data-i18n="totalQuota">📦 حجم کل</span><b id="valTotal">—</b></div>
+        <div class="stat"><span data-i18n="used">📉 مصرف‌شده</span><b id="valUsed">—</b></div>
+        <div class="stat"><span data-i18n="remained">📈 باقی‌مانده</span><b id="valRemained">—</b></div>
+        <div class="stat"><span data-i18n="downloadLbl">⬇️ دانلود</span><b id="valDown">—</b></div>
+        <div class="stat"><span data-i18n="uploadLbl">⬆️ آپلود</span><b id="valUp">—</b></div>
       </div>
     </section>
 
     <section class="card3d panel" id="panel-links">
+      <div class="sec-title" data-i18n="subLinkTitle">🔗 لینک سابسکریپشن</div>
       <div class="row-line">
         <div class="link-text" id="subLinkDisplay">{{ .subUrl }}</div>
-        <button class="btn3d" type="button" data-copy="{{ .subUrl }}" onclick="copyFromButton(this)"><span data-i18n="copy">کپی</span></button>
-        <button class="btn3d" type="button" data-copy="{{ .subUrl }}" onclick="openQR(this.dataset.copy)">QR</button>
+        <button class="btn3d" type="button" data-copy="{{ .subUrl }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button>
+        <button class="btn3d" type="button" data-copy="{{ .subUrl }}" onclick="openQR(this.dataset.copy)">▦ QR</button>
       </div>
-      <div style="display:flex;justify-content:flex-end;margin:.4rem 0">
-        <button class="btn3d" type="button" onclick="copyAllConfigs(this)"><span data-i18n="copyAll">کپی همه</span></button>
+      <hr class="sep-line">
+      <div class="sec-title" data-i18n="configsTitle">🧩 کانفیگ‌ها</div>
+      <div class="copy-all-row">
+        <button class="btn3d" type="button" onclick="copyAllConfigs(this)"><span data-i18n="copyAll">📋 کپی همه</span></button>
       </div>
       <div class="cfg-list">
         {{ range $index, $link := .links }}
         <div class="cfg-item card3d" data-link="{{ $link }}" style="margin:0;padding:.55rem">
           <div class="row-line">
             <div class="link-text">{{ $link }}</div>
-            <button class="btn3d" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">کپی</span></button>
-            <button class="btn3d" type="button" onclick="toggleConfigQR(this)">QR</button>
-            <button class="btn3d wg-dl" type="button" hidden onclick="downloadWg(this)" data-i18n="download">دانلود</button>
+            <button class="btn3d" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button>
+            <button class="btn3d" type="button" onclick="toggleConfigQR(this)">▦ QR</button>
+            <button class="btn3d wg-dl" type="button" hidden onclick="downloadWg(this)"><span data-i18n="download">⬇️ دانلود</span></button>
           </div>
         </div>
         {{ end }}
@@ -278,11 +287,11 @@
 
     <section class="card3d panel" id="panel-apps">
       <div class="os-row">
-        <span data-i18n="selectOS">سیستم عامل:</span>
+        <span data-i18n="selectOS">💻 سیستم عامل:</span>
         <select class="os" id="osSelect" onchange="setPlatformTab(this.value)">
-          <option value="android">Android</option>
-          <option value="ios">iOS</option>
-          <option value="windows">Windows</option>
+          <option value="android">🤖 Android</option>
+          <option value="ios">🍎 iOS</option>
+          <option value="windows">🪟 Windows</option>
         </select>
         <span id="osChip" hidden></span>
       </div>
@@ -300,40 +309,42 @@
       fa: {
         dir: "rtl", title: "اشتراک کلاسیک",
         nightMode: "شب", dayMode: "روز",
-        active: "فعال", inactive: "غیرفعال", pending: "در انتظار",
-        online: "آنلاین", offline: "آفلاین",
-        tabTime: "زمان باقیمانده", tabUsage: "جزییات مصرف", tabChart: "نمودار مصرف",
-        tabLinks: "لینک ساب و کانفیگها", tabApps: "نصب و راه اندازی",
-        remainTime: "زمان باقی‌مانده", remainTraffic: "ترافیک باقی‌مانده",
-        expireDate: "تاریخ انقضا:", totalQuota: "حجم کل", used: "مصرف‌شده", remained: "باقی‌مانده",
-        downloadLbl: "دانلود", uploadLbl: "آپلود", copy: "کپی", copyAll: "کپی همه", download: "دانلود",
-        selectOS: "سیستم عامل:", tehranTime: "وقت تهران",
+        active: "✅ فعال", inactive: "⛔ غیرفعال", pending: "⏳ در انتظار",
+        online: "🟢 آنلاین", offline: "🔴 آفلاین",
+        tabTime: "⏳ زمان باقیمانده", tabUsage: "📊 جزییات مصرف", tabChart: "📈 نمودار مصرف",
+        tabLinks: "🔗 لینک ساب و کانفیگها", tabApps: "📱 نصب و راه اندازی",
+        remainTime: "⏳ زمان باقی‌مانده", remainTraffic: "📶 ترافیک باقی‌مانده",
+        expireDate: "📆 تاریخ انقضا:", totalQuota: "📦 حجم کل", used: "📉 مصرف‌شده", remained: "📈 باقی‌مانده",
+        downloadLbl: "⬇️ دانلود", uploadLbl: "⬆️ آپلود", copy: "📋 کپی", copyAll: "📋 کپی همه", download: "⬇️ دانلود",
+        selectOS: "💻 سیستم عامل:", tehranTime: "وقت تهران",
+        subLinkTitle: "🔗 لینک سابسکریپشن", configsTitle: "🧩 کانفیگ‌ها",
         alertVol: "ترافیک باقیمانده شما کمتر از یک گیگ میباشد لطفا جهت تمدید سرویس خود اقدام فرمایید .",
         alertTime: "زمان باقیمانده شما کمتر از یک روز میباشد لطفا جهت تمدید سرویس خود اقدام فرمایید",
         days: "روز", hours: "ساعت",
         androidName: "اندروید", iosName: "آیفون", windowsName: "ویندوز",
-        downloadBtn: "دانلود", detectedHint: "تشخیص داده شد",
-        leadDetected: "برنامه‌های مناسب دستگاه شما", leadChosen: "برنامه‌های سیستم‌عامل انتخابی", leadUnknown: "سیستم‌عامل را انتخاب کنید",
-        noSubLink: "لینک یافت نشد"
+        downloadBtn: "⬇️ دانلود", detectedHint: "✨ تشخیص داده شد",
+        leadDetected: "📱 برنامه‌های مناسب دستگاه شما", leadChosen: "📂 برنامه‌های سیستم‌عامل انتخابی", leadUnknown: "💻 سیستم‌عامل را انتخاب کنید",
+        noSubLink: "❌ لینک یافت نشد"
       },
       en: {
         dir: "ltr", title: "Classic subscription",
         nightMode: "Night", dayMode: "Day",
-        active: "Active", inactive: "Inactive", pending: "Pending",
-        online: "Online", offline: "Offline",
-        tabTime: "Remaining time", tabUsage: "Usage details", tabChart: "Usage chart",
-        tabLinks: "Sub link & configs", tabApps: "Setup",
-        remainTime: "Remaining time", remainTraffic: "Remaining traffic",
-        expireDate: "Expires:", totalQuota: "Total", used: "Used", remained: "Remaining",
-        downloadLbl: "Download", uploadLbl: "Upload", copy: "Copy", copyAll: "Copy all", download: "Download",
-        selectOS: "OS:", tehranTime: "Tehran time",
+        active: "✅ Active", inactive: "⛔ Inactive", pending: "⏳ Pending",
+        online: "🟢 Online", offline: "🔴 Offline",
+        tabTime: "⏳ Remaining time", tabUsage: "📊 Usage details", tabChart: "📈 Usage chart",
+        tabLinks: "🔗 Sub link & configs", tabApps: "📱 Setup",
+        remainTime: "⏳ Remaining time", remainTraffic: "📶 Remaining traffic",
+        expireDate: "📆 Expires:", totalQuota: "📦 Total", used: "📉 Used", remained: "📈 Remaining",
+        downloadLbl: "⬇️ Download", uploadLbl: "⬆️ Upload", copy: "📋 Copy", copyAll: "📋 Copy all", download: "⬇️ Download",
+        selectOS: "💻 OS:", tehranTime: "Tehran time",
+        subLinkTitle: "🔗 Subscription link", configsTitle: "🧩 Configs",
         alertVol: "Less than 1 GB remains. Please renew your service.",
         alertTime: "Less than one day remains. Please renew your service.",
         days: "days", hours: "hours",
         androidName: "Android", iosName: "iPhone", windowsName: "Windows",
-        downloadBtn: "Download", detectedHint: "Detected",
-        leadDetected: "Apps for your device", leadChosen: "Apps for selected OS", leadUnknown: "Choose an OS",
-        noSubLink: "No link found"
+        downloadBtn: "⬇️ Download", detectedHint: "✨ Detected",
+        leadDetected: "📱 Apps for your device", leadChosen: "📂 Apps for selected OS", leadUnknown: "💻 Choose an OS",
+        noSubLink: "❌ No link found"
       }
     };
 
@@ -462,16 +473,16 @@
       if (lowTime || lowVol) {
         clock.style.display = "none";
         alert.classList.add("show");
-        alert.textContent = lowVol ? t("alertVol") : t("alertTime");
+        alert.textContent = "⚠️ " + (lowVol ? t("alertVol") : t("alertTime"));
         return;
       }
       clock.style.display = "";
       alert.classList.remove("show");
       const now = new Date();
       const locale = lang === "en" ? "en-GB" : "fa-IR";
-      document.getElementById("clockTime").textContent =
+      document.getElementById("clockTime").textContent = "🕐 " +
         new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "Asia/Tehran" }).format(now);
-      document.getElementById("clockDate").textContent =
+      document.getElementById("clockDate").textContent = "📅 " +
         new Intl.DateTimeFormat(locale, { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Tehran" }).format(now)
         + " (" + t("tehranTime") + ")";
       const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
@@ -479,7 +490,7 @@
       const [jy, jm, jd] = toJalali(+map.year, +map.month, +map.day);
       const ev = JALALI_EVENTS[jm + "/" + jd];
       const evEl = document.getElementById("clockEvent");
-      if (ev) { evEl.hidden = false; evEl.textContent = (lang === "en" ? "Calendar: " : "مناسبت امروز: ") + ev; }
+      if (ev) { evEl.hidden = false; evEl.textContent = (lang === "en" ? "📌 Calendar: " : "📌 مناسبت امروز: ") + ev; }
       else evEl.hidden = true;
     }
 
