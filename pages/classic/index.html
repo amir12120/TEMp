@@ -210,7 +210,14 @@
       display: none; align-items: center; justify-content: center; cursor: pointer;
     }
     .qr-overlay.open { display: flex; }
-    .qr-overlay img { width: min(86vw, 86vh); height: min(86vw, 86vh); background: #fff; border-radius: 12px; }
+    .qr-overlay img {
+      width: min(86vw, 86vh); height: min(86vw, 86vh);
+      box-sizing: border-box;
+      padding: 2.2rem;
+      background: #fff;
+      object-fit: contain;
+      border-radius: 16px;
+    }
 
     .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .55rem; }
     .app-card { text-align: center; padding: .6rem; }
