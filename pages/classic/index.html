@@ -131,14 +131,34 @@
     }
     @media (max-width: 600px) {
       .coin-logo { flex-basis: 48px; width: 48px; height: 48px; }
-      .tabs { gap: .18rem; }
-      .tab {
-        font-size: .58rem;
-        min-height: 34px;
-        padding: .28rem .12rem;
-        box-shadow: 3px 4px 0 var(--edge);
-        border-radius: 8px;
+      body { padding: .55rem; }
+      .shell {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: .45rem;
       }
+      .tabs {
+        flex-direction: column;
+        flex: 0 0 5.4rem;
+        width: 5.4rem;
+        gap: .35rem;
+        position: sticky;
+        top: .45rem;
+      }
+      .tab {
+        flex: 0 0 5.4rem;
+        width: 5.4rem;
+        height: 5.4rem;
+        min-height: 5.4rem;
+        padding: .3rem .22rem;
+        font-size: .68rem;
+        line-height: 1.2;
+        white-space: normal;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 3px 4px 0 var(--edge);
+      }
+      .stage { flex: 1; min-width: 0; }
     }
 
     .user-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
@@ -167,9 +187,10 @@
     .alert-box.show { display: block; }
     @keyframes pulse { 50% { opacity: .55; } }
 
+    .shell { display: flex; flex-direction: column; gap: .7rem; }
+    .stage { min-width: 0; }
     .tabs {
-      display: flex; flex-wrap: nowrap; gap: .4rem; margin-bottom: .9rem;
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      display: flex; flex-wrap: nowrap; gap: .4rem; margin-bottom: 0;
     }
     .tab {
       flex: 1 1 0; min-width: 0; min-height: 44px; font-size: .82rem;
@@ -178,7 +199,7 @@
     .tab.on { background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: #fff; }
 
     .panel { display: none; }
-    .panel.on { display: block; }
+    .panel.on { display: block; margin-bottom: 0; }
 
     .bar-track {
       height: 22px; border-radius: 999px; border: 2px solid var(--edge);
@@ -275,6 +296,7 @@
     </div>
     <div class="card3d alert-box" id="alertBox"></div>
 
+    <div class="shell">
     <div class="tabs">
       <button class="btn3d tab on" type="button" data-tab="time" onclick="showTab('time')"><span data-i18n="tabTime">⏳ زمان باقیمانده</span></button>
       <button class="btn3d tab" type="button" data-tab="usage" onclick="showTab('usage')"><span data-i18n="tabUsage">📊 جزییات مصرف</span></button>
@@ -282,6 +304,7 @@
       <button class="btn3d tab" type="button" data-tab="links" onclick="showTab('links')"><span data-i18n="tabLinks">🔗 لینک ساب و کانفیگها</span></button>
       <button class="btn3d tab" type="button" data-tab="apps" onclick="showTab('apps')"><span data-i18n="tabApps">📱 نصب و راه اندازی</span></button>
     </div>
+    <div class="stage">
 
     <section class="card3d panel on" id="panel-time">
       <div class="bar-meta">
@@ -350,6 +373,8 @@
       <div id="appsLead" style="margin-bottom:.6rem;color:var(--muted)"></div>
       <div class="apps-grid" id="appsGrid"></div>
     </section>
+    </div>
+    </div>
   </div>
 
   <div class="qr-overlay" id="qrModal" onclick="this.classList.remove('open')">
