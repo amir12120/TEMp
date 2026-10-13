@@ -131,6 +131,7 @@ jobs:
           node --check /tmp/modern-rendered.js
           node --check /tmp/speed-rendered.js
           node --check /tmp/electronics-rendered.js
+          node --check /tmp/classic-rendered.js
 
       - name: Validate required page features
         shell: bash
@@ -225,6 +226,65 @@ jobs:
           # day mode (red bench theme) + Persian are the defaults
           grep -q 'class="day-mode"' pages/electronics/index.html
           grep -q 'applyTheme(true)' pages/electronics/index.html
+
+      - name: Validate classic page features
+        shell: bash
+        run: |
+          test -s pages/classic/index.html
+          # the menu is a tablist and the panels are its siblings — the whole
+          # page used to be one unclosed <div>, which put every panel inside the
+          # flex menu row and squeezed it into a corner
+          grep -q '<div class="tabs" role="tablist">' pages/classic/index.html
+          grep -q '<div class="panels">' pages/classic/index.html
+          grep -q 'role="tab"' pages/classic/index.html
+          grep -q 'role="tabpanel"' pages/classic/index.html
+          # phones: two equal menu columns, last tab spanning the row; wide
+          # screens: one row of five equal tabs
+          grep -q 'grid-template-columns: repeat(5, minmax(0, 1fr))' pages/classic/index.html
+          grep -q 'grid-template-columns: repeat(2, minmax(0, 1fr))' pages/classic/index.html
+          grep -q 'grid-column: 1 / -1' pages/classic/index.html
+          # the active tab's card fills the height the menu left over
+          grep -q '100dvh' pages/classic/index.html
+          # the top bar holds only the day/night and language buttons plus the
+          # logo, then the account and the Tehran clock with calendar occasions
+          grep -q 'id="themeToggle"' pages/classic/index.html
+          grep -q 'id="langToggle"' pages/classic/index.html
+          grep -q 'class="coin-logo"' pages/classic/index.html
+          grep -q 'id="clockTime"' pages/classic/index.html
+          grep -q 'JALALI_EVENTS' pages/classic/index.html
+          grep -q 'function toJalali' pages/classic/index.html
+          # remaining time, usage details and the renewal warning
+          grep -q 'id="timeBar"' pages/classic/index.html
+          grep -q 'id="usageBar"' pages/classic/index.html
+          grep -q 'id="remainBlink"' pages/classic/index.html
+          grep -q 'ONE_DAY' pages/classic/index.html
+          grep -q 'ONE_GB' pages/classic/index.html
+          grep -q 'id="alertBox"' pages/classic/index.html
+          grep -q 'function showTab' pages/classic/index.html
+          # subscription link, per-config QR + copy, copy-all, OS detection
+          grep -q 'id="subLinkDisplay"' pages/classic/index.html
+          grep -q 'id="qrModal"' pages/classic/index.html
+          grep -q 'function toggleConfigQR' pages/classic/index.html
+          grep -q 'function copyAllConfigs' pages/classic/index.html
+          grep -q 'id="osSelect"' pages/classic/index.html
+          grep -q 'function detectOS' pages/classic/index.html
+          grep -q 'function renderApps' pages/classic/index.html
+          # day mode + Persian are the defaults
+          grep -q 'applyTheme(true)' pages/classic/index.html
+          grep -q 'let lang = "fa"' pages/classic/index.html
+          # every container must close: two missing </div> tags were exactly what
+          # broke this theme's layout, so keep a balance guard
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          source = Path("pages/classic/index.html").read_text(encoding="utf-8")
+          for tag in ("div", "section", "span", "button"):
+              opens = len(re.findall(rf"<{tag}\b", source))
+              closes = len(re.findall(rf"</{tag}>", source))
+              if opens != closes:
+                  raise SystemExit(f"unbalanced <{tag}>: {opens} open / {closes} close")
+          print("classic: containers balance")
+          PY
 
       - name: Run deployed-page smoke tests
         if: ${{ env.DEPLOY_URL != '' }}

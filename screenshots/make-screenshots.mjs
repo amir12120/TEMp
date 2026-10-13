@@ -246,7 +246,7 @@ async function settlePage(send) {
 /* Bottom edges of top-level blocks, so a crop can stop between two cards. */
 async function sectionBottoms(send) {
   const expr = `(() => {
-    const nodes = [...document.querySelectorAll('.card, .hud-card, .panel, .container > section, footer')];
+    const nodes = [...document.querySelectorAll('.card, .card3d, .hud-card, .panel, .tabs, .container > section, footer')];
     return nodes.map(n => Math.ceil(n.getBoundingClientRect().bottom + window.scrollY)).filter(b => b > 0);
   })()`;
   const out = await send("Runtime.evaluate", { expression: expr, returnByValue: true });
@@ -384,9 +384,10 @@ const day = flags.day ? true : flags.night ? false : undefined;
 
 /* Per-theme ceiling for the inline -top crop: the image is cut just after the
    last block that ends within this many css pixels. Themes whose hero section
-   is shorter (electronics = switches + clock + the two dials) get a tighter
-   crop so the README thumbnail stays readable. */
-const TOP_CLIP = { electronics: 760 };
+   is shorter (electronics = switches + clock + the two dials, classic = top bar
+   + account + clock + the tab menu) get a tighter crop so the README thumbnail
+   stays readable. */
+const TOP_CLIP = { electronics: 760, classic: 520 };
 
 let failed = 0;
 for (const theme of themes) {
