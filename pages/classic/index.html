@@ -83,24 +83,55 @@
       padding: .9rem 1rem; margin-bottom: .9rem;
     }
 
-    .top-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
-    .top-btns { display: flex; gap: .45rem; }
+    .top-row {
+      display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+      flex-wrap: nowrap; overflow: visible; position: relative;
+    }
+    .top-btns { display: flex; gap: .45rem; flex-shrink: 0; }
 
     .coin-logo {
-      width: 46px; height: 46px; perspective: 240px; display: inline-block;
-    }
-    .coin-inner {
-      width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-      animation: spinCoin 4.5s linear infinite;
+      flex: 0 0 60px;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      perspective: 160px;
+      transform-style: preserve-3d;
+      isolation: isolate;
+      will-change: transform;
+      animation: coin-spin 12s ease-in-out infinite;
+      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.28));
+      border: 2px solid var(--accent-2);
+      box-shadow: 0 6px 0 var(--edge), 0 0 18px color-mix(in srgb, var(--accent-2) 40%, transparent);
+      position: relative;
     }
     .coin-face {
       position: absolute; inset: 0; border-radius: 50%;
-      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center/cover no-repeat;
-      border: 3px solid var(--accent-2); backface-visibility: hidden;
-      box-shadow: 0 6px 0 var(--edge);
+      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
-    .coin-face.back { transform: rotateY(180deg); }
-    @keyframes spinCoin { to { transform: rotateY(360deg); } }
+    .coin-face.front { transform: translateZ(4px); }
+    .coin-face.back { transform: rotateY(180deg) translateZ(4px); }
+    .coin-logo::after {
+      content: "";
+      position: absolute; inset: 0; border-radius: 50%;
+      background: linear-gradient(120deg, rgba(255,255,255,.48), transparent 30%, transparent 58%, rgba(255,255,255,.08));
+      transform: translateZ(9px);
+      animation: coin-shine 12s ease-in-out infinite;
+      pointer-events: none; z-index: 1;
+    }
+    @keyframes coin-spin {
+      0%, 100% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
+      25% { transform: rotateX(8deg) rotateY(90deg) scale(1.04); }
+      50% { transform: rotateX(0deg) rotateY(180deg) scale(1); }
+      75% { transform: rotateX(-8deg) rotateY(270deg) scale(1.04); }
+    }
+    @keyframes coin-shine {
+      0%, 100% { opacity: .72; transform: translateZ(9px) rotate(0deg); }
+      50% { opacity: .34; transform: translateZ(9px) rotate(18deg); }
+    }
+    @media (max-width: 600px) {
+      .coin-logo { flex-basis: 48px; width: 48px; height: 48px; }
+    }
 
     .user-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
     .user-name { font-weight: 800; font-size: 1.05rem; }
@@ -204,7 +235,10 @@
           🌐 <span id="langLabel">EN</span>
         </button>
       </div>
-      <span class="coin-logo" aria-hidden="true"><span class="coin-inner"><span class="coin-face front"></span><span class="coin-face back"></span></span></span>
+      <span class="coin-logo" aria-hidden="true">
+        <span class="coin-face front"></span>
+        <span class="coin-face back"></span>
+      </span>
     </div>
 
     <div class="card3d user-row">
@@ -241,15 +275,6 @@
     </section>
 
     <section class="card3d panel" id="panel-usage">
-      <div class="bar-meta">
-        <span data-i18n="remainTraffic">📶 ترافیک باقی‌مانده</span>
-        <span id="usagePct">—</span>
-      </div>
-      <div class="bar-track"><div class="bar-fill" id="usageBar"></div></div>
-      <div class="blink-big" id="remainBlink">—</div>
-    </section>
-
-    <section class="card3d panel" id="panel-chart">
       <div class="stat-grid">
         <div class="stat"><span data-i18n="totalQuota">📦 حجم کل</span><b id="valTotal">—</b></div>
         <div class="stat"><span data-i18n="used">📉 مصرف‌شده</span><b id="valUsed">—</b></div>
@@ -257,6 +282,15 @@
         <div class="stat"><span data-i18n="downloadLbl">⬇️ دانلود</span><b id="valDown">—</b></div>
         <div class="stat"><span data-i18n="uploadLbl">⬆️ آپلود</span><b id="valUp">—</b></div>
       </div>
+    </section>
+
+    <section class="card3d panel" id="panel-chart">
+      <div class="bar-meta">
+        <span data-i18n="remainTraffic">📶 ترافیک باقی‌مانده</span>
+        <span id="usagePct">—</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="usageBar"></div></div>
+      <div class="blink-big" id="remainBlink">—</div>
     </section>
 
     <section class="card3d panel" id="panel-links">
