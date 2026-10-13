@@ -312,7 +312,6 @@
             <div class="link-text">{{ $link }}</div>
             <button class="btn3d" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button>
             <button class="btn3d" type="button" onclick="toggleConfigQR(this)">▦ QR</button>
-            <button class="btn3d wg-dl" type="button" hidden onclick="downloadWg(this)"><span data-i18n="download">⬇️ دانلود</span></button>
           </div>
         </div>
         {{ end }}
@@ -594,22 +593,6 @@
       const item = btn.closest("[data-link]");
       openQR(item && item.dataset.link);
     }
-    function isWg(link) {
-      const s = (link || "").toLowerCase();
-      return s.startsWith("wireguard://") || s.includes("[interface]") || s.includes("privatekey=");
-    }
-    function downloadWg(btn) {
-      const item = btn.closest("[data-link]");
-      const link = item && item.dataset.link;
-      if (!link) return;
-      const blob = new Blob([link], { type: "application/x-wireguard-profile" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "wg.conf";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
     const PLATFORMS = ["android", "ios", "windows"];
     const APPS = [
       { id: "v2rayng", name: "v2rayNG", icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png", platforms: { android: "https://github.com/2dust/v2rayNG/releases" } },
@@ -649,13 +632,6 @@
           <button type="button" class="btn3d" onclick="window.open('${app.platforms[platformTab]}','_blank','noopener')">${t("downloadBtn")}</button>
         </div>`).join("");
     }
-
-    document.querySelectorAll(".cfg-item[data-link]").forEach(item => {
-      if (isWg(item.dataset.link)) {
-        const b = item.querySelector(".wg-dl");
-        if (b) b.hidden = false;
-      }
-    });
 
     applyTheme(true);
     applyLang();
