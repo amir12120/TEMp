@@ -286,6 +286,11 @@
     .app-card img { width: 48px; height: 48px; border-radius: 12px; }
     .app-name { display: block; font-size: .8rem; font-weight: 700; margin: .35rem 0; }
     .os-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .7rem; }
+    .lead-os {
+      display: inline-block; margin-inline-start: .4rem; padding: .05rem .5rem;
+      border: 2px solid var(--edge); border-radius: 999px; background: var(--card);
+      font-size: .72rem; font-weight: 700; box-shadow: 2px 3px 0 var(--edge);
+    }
     select.os {
       font-family: inherit; font-weight: 700; padding: .35rem .5rem; border-radius: 10px;
       border: 2px solid var(--edge); background: var(--card); color: var(--text);
@@ -390,11 +395,11 @@
 
     <section class="card3d panel" id="panel-apps" role="tabpanel" aria-labelledby="tab-apps">
       <div class="os-row">
-        <span data-i18n="selectOS">💻 سیستم عامل:</span>
-        <select class="os" id="osSelect" onchange="setPlatformTab(this.value)">
-          <option value="android">🤖 Android</option>
-          <option value="ios">🍎 iOS</option>
-          <option value="windows">🪟 Windows</option>
+        <span id="osLabel" data-i18n="selectOS">💻 سیستم عامل:</span>
+        <select class="os" id="osSelect" aria-labelledby="osLabel" onchange="setPlatformTab(this.value)">
+          <option value="android" data-platform="android">🤖 Android</option>
+          <option value="ios" data-platform="ios">🍎 iOS</option>
+          <option value="windows" data-platform="windows">🪟 Windows</option>
         </select>
         <span id="osChip" hidden></span>
       </div>
@@ -426,6 +431,7 @@
         alertTime: "زمان باقیمانده شما کمتر از یک روز میباشد لطفا جهت تمدید سرویس خود اقدام فرمایید",
         days: "روز", hours: "ساعت",
         androidName: "اندروید", iosName: "آیفون", windowsName: "ویندوز",
+        androidIcon: "🤖", iosIcon: "🍎", windowsIcon: "🪟",
         downloadBtn: "⬇️ دانلود", detectedHint: "✨ تشخیص داده شد",
         leadDetected: "📱 برنامه‌های مناسب دستگاه شما", leadChosen: "📂 برنامه‌های سیستم‌عامل انتخابی", leadUnknown: "💻 سیستم‌عامل را انتخاب کنید",
         noSubLink: "❌ لینک یافت نشد"
@@ -446,6 +452,7 @@
         alertTime: "Less than one day remains. Please renew your service.",
         days: "days", hours: "hours",
         androidName: "Android", iosName: "iPhone", windowsName: "Windows",
+        androidIcon: "🤖", iosIcon: "🍎", windowsIcon: "🪟",
         downloadBtn: "⬇️ Download", detectedHint: "✨ Detected",
         leadDetected: "📱 Apps for your device", leadChosen: "📂 Apps for selected OS", leadUnknown: "💻 Choose an OS",
         noSubLink: "❌ No link found"
@@ -669,43 +676,297 @@
       openQR(item && item.dataset.link);
     }
     const PLATFORMS = ["android", "ios", "windows"];
+    const OS_LABEL = { android: "androidName", ios: "iosName", windows: "windowsName" };
+    const OS_ICON = { android: "androidIcon", ios: "iosIcon", windows: "windowsIcon" };
+
+    /* The same app list as the older themes, with the same promise: every
+       download is the newest published release (v2rayNG and ZedSecure even
+       when that release is a pre-release). */
     const APPS = [
-      { id: "v2rayng", name: "v2rayNG", icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png", platforms: { android: "https://github.com/2dust/v2rayNG/releases" } },
-      { id: "v2box", name: "v2Box", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fe/03/f8/fe03f855-940a-a28c-ceb8-4b8e61b720d8/V2BoxIcon-0-0-1x_U007epad-0-1-P3-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box", ios: "https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690" } },
-      { id: "hiddify", name: "Hiddify", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/70/5e/2f/705e2fce-cacd-28c0-05bb-946667dbc03a/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=app.hiddify.com", ios: "https://apps.apple.com/us/app/hiddify-proxy-vpn/id6596777532", windows: "https://github.com/hiddify/hiddify-app/releases" } },
-      { id: "happ", name: "Happ", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e0/11/af/e011af74-2151-a47d-d4a2-86eea7854f2a/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=com.happproxy", ios: "https://apps.apple.com/us/app/happ-proxy-utility/id6504287215", windows: "https://www.happ.su/main" } },
-      { id: "shadowrocket", name: "Shadowrocket", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/64/24/2d/64242de2-a763-914f-c686-8777445b83a3/AppIcon-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg", platforms: { ios: "https://apps.apple.com/us/app/shadowrocket/id932747118" } },
-      { id: "npvtunnel", name: "NPV Tunnel", icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c5/1a/b9/c51ab906-a25c-35c6-1f6d-8261ead56e82/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg", platforms: { android: "https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv", ios: "https://apps.apple.com/us/app/npv-tunnel/id1629465476" } }
+      {
+        id: "v2rayng",
+        name: "v2rayNG",
+        icon: "https://raw.githubusercontent.com/2dust/v2rayNG/master/fastlane/metadata/android/en-US/images/icon.png",
+        // releases list (newest first): the latest 2.3.x v2rayNG builds are pre-releases
+        platforms: { android: "https://github.com/2dust/v2rayNG/releases" },
+        directApk: { repo: "2dust/v2rayNG", arch: true, includePrerelease: true, fileName: (ver, arch) => `v2rayNG_${ver}_${arch}.apk` }
+      },
+      {
+        id: "pattng",
+        name: "PattNG",
+        icon: "https://raw.githubusercontent.com/patterniha/PattNG/my-releases/fastlane/metadata/android/en-US/images/icon.png",
+        platforms: { android: "https://github.com/patterniha/PattNG/releases/latest" },
+        directApk: { repo: "patterniha/PattNG", arch: false, fileName: (ver) => `PattNG_${ver}_universal.apk` }
+      },
+      {
+        id: "zedsecure",
+        name: "ZedSecure",
+        icon: "https://raw.githubusercontent.com/CluvexStudio/ZedSecure/main/desktop/icons/zedsecure.png",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.zedsecure.vpn",
+          // Desktop installer comes from the same release; the file name carries the version
+          windows: { directAsset: (ver) => `ZedSecure-${ver}-x86_64.msi` }
+        },
+        directApk: {
+          repo: "CluvexStudio/ZedSecure",
+          arch: true,              // assets are per-ABI: ZedSecure-{ver}-arm64-v8a.apk / -x86_64.apk
+          includePrerelease: true, // always the newest release, even if it is flagged pre-release
+          fileName: (ver, arch) => `ZedSecure-${ver}-${arch}.apk`,
+          tagPrefix: "v"            // tags carry a v prefix (e.g. v3.1.4)
+        }
+      },
+      {
+        id: "v2box",
+        name: "v2Box",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/fe/03/f8/fe03f855-940a-a28c-ceb8-4b8e61b720d8/V2BoxIcon-0-0-1x_U007epad-0-1-P3-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box",
+          ios: "https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690"
+        }
+      },
+      {
+        id: "incy",
+        name: "INCY",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/63/88/8a/63888a12-aca0-97a8-8b0f-30ba2459730c/AppIcon-0-0-1x_U007epad-0-11-0-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=llc.itdev.incy",
+          ios: "https://apps.apple.com/app/incy/id6756943388",
+          windows: { directAsset: () => "incy-windows-setup.exe" }
+        },
+        directApk: { repo: "INCY-DEV/incy-platforms", arch: false, fileName: () => "Incy.apk", tagPrefix: "desktop-v" }
+      },
+      {
+        id: "npvtunnel",
+        name: "NPV Tunnel",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c5/1a/b9/c51ab906-a25c-35c6-1f6d-8261ead56e82/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv",
+          ios: "https://apps.apple.com/us/app/npv-tunnel/id1629465476"
+        }
+      },
+      {
+        id: "hiddify",
+        name: "Hiddify",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/70/5e/2f/705e2fce-cacd-28c0-05bb-946667dbc03a/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=app.hiddify.com",
+          ios: "https://apps.apple.com/us/app/hiddify-proxy-vpn/id6596777532",
+          windows: { directAsset: () => "Hiddify-Windows-Setup-x64.exe" }
+        },
+        directApk: { repo: "hiddify/hiddify-app", arch: false, fileName: () => `Hiddify-Android-universal.apk`, tagPrefix: "v" }
+      },
+      {
+        id: "shadowrocket",
+        name: "Shadowrocket",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/64/24/2d/64242de2-a763-914f-c686-8777445b83a3/AppIcon-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg",
+        platforms: { ios: "https://apps.apple.com/us/app/shadowrocket/id932747118" }
+      },
+      {
+        id: "happ",
+        name: "Happ",
+        icon: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e0/11/af/e011af74-2151-a47d-d4a2-86eea7854f2a/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-85-220.png/512x512bb.jpg",
+        platforms: {
+          android: "https://play.google.com/store/apps/details?id=com.happproxy",
+          ios: "https://apps.apple.com/us/app/happ-proxy-utility/id6504287215",
+          windows: "https://www.happ.su/main"
+        }
+      }
     ];
+
+    /* the visitor's real device — android / ios / windows, null when unsure */
     function detectOS() {
       const ua = (navigator.userAgent || "").toLowerCase();
+      if (!ua) return null;
       if (/android/i.test(ua)) return "android";
       if (/iphone|ipod|ipad|ipados/i.test(ua)) return "ios";
+      // a modern iPad reports itself as Macintosh; multi-touch gives it away
       if (/macintosh|mac os x/i.test(ua)) return (navigator.maxTouchPoints || 0) > 1 ? "ios" : null;
       if (/windows|win32|win64|wow64/i.test(ua)) return "windows";
       return null;
     }
+
     const detectedOS = detectOS();
     let platformTab = PLATFORMS.includes(detectedOS) ? detectedOS : "android";
-    function setPlatformTab(p) { platformTab = p; renderApps(); }
+
+    function osName(platform) { return t(OS_LABEL[platform] || "androidName"); }
+    function osIcon(platform) { return t(OS_ICON[platform] || "androidIcon"); }
+
+    /* dropdown: labels follow the language and the detected OS gets a tick */
+    function updateOsSelect() {
+      const select = document.getElementById("osSelect");
+      if (!select) return;
+      [...select.options].forEach(opt => {
+        const platform = opt.dataset.platform;
+        opt.textContent = osIcon(platform) + " " + osName(platform) +
+          (platform === detectedOS ? " ✓" : "");
+      });
+      select.value = platformTab;
+    }
+
+    /* the line above the list: apps for the visitor's own device, or a nudge */
+    function updateAppsLead() {
+      const lead = document.getElementById("appsLead");
+      if (!lead) return;
+      lead.textContent = !detectedOS ? t("leadUnknown")
+        : platformTab === detectedOS ? t("leadDetected")
+        : t("leadChosen");
+      const badge = document.createElement("span");
+      badge.className = "lead-os";
+      badge.textContent = osIcon(platformTab) + " " + osName(platformTab);
+      lead.appendChild(badge);
+    }
+
+    function setPlatformTab(platform) {
+      if (!PLATFORMS.includes(platform)) return;
+      platformTab = platform;
+      renderApps();
+    }
+
     function renderApps() {
-      const sel = document.getElementById("osSelect");
-      if (sel) sel.value = platformTab;
+      updateOsSelect();
+      updateAppsLead();
+
       const chip = document.getElementById("osChip");
       if (chip) {
         chip.hidden = !detectedOS;
-        chip.textContent = detectedOS ? t("detectedHint") + ": " + t(detectedOS + "Name") : "";
+        chip.textContent = detectedOS
+          ? osIcon(detectedOS) + " " + t("detectedHint") + ": " + osName(detectedOS)
+          : "";
       }
-      const lead = document.getElementById("appsLead");
-      if (lead) lead.textContent = !detectedOS ? t("leadUnknown") : (platformTab === detectedOS ? t("leadDetected") : t("leadChosen"));
+
       const grid = document.getElementById("appsGrid");
-      const list = APPS.filter(a => a.platforms[platformTab]);
+      if (!grid) return;
+      const list = APPS.filter(app => app.platforms[platformTab]);
       grid.innerHTML = list.map(app => `
         <div class="app-card card3d" style="margin:0">
-          <img src="${app.icon}" alt="${app.name}" loading="lazy">
+          <img src="${app.icon}" alt="${app.name}" loading="lazy" draggable="false">
           <span class="app-name">${app.name}</span>
-          <button type="button" class="btn3d" onclick="window.open('${app.platforms[platformTab]}','_blank','noopener')">${t("downloadBtn")}</button>
+          <button type="button" class="btn3d" onclick="startDownload('${app.id}','${platformTab}')">${t("downloadBtn")}</button>
         </div>`).join("");
+    }
+
+    /* ---------- latest release resolved at runtime (includePrerelease => newest, even pre-release) ---------- */
+    const directApkFallback = (repo, includePrerelease) =>
+      `https://github.com/${repo}/releases${includePrerelease ? "" : "/latest"}`;
+    const directApkCache = {};
+    const directApkPromises = {};
+    const versionCache = {};
+    const VERSION_CACHE_TTL = 10 * 60 * 1000;
+
+    function stripV(version) {
+      return String(version || "").replace(/^v/i, "").replace(/^([0-9][0-9A-Za-z.\-]*)[\s\S]*$/, "$1").trim();
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("http " + res.status);
+      return res.json();
+    }
+
+    function normalizeReleaseVersion(raw) {
+      const value = String(raw || "").trim();
+      const match = value.match(/(?:^|[-_])v?(\d+(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?)/i);
+      return match ? match[1] : stripV(value);
+    }
+
+    function releaseTag(release) {
+      return String((release && release.tag_name) || "").trim();
+    }
+
+    // includePrerelease=true => always the newest release, even one flagged pre-release.
+    // v2rayNG needs it: its 2.3.x tags are pre-releases, so /releases/latest returns 2.2.6.
+    async function resolveLatestVersion(repo, includePrerelease) {
+      const cacheKey = includePrerelease ? repo + "#prerelease" : repo;
+      const cached = versionCache[cacheKey];
+      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.info;
+
+      const latest = () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`)
+        .then(j => ({ ver: normalizeReleaseVersion(j.tag_name), tag: releaseTag(j) }));
+
+      const sources = includePrerelease
+        ? [
+            // the releases list is newest-first; the first published release may be a pre-release
+            () => fetchJson(`https://api.github.com/repos/${repo}/releases?per_page=10`)
+              .then(list => {
+                const first = (Array.isArray(list) ? list : []).find(x => x && !x.draft && releaseTag(x));
+                return first ? { ver: normalizeReleaseVersion(first.tag_name), tag: releaseTag(first) } : null;
+              }),
+            latest
+          ]
+        : [latest];
+
+      sources.push(() => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`)
+        .then(j => ({ ver: normalizeReleaseVersion(j.value), tag: "" })));
+
+      for (const src of sources) {
+        try {
+          const info = await src();
+          if (info && /^[0-9]/.test(info.ver) && !/\s|\//.test(info.ver)) {
+            versionCache[cacheKey] = { info, at: Date.now() };
+            return info;
+          }
+        } catch (e) { /* next source */ }
+      }
+      return null;
+    }
+
+    function preferredApkArch() {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      if (/\bx86\b|x86_64|i[3-6]86/.test(ua) && !/arm/.test(ua)) return "x86_64";
+      return "arm64-v8a";
+    }
+
+    async function getDirectApkUrl(app, fileOf) {
+      const cfg = app.directApk;
+      if (!cfg) return null;
+      const cacheKey = fileOf ? app.id + ":" + fileOf("", "") : app.id;
+      if (directApkCache[cacheKey]) return directApkCache[cacheKey];
+      if (directApkPromises[cacheKey]) return directApkPromises[cacheKey];
+
+      directApkPromises[cacheKey] = (async () => {
+        const info = await resolveLatestVersion(cfg.repo, cfg.includePrerelease);
+        if (info) {
+          const arch = cfg.arch ? preferredApkArch() : null;
+          const file = fileOf ? fileOf(info.ver, arch) : cfg.fileName(info.ver, arch);
+          const tag = info.tag || (cfg.tagPrefix || "") + info.ver;
+          return `https://github.com/${cfg.repo}/releases/download/${tag}/${file}`;
+        }
+        return directApkFallback(cfg.repo, cfg.includePrerelease);
+      })();
+
+      const result = await directApkPromises[cacheKey];
+      if (result.includes("/releases/download/")) directApkCache[cacheKey] = result;
+      delete directApkPromises[cacheKey];
+      return result;
+    }
+
+    function openDirectApk(app, fileOf) {
+      getDirectApkUrl(app, fileOf)
+        .then(url => window.open(url, "_blank", "noopener"))
+        .catch(() => window.open(directApkFallback(app.directApk.repo, app.directApk.includePrerelease), "_blank", "noopener"));
+    }
+
+    setTimeout(() => {
+      APPS.filter(a => a.directApk).forEach(a => getDirectApkUrl(a).catch(() => {}));
+    }, 1500);
+
+    function startDownload(appId, platform) {
+      const app = APPS.find(a => a.id === appId);
+      if (!app) return;
+
+      if (app.directApk && platform === "android") {
+        openDirectApk(app);
+        return;
+      }
+
+      const target = app.platforms[platform];
+
+      if (target && typeof target === "object" && app.directApk) {
+        openDirectApk(app, target.directAsset);
+        return;
+      }
+
+      if (typeof target === "string" && target) window.open(target, "_blank", "noopener");
     }
 
     applyTheme(true);

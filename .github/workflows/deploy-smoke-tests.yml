@@ -267,8 +267,20 @@ jobs:
           grep -q 'function toggleConfigQR' pages/classic/index.html
           grep -q 'function copyAllConfigs' pages/classic/index.html
           grep -q 'id="osSelect"' pages/classic/index.html
+          grep -q 'data-platform="android"' pages/classic/index.html
           grep -q 'function detectOS' pages/classic/index.html
           grep -q 'function renderApps' pages/classic/index.html
+          grep -q 'function startDownload' pages/classic/index.html
+          # the same nine apps and the same newest-release downloads as the
+          # older themes (per-ABI APKs, ZedSecure's Windows installer, …)
+          grep -q 'api.github.com/repos/' pages/classic/index.html
+          grep -q '2dust/v2rayNG' pages/classic/index.html
+          grep -q 'patterniha/PattNG' pages/classic/index.html
+          grep -q 'CluvexStudio/ZedSecure' pages/classic/index.html
+          grep -q 'ZedSecure-${ver}-${arch}.apk' pages/classic/index.html
+          grep -q 'id: "zedsecure"' pages/classic/index.html
+          grep -q 'INCY-DEV/incy-platforms' pages/classic/index.html
+          grep -q 'hiddify/hiddify-app' pages/classic/index.html
           # day mode + Persian are the defaults
           grep -q 'applyTheme(true)' pages/classic/index.html
           grep -q 'let lang = "fa"' pages/classic/index.html
