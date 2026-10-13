@@ -10,20 +10,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #1a120e;
-      --bg-2: #2a1c14;
-      --card: #2e2118;
-      --text: #f3e6d8;
-      --muted: #c4a888;
-      --accent: #8b5a2b;
-      --accent-2: #c47a3a;
-      --edge: #5c3d28;
-      --hi: #4a3224;
+      --bg: #0a0705;
+      --bg-2: #140e0a;
+      --card: #16100c;
+      --text: #e8d4c4;
+      --muted: #9a7a62;
+      --accent: #6a3e1c;
+      --accent-2: #8a5228;
+      --edge: #2a1a12;
+      --hi: #1c120c;
       --good: #3cb371;
       --bad: #e23d3d;
-      --shadow: 10px 12px 0 #0d0806, 0 18px 36px rgba(0,0,0,.55);
-      --inset: inset 0 2px 0 rgba(255,220,180,.18), inset 0 -4px 8px rgba(0,0,0,.35);
-      --wave: rgba(196,122,58,.22);
+      --shadow: 10px 12px 0 #050302, 0 18px 36px rgba(0,0,0,.75);
+      --inset: inset 0 2px 0 rgba(255,220,180,.08), inset 0 -4px 8px rgba(0,0,0,.55);
+      --wave: rgba(90,55,28,.28);
       --font: "Vazirmatn", "Inter", sans-serif;
     }
     html.day-mode, body.day-mode {
@@ -457,7 +457,7 @@
     function applyTheme(day) {
       document.documentElement.classList.toggle("day-mode", day);
       document.body.classList.toggle("day-mode", day);
-      document.getElementById("themeColorMeta").setAttribute("content", day ? "#dce9f7" : "#1a120e");
+      document.getElementById("themeColorMeta").setAttribute("content", day ? "#dce9f7" : "#0a0705");
       updateThemeBtn();
       renderBars();
     }
