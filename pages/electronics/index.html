@@ -424,7 +424,10 @@
     }
     .gauge-card.zoomed .zoom-hint { transform: rotate(180deg); color: var(--accent); border-color: var(--accent); }
 
-    .gauge-wrap { position: relative; display: grid; place-items: center; flex: 1 1 auto; padding-top: 0.3rem; }
+    /* the dial hugs the top of the free space instead of centring in it: the two
+       cards have different footers, so centring put one dial ~45px below the
+       other — both instruments now start on the same line */
+    .gauge-wrap { position: relative; display: grid; place-items: start center; flex: 1 1 auto; padding-top: 0.3rem; }
     .meter { position: relative; width: min(100%, 340px); container: meter / inline-size; }
     .gauge-card.zoomed .meter { width: min(100%, 470px); }
     .meter-svg { display: block; width: 100%; height: auto; overflow: visible; }

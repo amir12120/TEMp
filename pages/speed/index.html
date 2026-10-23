@@ -461,7 +461,13 @@
 
     /* the dial centres in the free space and the footer sticks to the bottom,
        so the two cards stay balanced at equal height */
-    .gauge-wrap { position: relative; display: grid; place-items: center; flex: 1 1 auto; }
+    /* the dial hugs the top of the free space instead of centring in it: the two
+       cards have different footers (the time card carries the clock strip), so
+       centring put one dial below the other — both now start on the same line */
+    /* the single track is pinned to the wrap width: without it the clock strip's
+       longest line widened the column and the dial spilled out of the card on a
+       320px screen */
+    .gauge-wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); place-items: start center; flex: 1 1 auto; }
 
     .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; container: dial / size; }
     .gauge-card.zoomed .gauge { width: min(100%, 460px); }
@@ -611,6 +617,15 @@
         font-size: 0.68rem; text-align: start;
         border-top: none; padding-top: 0; margin-top: 0;
       }
+    }
+    /* a 320px phone leaves the card ~138px: the face and the digital clock no
+       longer fit on one row and the digits ran over the dial, so the face
+       shrinks and the type steps down */
+    @container gauge-card (max-width: 150px) {
+      .clock-badge { gap: 0.4rem; padding: 0.4rem 0.45rem; }
+      .clock-face { width: 34px; height: 34px; }
+      .clock-digital { font-size: 0.9rem; }
+      .clock-date { font-size: 0.66rem; }
     }
 
     /* zoomed gauge: clock off — the expiry date under the dial says it all */
