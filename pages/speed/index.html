@@ -39,6 +39,13 @@
       --gloss: rgba(255, 255, 255, 0.09);
       --emboss-drop: 0 16px 30px rgba(0, 0, 0, 0.5);
       --font-dig: "Orbitron", "Inter", monospace;
+      /* numbers and labels you have to read at a glance: a plain UI face with
+         tabular digits — the wide sci-fi display font is unreadable at 9-13px */
+      --font-read: "Vazirmatn", "Inter", system-ui, sans-serif;
+      /* text on the dial: the neon accents are for strokes and glows, they are
+         too light to carry small text (especially in day mode) */
+      --accent-ink: var(--accent);
+      --bad-ink: var(--bad);
       --radius: 22px;
     }
 
@@ -59,6 +66,10 @@
       --emboss-lo: rgba(30, 80, 140, 0.22);
       --gloss: rgba(255, 255, 255, 0.7);
       --emboss-drop: 0 16px 28px rgba(25, 70, 130, 0.22);
+      /* daylight needs clearly darker ink: cyan/red on a pale blue page drops to
+         ~2:1 contrast, which is what made the dial values hard to read */
+      --accent-ink: #0a6a80;
+      --bad-ink: #b3152b;
     }
 
     * { box-sizing: border-box; }
@@ -255,9 +266,15 @@
     .presence-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
     .presence.online .presence-dot { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18); animation: pulse 1.8s ease infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    /* a slow glow, not a strobe: the old 0.35 opacity + shrink made the value
+       disappear for half of every 1.25s cycle, which is what read as "unclear" */
     @keyframes remained-blink {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.35; transform: scale(0.94); }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.76; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .gauge-remained { animation: none; }
+      .speed-line { animation: none; }
     }
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -368,10 +385,16 @@
       align-items: stretch;
     }
     @media (min-width: 760px) { .cluster { gap: 1rem; } }
+    /* two half-width dials on a 390px phone leave ~160px per dial: the readouts
+       inside them can never be read at that size, so phones get one per row */
+    @media (max-width: 560px) { .cluster { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; } }
 
     .gauge-card {
       position: relative;
       min-width: 0;
+      /* every label inside the card sizes itself from the card width, so a
+         narrow phone card shrinks as a whole instead of overlapping */
+      container: gauge-card / inline-size;
       /* raised dashboard housing: gloss on top, highlight inside, shade below */
       background: linear-gradient(180deg, var(--gloss), transparent 42%), var(--panel);
       background-clip: padding-box;
@@ -427,7 +450,8 @@
     .card-head {
       position: relative; z-index: 2;
       display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
-      font-size: clamp(0.58rem, 2.7vw, 0.78rem); font-weight: 800; letter-spacing: 0.06em;
+      font-size: clamp(0.72rem, 3.1vw, 0.84rem);
+      font-size: clamp(0.68rem, 3.4cqw, 0.86rem); font-weight: 800; letter-spacing: 0.03em;
       color: var(--muted); text-transform: uppercase;
       margin-bottom: 0.4rem;
       line-height: 1.25;
@@ -438,7 +462,7 @@
        so the two cards stay balanced at equal height */
     .gauge-wrap { position: relative; display: grid; place-items: center; flex: 1 1 auto; }
 
-    .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; }
+    .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; container: dial / size; }
     .gauge-card.zoomed .gauge { width: min(100%, 460px); }
 
     /* embossed instrument dial behind the SVG (rim light + deep inner shade) */
@@ -470,64 +494,71 @@
     .needle-base { fill: #0b1220; stroke: var(--txt); stroke-width: 2; }
 
     .gauge-readout {
-      position: absolute; z-index: 2; left: 50%; top: 62%; transform: translate(-50%, 0);
+      position: absolute; z-index: 2; left: 50%; top: 57%; transform: translate(-50%, 0);
       display: flex; flex-direction: column; align-items: center; gap: 0.05rem;
       text-align: center; pointer-events: none; width: 78%;
     }
     .readout-big {
-      font-family: var(--font-dig); font-size: clamp(1rem, 4.6vw, 2.2rem);
-      font-weight: 800; line-height: 1; letter-spacing: 0.02em;
+      /* the vw line is the fallback for browsers without container queries */
+      font-size: clamp(1rem, 6vw, 2.3rem);
+      font-family: var(--font-read); font-size: clamp(0.95rem, 12.5cqw, 3.2rem);
+      font-weight: 800; line-height: 1.05; letter-spacing: 0;
       color: var(--txt);
-      /* halo keeps the digits readable when the needle sweeps over them */
-      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg), 0 0 20px rgba(34, 211, 238, 0.35);
+      /* tabular digits stop the countdown from jittering every second */
+      font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
+      /* a tight halo only — a wide blur eats the glyph edges and blurs them */
+      text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .readout-unit {
-      font-size: clamp(0.5rem, 2.2vw, 0.72rem); font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.1em;
-      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
+      font-size: clamp(0.6rem, 2.6vw, 0.78rem);
+      font-size: clamp(0.54rem, 5.4cqw, 0.8rem); font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.2;
+      text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .readout-sub {
-      font-family: var(--font-dig); font-size: clamp(0.56rem, 2.7vw, 0.82rem);
-      font-weight: 600; color: var(--accent); margin-top: 0.15rem;
-      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
-    }
-    .readout-cap {
-      font-size: clamp(0.54rem, 2.2vw, 0.66rem); color: var(--muted); margin-top: 0.2rem;
-      text-shadow: 0 0 6px var(--bg), 0 0 12px var(--bg);
+      font-size: clamp(0.72rem, 3.4vw, 1rem);
+      font-family: var(--font-read); font-size: clamp(0.62rem, 6.6cqw, 1.02rem);
+      font-weight: 700; color: var(--accent-ink); margin-top: 0.2rem;
+      font-variant-numeric: tabular-nums; letter-spacing: 0.02em; line-height: 1.2;
+      text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
 
-    /* the readout scales up when the gauge is blown up */
-    .gauge-card.zoomed .readout-big { font-size: clamp(2rem, 6.5vw, 3rem); }
-    .gauge-card.zoomed .readout-unit { font-size: 0.82rem; }
-    .gauge-card.zoomed .readout-sub { font-size: 1rem; }
-    .gauge-card.zoomed .readout-cap { font-size: 0.74rem; }
+    /* the readout scales up when the gauge is blown up — still measured against
+       the dial, so the blown-up card is the only thing that gets bigger */
+    .gauge-card.zoomed .readout-big { font-size: clamp(2rem, 12.5cqw, 3.4rem); }
+    .gauge-card.zoomed .readout-unit { font-size: clamp(0.7rem, 5.4cqw, 1rem); }
+    .gauge-card.zoomed .readout-sub { font-size: clamp(0.8rem, 6.6cqw, 1.35rem); }
 
-    /* حجم باقی‌مانده روی صفحهٔ گیج: برچسب «باقی‌مانده» + مقدار قرمز چشمک‌زن،
-       وسط نیمهٔ بالایی دایره — هم‌فاصله از مرکز دایره و نشانگرِ ۱۲ ساعت */
+    /* حجم باقی‌مانده روی صفحهٔ گیج: برچسب «باقی‌مانده» + مقدار قرمز با درخشش
+       آرام، وسط نیمهٔ بالایی دایره — هم‌فاصله از مرکز دایره و نشانگرِ ۱۲ ساعت */
     .gauge-remained-wrap {
       position: absolute; z-index: 2; left: 50%; top: 29.2%; transform: translate(-50%, -50%);
       display: flex; flex-direction: column; align-items: center; gap: 0.14rem;
       text-align: center; white-space: nowrap; pointer-events: none;
     }
     .gauge-remained-cap {
-      font-size: clamp(0.5rem, 2.4vw, 0.64rem); font-weight: 800; letter-spacing: 0.05em;
+      font-size: clamp(0.56rem, 2.4vw, 0.7rem);
+      font-size: clamp(0.46rem, 4.3cqw, 0.7rem); font-weight: 700; letter-spacing: 0.02em;
       color: var(--muted);
-      text-shadow: 0 0 8px var(--bg), 0 0 12px var(--bg);
+      text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .gauge-remained {
       direction: ltr;
-      font-family: var(--font-dig); font-size: clamp(0.66rem, 3.2vw, 0.86rem);
-      font-weight: 900; color: var(--bad); line-height: 1;
-      text-shadow: 0 0 8px var(--bg), 0 0 14px rgba(255, 77, 94, 0.6);
-      animation: remained-blink 1.25s ease-in-out infinite;
+      font-size: clamp(0.66rem, 3.4vw, 0.98rem);
+      font-family: var(--font-read); font-size: clamp(0.56rem, 5.6cqw, 1.2rem);
+      font-weight: 800; color: var(--bad-ink); line-height: 1.15;
+      font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+      text-shadow: 0 0 2px var(--bg), 0 0 6px rgba(255, 77, 94, 0.32);
+      animation: remained-blink 2.4s ease-in-out infinite;
     }
-    .gauge-card.zoomed .gauge-remained { font-size: 1.02rem; }
-    .gauge-card.zoomed .gauge-remained-cap { font-size: 0.74rem; }
+    .gauge-card.zoomed .gauge-remained { font-size: 1.16rem; }
+    .gauge-card.zoomed .gauge-remained-cap { font-size: 0.8rem; }
 
     .gauge-foot {
       position: relative; z-index: 2;
       margin-top: auto; padding-top: 0.5rem; text-align: center;
-      font-size: clamp(0.64rem, 2.8vw, 0.8rem); color: var(--muted); line-height: 1.4;
+      font-size: clamp(0.72rem, 2.9vw, 0.84rem);
+      font-size: clamp(0.66rem, 3.1cqw, 0.86rem); color: var(--muted); line-height: 1.45;
     }
     .gauge-card.zoomed .gauge-foot { font-size: 0.98rem; padding-top: 0.85rem; }
     .gauge-foot strong { color: var(--txt); font-weight: 700; }
@@ -554,8 +585,8 @@
     .clock-hand.minute { stroke-width: 2.6; }
     .clock-hand.second { stroke: var(--accent); stroke-width: 1.4; }
     .clock-hub { fill: var(--accent); }
-    .clock-digital { font-family: var(--font-dig); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; }
-    .clock-date { font-size: 0.62rem; color: var(--muted); text-align: center; line-height: 1.35; }
+    .clock-digital { font-family: var(--font-read); font-size: 1rem; font-weight: 800; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+    .clock-date { font-size: 0.7rem; color: var(--muted); text-align: center; line-height: 1.4; }
     .clock-event {
       font-size: 0.6rem; color: var(--warn); text-align: center; line-height: 1.35;
       border-top: 1px dashed var(--line); padding-top: 0.2rem; margin-top: 0.1rem;
@@ -564,14 +595,21 @@
 
     /* narrow cards (phones): the clock drops under the dial so it stays readable */
     @media (max-width: 720px) {
+      /* the badge leaves the dial corner and becomes a wide strip under it, so
+         the clock, the time and the date sit on one line instead of a tall box */
       .clock-badge {
-        position: static; width: 100%; margin-top: 0.4rem;
-        padding: 0.45rem 0.35rem 0.5rem; border-radius: 14px;
+        position: static; width: 100%; margin-top: 0.5rem;
+        padding: 0.45rem 0.6rem; border-radius: 14px;
+        flex-direction: row; align-items: center; justify-content: center; gap: 0.7rem;
       }
-      .clock-face { width: 56px; height: 56px; }
-      .clock-digital { font-size: 0.9rem; }
-      .clock-date { font-size: 0.6rem; }
-      .clock-event { font-size: 0.58rem; }
+      .clock-face { width: 48px; height: 48px; flex: 0 0 auto; }
+      .clock-info { align-items: flex-start; gap: 0.08rem; }
+      .clock-digital { font-size: 1rem; }
+      .clock-date { font-size: 0.74rem; text-align: start; }
+      .clock-event {
+        font-size: 0.68rem; text-align: start;
+        border-top: none; padding-top: 0; margin-top: 0;
+      }
     }
 
     /* zoomed gauge: clock off — the expiry date under the dial says it all */
@@ -581,9 +619,13 @@
     .usage-details {
       position: relative; z-index: 2;
       margin-top: 0.6rem;
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem;
+      display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.45rem;
     }
-    @media (max-width: 560px) { .usage-details { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem; } }
+    /* five figures over six tracks: two rows of 3, then two half-width cells
+       instead of a lopsided row with an empty hole */
+    .ud { grid-column: span 2; }
+    .ud:nth-child(4), .ud:nth-child(5) { grid-column: span 3; }
+    @media (max-width: 560px) { .usage-details { gap: 0.35rem; } }
     .ud {
       border: 1px solid var(--line);
       background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
@@ -591,10 +633,17 @@
       border-radius: 12px; padding: 0.4rem 0.35rem;
       display: flex; flex-direction: column; gap: 0.12rem; text-align: center; min-width: 0;
     }
-    .ud span { font-size: clamp(0.48rem, 2vw, 0.62rem); color: var(--muted); line-height: 1.2; }
-    .ud b { font-family: var(--font-dig); font-size: clamp(0.56rem, 2.8vw, 0.82rem); font-weight: 700; word-break: break-all; }
-    .gauge-card.zoomed .ud span { font-size: 0.64rem; }
-    .gauge-card.zoomed .ud b { font-size: 0.95rem; }
+    .ud span { font-size: clamp(0.64rem, 2.7vw, 0.75rem); font-size: clamp(0.58rem, 3.3cqw, 0.76rem); font-weight: 700; color: var(--muted); line-height: 1.35; }
+    .ud b {
+      font-family: var(--font-read); font-size: clamp(0.74rem, 3.1vw, 0.94rem);
+      font-size: clamp(0.68rem, 4.1cqw, 0.96rem);
+      font-weight: 800; color: var(--txt); line-height: 1.3;
+      font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+      /* the value is a unit token: never split "12.50 GB" in two */
+      white-space: nowrap;
+    }
+    .gauge-card.zoomed .ud span { font-size: 0.8rem; }
+    .gauge-card.zoomed .ud b { font-size: 1.05rem; }
 
     /* ---------- generic panels ---------- */
     .panel {
@@ -850,10 +899,8 @@
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
     }
     .zoom-panel .gauge-card .gauge { width: min(100%, 430px); }
-    .zoom-panel .gauge-card .readout-big { font-size: clamp(2.1rem, 7vw, 3.1rem); }
-    .zoom-panel .gauge-card .readout-unit { font-size: 0.84rem; }
-    .zoom-panel .gauge-card .readout-sub { font-size: 1.05rem; }
-    .zoom-panel .gauge-card .readout-cap { font-size: 0.76rem; }
+    /* readout sizes are intentionally not overridden here: they follow the dial
+       (cqw) and grow on their own inside the zoom stage */
     .zoom-panel .gauge-card .card-head { font-size: 0.84rem; }
     .zoom-panel .gauge-card .gauge-foot { font-size: 1rem; padding-top: 0.9rem; }
     .zoom-panel .gauge-card .ud span { font-size: 0.66rem; }
@@ -938,7 +985,6 @@
               <strong class="readout-big" id="timeBig">00</strong>
               <span class="readout-unit" data-i18n="unitDays">روز</span>
               <span class="readout-sub" id="timeSub">00:00:00</span>
-              <span class="readout-cap" data-i18n="timeCap">زمان باقی‌مانده</span>
             </div>
           </div>
 
@@ -991,8 +1037,6 @@
             <div class="gauge-readout">
               <strong class="readout-big" id="usageBig">۰٪</strong>
               <span class="readout-unit" data-i18n="usedShort">مصرف‌شده</span>
-              <span class="readout-sub" id="usageSub">—</span>
-              <span class="readout-cap" data-i18n="remainedCap">حجم باقی‌مانده</span>
             </div>
           </div>
         </div>
@@ -1532,7 +1576,6 @@
 
       const pctText = Math.round(percent) + t("pct");
       set("usageBig", lang === "fa" ? toPersianDigits(pctText) : pctText);
-      set("usageSub", remainedText);
       set("usageRemained", remainedText);
 
       const alertVol = document.getElementById("alertVol");
