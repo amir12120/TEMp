@@ -246,7 +246,7 @@ async function settlePage(send) {
 /* Bottom edges of top-level blocks, so a crop can stop between two cards. */
 async function sectionBottoms(send) {
   const expr = `(() => {
-    const nodes = [...document.querySelectorAll('.card, .card3d, .hud-card, .panel, .tabs, .container > section, footer')];
+    const nodes = [...document.querySelectorAll('.card, .card3d, .hud-card, .panel, .tabs, .gauge-card, .container > section, footer')];
     return nodes.map(n => Math.ceil(n.getBoundingClientRect().bottom + window.scrollY)).filter(b => b > 0);
   })()`;
   const out = await send("Runtime.evaluate", { expression: expr, returnByValue: true });
@@ -387,7 +387,7 @@ const day = flags.day ? true : flags.night ? false : undefined;
    is shorter (electronics = switches + clock + the two dials, classic = top bar
    + account + clock + the tab menu) get a tighter crop so the README thumbnail
    stays readable. */
-const TOP_CLIP = { electronics: 760, classic: 520 };
+const TOP_CLIP = { electronics: 830, speed: 760, classic: 520 };
 
 let failed = 0;
 for (const theme of themes) {

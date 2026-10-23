@@ -189,7 +189,8 @@ jobs:
           grep -q 'JALALI_EVENTS' pages/electronics/index.html
           grep -q 'id="clockDate"' pages/electronics/index.html
           grep -q 'id="clockEvent"' pages/electronics/index.html
-          # the two multimeter dials always sit side by side
+          # the two multimeter dials: side by side on wide screens, one per row
+          # on phones (two ~160px dials were unreadable)
           grep -q 'id="timeGauge"' pages/electronics/index.html
           grep -q 'id="usageGauge"' pages/electronics/index.html
           grep -q 'id="usageRemained"' pages/electronics/index.html

@@ -42,6 +42,12 @@
       --gloss: rgba(255, 255, 255, 0.07);
       --font-dig: "Orbitron", "Inter", monospace;
       --font-silk: ui-monospace, SFMono-Regular, Menlo, "Courier New", monospace;
+      /* figures you have to read at a glance: a plain UI face with tabular
+         digits, instead of the wide display font at 9-13px */
+      --font-read: "Vazirmatn", "Inter", system-ui, sans-serif;
+      /* printed text inks: the LED colours are for glows, too light for text */
+      --accent-2-ink: var(--accent-2);
+      --silk-ink: rgba(255, 205, 196, 0.74);
       --radius: 20px;
       --screw: radial-gradient(circle at 34% 30%, #d9d9d9, #8b8b8b 45%, #4a4a4a 100%);
     }
@@ -72,6 +78,10 @@
       --emboss-lo: rgba(160, 45, 32, 0.20);
       --gloss: rgba(255, 255, 255, 0.62);
       --screw: radial-gradient(circle at 34% 30%, #ffffff, #cfcfcf 45%, #8f8f8f 100%);
+      /* on the white plate the amber small print drops to 3.6:1 and the silk to
+         3.3:1, so the printed inks get their own darker day colours */
+      --accent-2-ink: #b8440f;
+      --silk-ink: #8f3324;
     }
 
     * { box-sizing: border-box; }
@@ -189,8 +199,8 @@
     }
     .part-title {
       display: flex; align-items: center; gap: 0.4rem;
-      font-size: clamp(0.72rem, 3vw, 0.92rem); font-weight: 800; letter-spacing: 0.01em;
-      color: var(--txt);
+      font-size: clamp(0.78rem, 3.6cqw, 0.95rem); font-weight: 800; letter-spacing: 0.01em;
+      color: var(--txt); min-width: 0;
     }
     .glyph { width: 20px; height: 20px; flex: 0 0 auto; color: var(--accent); }
     .glyph .fill { fill: currentColor; }
@@ -198,9 +208,11 @@
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.42; } }
+    /* a slow glow, not a strobe: 0.32 opacity + shrink hid the value for half
+       of every 1.25s cycle, which is what read as "unclear" */
     @keyframes remained-blink {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.32; transform: scale(0.95); }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.76; }
     }
     @keyframes led-breathe { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
 
@@ -378,16 +390,22 @@
     .clock-date { font-size: clamp(0.66rem, 2.9vw, 0.84rem); color: var(--txt); font-weight: 700; }
     .clock-event { font-size: clamp(0.6rem, 2.6vw, 0.76rem); color: var(--accent-2); font-weight: 800; }
     .tz-chip { font-family: var(--font-silk); font-size: 0.54rem; letter-spacing: 0.12em; color: var(--silkscreen); text-transform: uppercase; }
-    .seg-scale { display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-silk); font-size: 0.5rem; letter-spacing: 0.14em; color: var(--silkscreen); text-transform: uppercase; }
+    /* the screws sit in the module corners: keep the printed model line clear */
+    .seg-scale { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.7rem; font-family: var(--font-silk); font-size: 0.56rem; letter-spacing: 0.12em; color: var(--silk-ink); text-transform: uppercase; }
 
     /* ---------- analogue multimeter gauges (half-round dials, side by side) ---------- */
     .cluster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; align-items: stretch; }
     @media (min-width: 760px) { .cluster { gap: 1rem; } }
+    /* two half-width meters on a 390px phone leave ~150px each — far too little
+       for the printed window, so phones get one instrument per row */
+    @media (max-width: 560px) { .cluster { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; } }
 
     .gauge-card {
       display: flex; flex-direction: column;
       padding: 0.7rem 0.6rem 0.75rem !important;
       cursor: pointer; overflow: hidden;
+      /* labels outside the window size themselves from the card width */
+      container: gauge-card / inline-size;
     }
     @media (min-width: 760px) { .gauge-card { padding: 0.95rem 1rem 1rem !important; } }
     .gauge-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -406,7 +424,7 @@
     .gauge-card.zoomed .zoom-hint { transform: rotate(180deg); color: var(--accent); border-color: var(--accent); }
 
     .gauge-wrap { position: relative; display: grid; place-items: center; flex: 1 1 auto; padding-top: 0.3rem; }
-    .meter { position: relative; width: min(100%, 340px); }
+    .meter { position: relative; width: min(100%, 340px); container: meter / inline-size; }
     .gauge-card.zoomed .meter { width: min(100%, 470px); }
     .meter-svg { display: block; width: 100%; height: auto; overflow: visible; }
 
@@ -430,51 +448,56 @@
       position: absolute; z-index: 2; left: 50%; top: 56.9%; transform: translateX(-50%);
       width: 84%; height: 40%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 0.08rem; padding: 0.16rem 0.24rem; border-radius: 8px;
+      gap: 0.06rem; padding: 0.2rem 0.3rem; border-radius: 8px;
       background: var(--dial);
       box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.42), 0 0 0 1px var(--line-strong);
       text-align: center; pointer-events: none; overflow: hidden;
     }
-    .meter-silk-html { direction: ltr; font-family: var(--font-silk); font-size: clamp(0.4rem, 1.7vw, 0.54rem); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--silkscreen); opacity: 0.92; }
+    .meter-silk-html { direction: ltr; font-family: var(--font-silk); font-size: clamp(0.44rem, 3.3cqw, 0.6rem); font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--silk-ink); }
     .readout-row { display: flex; align-items: baseline; justify-content: center; gap: 0.22rem; max-width: 100%; white-space: nowrap; }
     .readout-big {
-      font-family: var(--font-dig);
-      font-size: clamp(0.85rem, 4vw, 1.4rem); font-weight: 800; line-height: 1; letter-spacing: 0.01em;
+      /* sized by the meter itself, so the window never overflows its plate */
+      font-family: var(--font-read);
+      font-size: clamp(0.95rem, 9.5cqw, 2.4rem); font-weight: 800; line-height: 1.05; letter-spacing: 0;
+      font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
       color: var(--txt);
     }
-    .readout-unit { font-size: clamp(0.44rem, 1.8vw, 0.58rem); font-weight: 800; color: var(--muted); letter-spacing: 0.08em; }
-    .readout-sub { font-family: var(--font-dig); font-size: clamp(0.48rem, 2vw, 0.68rem); font-weight: 700; color: var(--accent-2); direction: ltr; }
-    .gauge-card.zoomed .readout-big { font-size: clamp(1.5rem, 5.5vw, 2.4rem); }
-    .gauge-card.zoomed .readout-sub { font-size: 0.95rem; }
-    .gauge-card.zoomed .readout-unit { font-size: 0.74rem; }
-    .gauge-card.zoomed .meter-silk-html { font-size: 0.62rem; }
+    .readout-unit { font-size: clamp(0.55rem, 4.6cqw, 0.85rem); font-weight: 800; color: var(--muted); letter-spacing: 0.04em; }
+    .readout-sub {
+      font-family: var(--font-read); font-size: clamp(0.62rem, 5cqw, 1rem); font-weight: 700;
+      font-variant-numeric: tabular-nums; color: var(--accent-2-ink); direction: ltr; line-height: 1.2;
+    }
+    /* the blown-up meter is a bigger container, so the window already scales */
 
     /* blinking red remaining quota printed inside the usage dial */
     .meter-remained {
       display: flex; align-items: baseline; justify-content: center; gap: 0.22rem;
       max-width: 100%; white-space: nowrap;
     }
-    .meter-remained-cap { font-size: clamp(0.44rem, 1.8vw, 0.6rem); font-weight: 800; letter-spacing: 0.05em; color: var(--muted); }
+    .meter-remained-cap { font-size: clamp(0.5rem, 3.8cqw, 0.76rem); font-weight: 800; letter-spacing: 0.03em; color: var(--muted); }
     .meter-remained-value {
-      direction: ltr; font-family: var(--font-dig); font-size: clamp(0.7rem, 3.1vw, 1.05rem); font-weight: 900;
-      color: var(--bad); line-height: 1;
-      text-shadow: 0 0 8px rgba(216, 31, 20, 0.55);
-      animation: remained-blink 1.25s ease-in-out infinite;
+      direction: ltr; font-family: var(--font-read); font-size: clamp(0.72rem, 6cqw, 1.3rem); font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--bad); line-height: 1.1;
+      text-shadow: 0 0 6px rgba(216, 31, 20, 0.32);
+      animation: remained-blink 2.4s ease-in-out infinite;
     }
-    .gauge-card.zoomed .meter-remained-value { font-size: 1.3rem; }
-    .gauge-card.zoomed .meter-remained-cap { font-size: 0.76rem; }
 
-    .gauge-foot { position: relative; z-index: 2; margin-top: auto; padding-top: 0.45rem; text-align: center; font-size: clamp(0.62rem, 2.8vw, 0.78rem); color: var(--muted); line-height: 1.45; }
+    .gauge-foot { position: relative; z-index: 2; margin-top: auto; padding-top: 0.45rem; text-align: center; font-size: clamp(0.68rem, 3cqw, 0.85rem); color: var(--muted); line-height: 1.45; }
     .gauge-foot strong { color: var(--txt); font-weight: 800; }
     .gauge-card.zoomed .gauge-foot { font-size: 0.95rem; }
 
-    .usage-details { position: relative; z-index: 2; margin-top: auto; padding-top: 0.5rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem 0.5rem; }
-    .ud { display: flex; align-items: baseline; justify-content: space-between; gap: 0.3rem; min-width: 0; }
-    .ud span { font-size: clamp(0.5rem, 2.1vw, 0.62rem); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ud b { font-family: var(--font-dig); font-size: clamp(0.56rem, 2.5vw, 0.74rem); font-weight: 700; white-space: nowrap; }
+    .usage-details { position: relative; z-index: 2; margin-top: auto; padding: 0.5rem 0.15rem 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem 0.6rem; }
+    /* label above value: on a wide card a space-between row put the label and
+       the number at opposite edges, so "5.00GB" did not look like "مصرف" */
+    .ud { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; min-width: 0; }
+    .ud.wide { flex-direction: row; align-items: baseline; justify-content: flex-start; gap: 0.45rem; }
+    .ud span { font-size: clamp(0.6rem, 3cqw, 0.76rem); font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ud b {
+      font-family: var(--font-read); font-size: clamp(0.68rem, 3.4cqw, 0.9rem); font-weight: 800;
+      font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
     .ud.wide { grid-column: 1 / -1; }
-    .gauge-card.zoomed .ud span { font-size: 0.7rem; }
-    .gauge-card.zoomed .ud b { font-size: 0.9rem; }
 
     /* ---------- enlarged gauge stage ---------- */
     .zoom-stage { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 1rem; }
@@ -843,7 +866,6 @@
                 <strong class="readout-big" id="usageBig">۰٪</strong>
                 <span class="readout-unit" data-i18n="usedShort">مصرف‌شده</span>
               </div>
-              <span class="readout-sub" id="usageSub">—</span>
             </div>
           </div>
         </div>
@@ -1476,8 +1498,6 @@
       const pctText = Math.round(percent) + t("pct");
       set("usageBig", lang === "fa" ? toPersianDigits(pctText) : pctText);
       set("usageRemained", remainedText);
-      /* the dial window prints what the percentage is a percentage of */
-      set("usageSub", t("ofTotal") + " " + totalText);
 
       const alertVol = document.getElementById("alertVol");
       if (!isPending && total > 0 && remained < ONE_GB_BYTES) alertVol.classList.add("show");
