@@ -396,9 +396,10 @@
     /* ---------- analogue multimeter gauges (half-round dials, side by side) ---------- */
     .cluster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; align-items: stretch; }
     @media (min-width: 760px) { .cluster { gap: 1rem; } }
-    /* two half-width meters on a 390px phone leave ~150px each — far too little
-       for the printed window, so phones get one instrument per row */
-    @media (max-width: 560px) { .cluster { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; } }
+    /* the two meters stay side by side at every width: the type inside a dial is
+       measured against the meter, so a narrow card shrinks as a whole instead of
+       spilling over the frame — phones only lose a little of the gutter */
+    @media (max-width: 560px) { .cluster { gap: 0.45rem; } }
 
     .gauge-card {
       display: flex; flex-direction: column;
@@ -462,9 +463,9 @@
       font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
       color: var(--txt);
     }
-    .readout-unit { font-size: clamp(0.55rem, 4.6cqw, 0.85rem); font-weight: 800; color: var(--muted); letter-spacing: 0.04em; }
+    .readout-unit { font-size: clamp(0.62rem, 4.6cqw, 0.85rem); font-weight: 800; color: var(--muted); letter-spacing: 0.04em; }
     .readout-sub {
-      font-family: var(--font-read); font-size: clamp(0.62rem, 5cqw, 1rem); font-weight: 700;
+      font-family: var(--font-read); font-size: clamp(0.68rem, 5cqw, 1rem); font-weight: 700;
       font-variant-numeric: tabular-nums; color: var(--accent-2-ink); direction: ltr; line-height: 1.2;
     }
     /* the blown-up meter is a bigger container, so the window already scales */
@@ -474,7 +475,7 @@
       display: flex; align-items: baseline; justify-content: center; gap: 0.22rem;
       max-width: 100%; white-space: nowrap;
     }
-    .meter-remained-cap { font-size: clamp(0.5rem, 3.8cqw, 0.76rem); font-weight: 800; letter-spacing: 0.03em; color: var(--muted); }
+    .meter-remained-cap { font-size: clamp(0.56rem, 3.8cqw, 0.76rem); font-weight: 800; letter-spacing: 0.03em; color: var(--muted); }
     .meter-remained-value {
       direction: ltr; font-family: var(--font-read); font-size: clamp(0.72rem, 6cqw, 1.3rem); font-weight: 800;
       font-variant-numeric: tabular-nums;
@@ -492,9 +493,9 @@
        the number at opposite edges, so "5.00GB" did not look like "مصرف" */
     .ud { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; min-width: 0; }
     .ud.wide { flex-direction: row; align-items: baseline; justify-content: flex-start; gap: 0.45rem; }
-    .ud span { font-size: clamp(0.6rem, 3cqw, 0.76rem); font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ud span { font-size: clamp(0.64rem, 3cqw, 0.76rem); font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ud b {
-      font-family: var(--font-read); font-size: clamp(0.68rem, 3.4cqw, 0.9rem); font-weight: 800;
+      font-family: var(--font-read); font-size: clamp(0.72rem, 3.4cqw, 0.9rem); font-weight: 800;
       font-variant-numeric: tabular-nums; white-space: nowrap;
     }
     .ud.wide { grid-column: 1 / -1; }

@@ -178,6 +178,20 @@ jobs:
           # day mode + Persian are the defaults
           grep -q 'class="day-mode"' pages/speed/index.html
           grep -q 'applyTheme(true)' pages/speed/index.html
+          # the two dials stay side by side at every width: collapsing them to
+          # one column on phones was tried and rejected, keep the guard
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          src = Path("pages/speed/index.html").read_text(encoding="utf-8")
+          blocks = [b for b in re.findall(r"\.cluster[^{]*\{([^}]*)\}", src) if "grid-template-columns" in b]
+          if not blocks or "repeat(2," not in blocks[0]:
+              raise SystemExit("speed: .cluster must declare two columns")
+          for extra in blocks[1:]:
+              if "repeat(2," not in extra:
+                  raise SystemExit("speed: .cluster must stay side by side at every width")
+          print("speed: dials side by side")
+          PY
 
       - name: Validate electronics page features
         shell: bash
@@ -189,8 +203,7 @@ jobs:
           grep -q 'JALALI_EVENTS' pages/electronics/index.html
           grep -q 'id="clockDate"' pages/electronics/index.html
           grep -q 'id="clockEvent"' pages/electronics/index.html
-          # the two multimeter dials: side by side on wide screens, one per row
-          # on phones (two ~160px dials were unreadable)
+          # the two multimeter dials always sit side by side, on phones too
           grep -q 'id="timeGauge"' pages/electronics/index.html
           grep -q 'id="usageGauge"' pages/electronics/index.html
           grep -q 'id="usageRemained"' pages/electronics/index.html
@@ -227,6 +240,19 @@ jobs:
           # day mode (red bench theme) + Persian are the defaults
           grep -q 'class="day-mode"' pages/electronics/index.html
           grep -q 'applyTheme(true)' pages/electronics/index.html
+          # the two meters stay side by side at every width (same guard as speed)
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          src = Path("pages/electronics/index.html").read_text(encoding="utf-8")
+          blocks = [b for b in re.findall(r"\.cluster[^{]*\{([^}]*)\}", src) if "grid-template-columns" in b]
+          if not blocks or "repeat(2," not in blocks[0]:
+              raise SystemExit("electronics: .cluster must declare two columns")
+          for extra in blocks[1:]:
+              if "repeat(2," not in extra:
+                  raise SystemExit("electronics: .cluster must stay side by side at every width")
+          print("electronics: meters side by side")
+          PY
 
       - name: Validate classic page features
         shell: bash

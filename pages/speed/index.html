@@ -385,9 +385,10 @@
       align-items: stretch;
     }
     @media (min-width: 760px) { .cluster { gap: 1rem; } }
-    /* two half-width dials on a 390px phone leave ~160px per dial: the readouts
-       inside them can never be read at that size, so phones get one per row */
-    @media (max-width: 560px) { .cluster { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; } }
+    /* the two dials stay side by side at every width: every label is measured
+       against its card, so a narrow card shrinks as a whole instead of spilling
+       over the dial — phones only lose a little of the gutter */
+    @media (max-width: 560px) { .cluster { gap: 0.45rem; } }
 
     .gauge-card {
       position: relative;
@@ -511,13 +512,13 @@
     }
     .readout-unit {
       font-size: clamp(0.6rem, 2.6vw, 0.78rem);
-      font-size: clamp(0.54rem, 5.4cqw, 0.8rem); font-weight: 700; color: var(--muted);
+      font-size: clamp(0.62rem, 5.4cqw, 0.8rem); font-weight: 700; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.2;
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .readout-sub {
       font-size: clamp(0.72rem, 3.4vw, 1rem);
-      font-family: var(--font-read); font-size: clamp(0.62rem, 6.6cqw, 1.02rem);
+      font-family: var(--font-read); font-size: clamp(0.68rem, 6.6cqw, 1.02rem);
       font-weight: 700; color: var(--accent-ink); margin-top: 0.2rem;
       font-variant-numeric: tabular-nums; letter-spacing: 0.02em; line-height: 1.2;
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
@@ -538,14 +539,14 @@
     }
     .gauge-remained-cap {
       font-size: clamp(0.56rem, 2.4vw, 0.7rem);
-      font-size: clamp(0.46rem, 4.3cqw, 0.7rem); font-weight: 700; letter-spacing: 0.02em;
+      font-size: clamp(0.56rem, 4.3cqw, 0.7rem); font-weight: 700; letter-spacing: 0.02em;
       color: var(--muted);
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .gauge-remained {
       direction: ltr;
       font-size: clamp(0.66rem, 3.4vw, 0.98rem);
-      font-family: var(--font-read); font-size: clamp(0.56rem, 5.6cqw, 1.2rem);
+      font-family: var(--font-read); font-size: clamp(0.66rem, 5.6cqw, 1.2rem);
       font-weight: 800; color: var(--bad-ink); line-height: 1.15;
       font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
       text-shadow: 0 0 2px var(--bg), 0 0 6px rgba(255, 77, 94, 0.32);
@@ -626,6 +627,12 @@
     .ud { grid-column: span 2; }
     .ud:nth-child(4), .ud:nth-child(5) { grid-column: span 3; }
     @media (max-width: 560px) { .usage-details { gap: 0.35rem; } }
+    /* a phone card is ~160px wide: three figures per row leave ~42px each and
+       the values spill out of their cells, so narrow cards show two per row */
+    @container gauge-card (max-width: 260px) {
+      .usage-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ud, .ud:nth-child(4), .ud:nth-child(5) { grid-column: span 1; }
+    }
     .ud {
       border: 1px solid var(--line);
       background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
@@ -633,10 +640,10 @@
       border-radius: 12px; padding: 0.4rem 0.35rem;
       display: flex; flex-direction: column; gap: 0.12rem; text-align: center; min-width: 0;
     }
-    .ud span { font-size: clamp(0.64rem, 2.7vw, 0.75rem); font-size: clamp(0.58rem, 3.3cqw, 0.76rem); font-weight: 700; color: var(--muted); line-height: 1.35; }
+    .ud span { font-size: clamp(0.64rem, 2.7vw, 0.75rem); font-size: clamp(0.64rem, 3.3cqw, 0.76rem); font-weight: 700; color: var(--muted); line-height: 1.35; }
     .ud b {
       font-family: var(--font-read); font-size: clamp(0.74rem, 3.1vw, 0.94rem);
-      font-size: clamp(0.68rem, 4.1cqw, 0.96rem);
+      font-size: clamp(0.72rem, 4.1cqw, 0.96rem);
       font-weight: 800; color: var(--txt); line-height: 1.3;
       font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
       /* the value is a unit token: never split "12.50 GB" in two */
