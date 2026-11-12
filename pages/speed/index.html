@@ -381,14 +381,14 @@
     .cluster {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.6rem;
-      align-items: stretch;
+      gap: 0.5rem;
+      align-items: start;
     }
-    @media (min-width: 760px) { .cluster { gap: 1rem; } }
+    @media (min-width: 760px) { .cluster { gap: 0.8rem; } }
     /* the two dials stay side by side at every width: every label is measured
        against its card, so a narrow card shrinks as a whole instead of spilling
        over the dial — phones only lose a little of the gutter */
-    @media (max-width: 560px) { .cluster { gap: 0.45rem; } }
+    @media (max-width: 560px) { .cluster { gap: 0.4rem; } }
 
     .gauge-card {
       position: relative;
@@ -402,9 +402,9 @@
       border: 1px solid var(--line);
       border-top-color: var(--emboss-hi);
       border-radius: var(--radius);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--emboss-drop), var(--shadow);
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--shadow);
       backdrop-filter: blur(12px);
-      padding: 0.65rem 0.6rem 0.8rem;
+      padding: 0.6rem 0.5rem 0.75rem;
       overflow: hidden;
       cursor: pointer;
       touch-action: manipulation;
@@ -412,7 +412,7 @@
       animation: fadeUp 0.6s ease both;
       transition: border-color 0.2s ease, box-shadow 0.25s ease;
     }
-    @media (min-width: 760px) { .gauge-card { padding: 1rem 1rem 1.1rem; } }
+    @media (min-width: 760px) { .gauge-card { padding: 0.9rem 0.9rem 1rem; } }
     .gauge-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     /* the card keeps its own grid cell while it is open in the zoom stage */
     .gauge-card.zoomed {
@@ -539,47 +539,47 @@
     /* حجم باقی‌مانده روی صفحهٔ گیج: برچسب «باقی‌مانده» + مقدار قرمز با درخشش
        آرام، وسط نیمهٔ بالایی دایره — هم‌فاصله از مرکز دایره و نشانگرِ ۱۲ ساعت */
     .gauge-remained-wrap {
-      position: absolute; z-index: 2; left: 50%; top: 29.2%; transform: translate(-50%, -50%);
+      position: absolute; z-index: 2; left: 50%; top: 28%; transform: translate(-50%, -50%);
       display: flex; flex-direction: column; align-items: center; gap: 0.14rem;
       text-align: center; white-space: nowrap; pointer-events: none;
     }
     .gauge-remained-cap {
-      font-size: clamp(0.56rem, 2.4vw, 0.7rem);
-      font-size: clamp(0.56rem, 4.3cqw, 0.7rem); font-weight: 700; letter-spacing: 0.02em;
+      font-size: clamp(0.5rem, 2vw, 0.65rem);
+      font-size: clamp(0.5rem, 4cqw, 0.65rem); font-weight: 700; letter-spacing: 0.02em;
       color: var(--muted);
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .gauge-remained {
       direction: ltr;
-      font-size: clamp(0.66rem, 3.4vw, 0.98rem);
-      font-family: var(--font-read); font-size: clamp(0.66rem, 5.6cqw, 1.2rem);
+      font-size: clamp(0.6rem, 3vw, 0.9rem);
+      font-family: var(--font-read); font-size: clamp(0.6rem, 5.6cqw, 1.1rem);
       font-weight: 800; color: var(--bad-ink); line-height: 1.15;
       font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
       text-shadow: 0 0 2px var(--bg), 0 0 6px rgba(255, 77, 94, 0.32);
       animation: remained-blink 2.4s ease-in-out infinite;
     }
-    .gauge-card.zoomed .gauge-remained { font-size: 1.16rem; }
-    .gauge-card.zoomed .gauge-remained-cap { font-size: 0.8rem; }
+    .gauge-card.zoomed .gauge-remained { font-size: 1.12rem; }
+    .gauge-card.zoomed .gauge-remained-cap { font-size: 0.75rem; }
 
     .gauge-foot {
       position: relative; z-index: 2;
-      margin-top: auto; padding-top: 0.5rem; text-align: center;
-      font-size: clamp(0.72rem, 2.9vw, 0.84rem);
-      font-size: clamp(0.66rem, 3.1cqw, 0.86rem); color: var(--muted); line-height: 1.45;
+      margin-top: auto; padding-top: 0.4rem; text-align: center;
+      font-size: clamp(0.68rem, 2.9vw, 0.8rem);
+      font-size: clamp(0.62rem, 3.1cqw, 0.8rem); color: var(--muted); line-height: 1.4;
     }
-    .gauge-card.zoomed .gauge-foot { font-size: 0.98rem; padding-top: 0.85rem; }
+    .gauge-card.zoomed .gauge-foot { font-size: 0.92rem; padding-top: 0.7rem; }
     .gauge-foot strong { color: var(--txt); font-weight: 700; }
 
     /* ---------- round Tehran clock (corner of the time gauge) ---------- */
     .clock-badge {
-      position: absolute; top: 0.2rem; inset-inline-end: 0.2rem;
+      position: absolute; top: 0; inset-inline-end: 0;
       width: 116px;
       background: linear-gradient(180deg, var(--gloss), transparent 45%), var(--dial);
       border: 1px solid var(--line); border-top-color: var(--emboss-hi);
       border-radius: 18px;
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 12px 30px rgba(0, 0, 0, 0.4);
-      padding: 0.5rem 0.5rem 0.6rem;
-      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 10px 24px rgba(0, 0, 0, 0.4);
+      padding: 0.4rem 0.4rem 0.5rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
       z-index: 3;
       animation: fadeUp 0.7s ease both;
     }

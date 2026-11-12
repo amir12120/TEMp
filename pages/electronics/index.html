@@ -394,21 +394,21 @@
     .seg-scale { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.7rem; font-family: var(--font-silk); font-size: 0.56rem; letter-spacing: 0.12em; color: var(--silk-ink); text-transform: uppercase; }
 
     /* ---------- analogue multimeter gauges (half-round dials, side by side) ---------- */
-    .cluster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; align-items: stretch; }
-    @media (min-width: 760px) { .cluster { gap: 1rem; } }
+    .cluster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; align-items: start; }
+    @media (min-width: 760px) { .cluster { gap: 0.8rem; } }
     /* the two meters stay side by side at every width: the type inside a dial is
        measured against the meter, so a narrow card shrinks as a whole instead of
        spilling over the frame — phones only lose a little of the gutter */
-    @media (max-width: 560px) { .cluster { gap: 0.45rem; } }
+    @media (max-width: 560px) { .cluster { gap: 0.4rem; } }
 
     .gauge-card {
       display: flex; flex-direction: column;
-      padding: 0.7rem 0.6rem 0.75rem !important;
+      padding: 0.65rem 0.5rem 0.7rem !important;
       cursor: pointer; overflow: hidden;
       /* labels outside the window size themselves from the card width */
       container: gauge-card / inline-size;
     }
-    @media (min-width: 760px) { .gauge-card { padding: 0.95rem 1rem 1rem !important; } }
+    @media (min-width: 760px) { .gauge-card { padding: 0.9rem 0.9rem 1rem !important; } }
     .gauge-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     .gauge-card.zoomed { cursor: zoom-out; border-color: var(--accent); box-shadow: 0 0 0 1px var(--line-strong), var(--shadow); }
     .gauge-card.anim-off { animation: none; }
@@ -449,10 +449,10 @@
     /* engraved readout window printed on the plate BELOW the pivot line: the
        needle sweeps the half circle above it, so no digit is ever crossed */
     .meter-window {
-      position: absolute; z-index: 2; left: 50%; top: 56.9%; transform: translateX(-50%);
-      width: 84%; height: 40%;
+      position: absolute; z-index: 2; left: 50%; top: 56%; transform: translateX(-50%);
+      width: 84%; height: 38%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 0.06rem; padding: 0.2rem 0.3rem; border-radius: 8px;
+      gap: 0.06rem; padding: 0.18rem 0.25rem; border-radius: 8px;
       background: var(--dial);
       box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.42), 0 0 0 1px var(--line-strong);
       text-align: center; pointer-events: none; overflow: hidden;
@@ -475,19 +475,19 @@
 
     /* blinking red remaining quota printed inside the usage dial */
     .meter-remained {
-      display: flex; align-items: baseline; justify-content: center; gap: 0.22rem;
+      display: flex; align-items: baseline; justify-content: center; gap: 0.18rem;
       max-width: 100%; white-space: nowrap;
     }
-    .meter-remained-cap { font-size: clamp(0.56rem, 3.8cqw, 0.76rem); font-weight: 800; letter-spacing: 0.03em; color: var(--muted); }
+    .meter-remained-cap { font-size: clamp(0.5rem, 3.5cqw, 0.7rem); font-weight: 800; letter-spacing: 0.03em; color: var(--muted); }
     .meter-remained-value {
-      direction: ltr; font-family: var(--font-read); font-size: clamp(0.72rem, 6cqw, 1.3rem); font-weight: 800;
+      direction: ltr; font-family: var(--font-read); font-size: clamp(0.65rem, 5.5cqw, 1.15rem); font-weight: 800;
       font-variant-numeric: tabular-nums;
       color: var(--bad); line-height: 1.1;
       text-shadow: 0 0 6px rgba(216, 31, 20, 0.32);
       animation: remained-blink 2.4s ease-in-out infinite;
     }
 
-    .gauge-foot { position: relative; z-index: 2; margin-top: auto; padding-top: 0.45rem; text-align: center; font-size: clamp(0.68rem, 3cqw, 0.85rem); color: var(--muted); line-height: 1.45; }
+    .gauge-foot { position: relative; z-index: 2; margin-top: auto; padding-top: 0.35rem; text-align: center; font-size: clamp(0.62rem, 3cqw, 0.8rem); color: var(--muted); line-height: 1.4; }
     .gauge-foot strong { color: var(--txt); font-weight: 800; }
     .gauge-card.zoomed .gauge-foot { font-size: 0.95rem; }
 
