@@ -116,22 +116,28 @@ jobs:
       - name: Validate page JavaScript syntax
         shell: bash
         run: |
+          rm -f /tmp/*-rendered.js
           python3 - <<'PY'
           from pathlib import Path
           import re
           themes = [line.strip() for line in Path("pages.txt").read_text(encoding="utf-8").splitlines()]
           for name in [theme for theme in themes if theme]:
               source = Path(f"pages/{name}/index.html").read_text(encoding="utf-8")
-              scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", source, re.S)
-              if len(scripts) != 1:
-                  raise SystemExit(f"{name}: expected one inline script, found {len(scripts)}")
-              rendered = re.sub(r"\{\{[^}]*\}\}", "0", scripts[0])
-              Path(f"/tmp/{name}-rendered.js").write_text(rendered, encoding="utf-8")
+              # every inline script must parse; a theme may also pull in external
+              # scripts (electronics2 loads the Tailwind CDN), so skip those and
+              # check each inline block on its own instead of expecting exactly one
+              scripts = re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", source, re.S)
+              inline = [body for body in scripts if body.strip()]
+              if not inline:
+                  raise SystemExit(f"{name}: no inline script found")
+              for index, body in enumerate(inline):
+                  rendered = re.sub(r"\{\{[^}]*\}\}", "0", body)
+                  Path(f"/tmp/{name}-{index}-rendered.js").write_text(rendered, encoding="utf-8")
           PY
-          node --check /tmp/modern-rendered.js
-          node --check /tmp/speed-rendered.js
-          node --check /tmp/electronics-rendered.js
-          node --check /tmp/classic-rendered.js
+          for file in /tmp/*-rendered.js; do
+            echo "checking $file"
+            node --check "$file"
+          done
 
       - name: Validate required page features
         shell: bash

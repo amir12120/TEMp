@@ -99,6 +99,9 @@ const SAMPLE_STATE = {
   })()`,
 };
 
+/* electronics2 keeps the same localStorage keys as electronics, so it shares the seeding script. */
+SAMPLE_STATE.electronics2 = SAMPLE_STATE.electronics;
+
 /* ------------------------------------------------------------------ template → static HTML */
 function renderStatic(tpl, s) {
   let out = tpl.replace(

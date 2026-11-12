@@ -26,8 +26,9 @@ bash <(curl -sL https://raw.githubusercontent.com/amir12120/TEMp/main/install.sh
   2) speed
   3) electronics
   4) classic
+  5) electronics2
 
-Select theme number [1-3]:
+Select theme number [1-5]:
 ```
 
 عدد تم موردنظر را وارد کنید — همان تم با نام `index.html` در مسیر `/etc/3x-ui/templates/my-theme/` قرار می‌گیرد، پنل ری‌استارت می‌شود و کار تمام است.
@@ -87,16 +88,21 @@ sudo temp speed # اگر به پوشهٔ قالب دسترسی نوشتن ندا
 | `modern` | صفحه اشتراک مدرن — دو زبانه (فارسی/انگلیسی)، حالت شب و روز، QR کد برای تک‌تک کانفیگ‌ها، اندازه‌گیری تأخیر ترنسپورت‌های HTTP از مرورگر، نشانگر آنلاین/آفلاین زنده، ساعت تهران با رویدادهای تقویم ایرانی، بخش دانلود اپلیکیشن (۹ برنامه با لینک آخرین نسخه — برای v2rayNG حتی نسخه‌های pre-release) |
 | `speed`  | داشبورد اسپرت «کیلومتر و دور موتور» — دو گیج عقربه‌ای (زمان باقی‌مانده روی **مقیاس ثابت ۳۰ روزه** — عقربه تا وقتی بیش از ۳۰ روز باقی است روی «پر» می‌ماند و بعد کم‌کم به صفر و رنگ قرمز می‌رسد، به‌همراه جزئیات مصرف با **حجم باقی‌ماندهٔ قرمز چشمک‌زن با برچسب «باقی‌مانده» در وسط نیمهٔ بالایی صفحهٔ گیج**) که **همیشه کنار هم** می‌مانند و روی موبایل هم با یک ضربه **بزرگ و خوانا** می‌شوند و با ضربه‌ی بعدی سر جایشان برمی‌گردند (در حالت بزرگ‌شدهٔ گیج زمان، ساعت تهران کنار می‌رود و فقط **تاریخ انقضا زیر صفحهٔ گیج** می‌ماند)، ساعت گرد به وقت تهران با تاریخ و مناسبت زیر آن، کارت وضعیت سرویس/آنلاین/کاربر در گوشه، کلیدهای زبان و شب/روز به شکل **کلیدهای داشبورد ماشین** در بالاترین نقطهٔ صفحه، لوگوی سکهٔ چرخان (همان تم مدرن)، لینک ساب و کانفیگ‌ها پایین گیج‌ها (روی موبایل هر کانفیگ **در یک خط** مثل تم مدرن، با کلیدهای QR و کپی کنار هم)، بخش **نصب و راه‌اندازی / دانلود برنامه‌ها** که سیستم‌عامل کاربر را خودکار تشخیص می‌دهد و برنامه‌های همان دستگاه را نشان می‌دهد و برای انتخاب دستی هم یک **منوی کشویی** دارد (۹ برنامه، همیشه آخرین نسخه — برای v2rayNG حتی نسخه‌های pre-release)، همهٔ منوها/گیج‌ها/کلیدها/باکس‌ها **برجسته و سه‌بعدی**، و **حالت پیش‌فرض روز + زبان فارسی** |
 | `electronics` | تم «میز کار الکترونیک» — بخش **«ساعت و تاریخ»**: ساعت **سون‌سگمنت** به وقت تهران با تاریخ (شمسی/میلادی) و مناسبت‌ها زیر آن، دو گیج **نیم‌دایرهٔ مولتی‌متری عقربه‌ای** که **همیشه کنار هم** هستند و با یک ضربه بزرگ و خوانا می‌شوند: گیج زمان روی **مقیاس ۳۰ روزه** (تا وقتی بیش از ۳۰ روز مانده عقربه روی ۳۰ منتظر می‌ماند و بعد کم می‌شود) و گیج مصرف با **حجم باقی‌ماندهٔ قرمز چشمک‌زن داخل صفحهٔ گیج** و **درصد مصرف‌شده زیر آن**؛ زیر آن دو، **یک نمودار مصرف** که بازه‌اش را کاربر از **منوی کشویی** انتخاب می‌کند (**ساعتی / روزانه / هفتگی / ماهانه** — فقط همان بازه رسم می‌شود تا نمودارها کل صفحه را نگیرند؛ از نمونه‌های شمارندهٔ پنل ساخته می‌شود)، اخطار تمدید وقتی کمتر از **یک روز** یا **یک گیگ** مانده، کلیدهای شب/روز و زبان در بالاترین نقطهٔ صفحه، لوگو/کاربر/وضعیت سرویس با نشانگر آنلاین-آفلاین (مثل تم‌های قبلی)، لینک ساب با QR و کپی، کانفیگ‌ها هر یک **در یک خط** با کلیدهای QR و کپی **زیر هم در یک ستون** به‌همراه دکمهٔ «کپی همه»، بخش **نصب و راه‌اندازی / دانلود برنامه‌ها** با تشخیص خودکار دستگاه (همان ۹ برنامه و همان قوانین دو تم قبلی)، همهٔ بخش‌ها با **ظاهر برد مدار چاپی، پیچ، صفحهٔ فلزی و صفحهٔ نمایش LCD** — و **حالت روز قرمز** با پیش‌فرض **روز + فارسی** |
+| `electronics2` | نسخهٔ تازهٔ تم «میز کار الکترونیک» با **رابط کاربری Tailwind CSS** — چیدمان کاملاً یوتیلیتی (Tailwind + کانفیگ رنگ و فونت) به‌همراه CSS اختصاصی برای قطعات ابزاری (گیج، سون‌سگمنت، برد مدار)؛ همهٔ امکانات تم `electronics` را دارد: ساعت **سون‌سگمنت** تهران با تاریخ شمسی و مناسبت، دو گیج **نیم‌دایرهٔ عقربه‌ای** که همیشه کنار هم می‌مانند و با یک ضربه بزرگ می‌شوند، **نمودار مصرف** با منوی کشویی (ساعتی/روزانه/هفتگی/ماهانه)، اخطار تمدید زیر **یک روز** یا **یک گیگ**، لینک ساب با QR و کپی، کانفیگ‌ها با کلیدهای QR و کپی و «کپی همه»، بخش **نصب و دانلود برنامه‌ها** با تشخیص خودکار دستگاه، و کلیدهای **شب/روز** و **فارسی/انگلیسی** — پیش‌فرض **روز + فارسی** |
 | `classic` | تم **کلاسیک سه‌بعدی** — کلیدها و کارت‌ها برجسته با سایهٔ سخت، لوگوی سکهٔ چرخان، پیش‌فرض **روز + فارسی**؛ حالت روز با ته‌رنگ آبی و حالت شب قهوه‌ای پررنگ؛ نام اکانت با وضعیت فعال/آنلاین؛ ساعت و تاریخ تهران با مناسبت تقویم که اگر ترافیک کمتر از **یک گیگ** یا زمان کمتر از **یک روز** باشد جای خود را به اخطار تمدید می‌دهد؛ سربرگ‌های زمان باقی‌مانده (نمودار خطی مقیاس ۳۰ روزه، سبز تا قرمز + تاریخ انقضا)، جزییات مصرف (نمودار ترافیک باقی‌مانده + عدد قرمز چشمک‌زن)، نمودار مصرف، لینک ساب و کانفیگ‌ها (هر کانفیگ در یک خط با کلیدهای کپی و QR کنار هم، QR تمام‌صفحه)، بخش نصب و راه‌اندازی که دستگاه را خودکار تشخیص می‌دهد و همان **۹ برنامهٔ** دو تم دیگر را نشان می‌دهد (با یک **منوی کشویی** برای انتخاب دستی، همیشه آخرین نسخه — برای v2rayNG و ZedSecure حتی pre-release)؛ منوی تب‌ها که روی موبایل **دو ستونهٔ هم‌اندازه** (تب آخر تمام‌عرض) و روی دسکتاپ پنج ستونه است و کارت تب فعال تا انتهای صفحه کشیده می‌شود؛ موج مورب از گوشهٔ بالا-چپ تا پایین-راست |
 
 <a id="fa-screenshots"></a>
 ## 📸 اسکرین‌شات تم‌ها
 
-تصاویر زیر از **خود تم‌ها** و با دادهٔ نمونه گرفته شده‌اند — روی هر تصویر بزنید تا در اندازهٔ کامل باز شود (تصویر کل صفحه: [`modern`](screenshots/modern.png) · [`speed`](screenshots/speed.png) · [`electronics`](screenshots/electronics.png) · [`classic`](screenshots/classic.png)):
+تصاویر زیر از **خود تم‌ها** و با دادهٔ نمونه گرفته شده‌اند — روی هر تصویر بزنید تا در اندازهٔ کامل باز شود (تصویر کل صفحه: [`modern`](screenshots/modern.png) · [`speed`](screenshots/speed.png) · [`electronics`](screenshots/electronics.png) · [`electronics2`](screenshots/electronics2.png) · [`classic`](screenshots/classic.png), [`electronics2`](screenshots/electronics2.png)):
 
 | `modern` — پیش‌فرض شب | `speed` — پیش‌فرض روز | `electronics` — پیش‌فرض روز | `classic` — پیش‌فرض روز |
 |:---:|:---:|:---:|:---:|
 | [![تم مدرن](screenshots/modern-top.png)](screenshots/modern.png) | [![تم اسپرت](screenshots/speed-top.png)](screenshots/speed.png) | [![تم الکترونیک](screenshots/electronics-top.png)](screenshots/electronics.png) | [![تم کلاسیک](screenshots/classic-top.png)](screenshots/classic.png) |
+
+| `electronics2` — پیش‌فرض روز |
+|:---:|
+| [![تم الکترونیک ۲](screenshots/electronics2-top.png)](screenshots/electronics2.png) |
 
 این تصاویر دستی گرفته نشده‌اند: اسکریپت `screenshots/make-screenshots.mjs` جای‌نگهدارهای Go را با دادهٔ نمونه پر می‌کند و با کروم بی‌سر (headless) از هر تم اسکرین‌شات می‌گیرد؛ برای تم‌هایی که نمودار تاریخچه‌دار دارند (الکترونیک) تاریخچهٔ نمونه هم تزریق می‌شود تا نمودار خالی عکس‌برداری نشود. بعد از هر تغییر در تم‌ها یا اضافه‌کردن تم جدید، یک‌بار اجرا کنید و تصاویر تازه را کامیت کنید (روی سیستم باید Chrome یا Edge نصب باشد):
 
@@ -105,6 +111,7 @@ node screenshots/make-screenshots.mjs                 # همهٔ تم‌های p
 node screenshots/make-screenshots.mjs modern --day    # یک تم، در حالت روز
 node screenshots/make-screenshots.mjs speed --night   # یک تم، در حالت شب
 node screenshots/make-screenshots.mjs electronics     # تم الکترونیک (پیش‌فرض روز)
+node screenshots/make-screenshots.mjs electronics2    # تم الکترونیک ۲ (Tailwind)
 node screenshots/make-screenshots.mjs classic         # تم کلاسیک (پیش‌فرض روز)
 ```
 
@@ -127,7 +134,7 @@ node screenshots/make-screenshots.mjs classic         # تم کلاسیک (پی�
 ```
 TEMp/
 ├── install.sh          # نصاب با منوی تعاملی + ساخت دستور temp
-├── pages.txt           # لیست تم‌های موجود (هر نام یک خط: modern، speed، electronics، classic)
+├── pages.txt           # لیست تم‌های موجود (هر نام یک خط: modern، speed، electronics، classic، electronics2)
 ├── pages/
 │   ├── modern/
 │   │   └── index.html  # تم مدرن
@@ -135,6 +142,8 @@ TEMp/
 │   │   └── index.html  # تم اسپرت کیلومتر
 │   ├── electronics/
 │   │   └── index.html  # تم میز کار الکترونیک
+│   ├── electronics2/
+│   │   └── index.html  # همان تم با رابط Tailwind CSS
 │   └── classic/
 │       └── index.html  # تم کلاسیک سه‌بعدی
 └── screenshots/        # اسکرین‌شات تم‌ها + اسکریپت ساخت آن‌ها
@@ -145,6 +154,8 @@ TEMp/
     ├── speed-top.png         # تم اسپرت — برش README
     ├── electronics.png       # تم الکترونیک — کل صفحه
     ├── electronics-top.png   # تم الکترونیک — برش README
+    ├── electronics2.png      # تم الکترونیک ۲ — کل صفحه
+    ├── electronics2-top.png  # تم الکترونیک ۲ — برش README
     ├── classic.png           # تم کلاسیک — کل صفحه
     └── classic-top.png       # تم کلاسیک — برش README
 ```
@@ -205,6 +216,7 @@ and **Save**. The subscription page now renders from this folder.
 | `modern` | Modern bilingual (fa/en) subscription & usage panel — dark/light modes, per-config QR codes, browser latency measurement for HTTP transports, live online/offline presence, Tehran clock with Iranian-calendar events, app download section (9 apps, always the newest release; v2rayNG includes pre-releases) |
 | `speed`  | Sporty car-dashboard (speedometer/tachometer) theme — two needle gauges (time remaining on a **fixed 30-day scale** — the needle waits at “full” while more than 30 days are left, then counts down to zero and turns red, plus usage details with the **remaining quota blinking in red under a “Remaining” label in the middle of the upper half of the dial**) that always sit **side by side** and blow up to a readable size on tap (tap again to put them back — in the enlarged time gauge the Tehran clock steps aside and only the **expiry date under the dial** remains), round Tehran clock with date and occasion beneath it, service status/online/user card in the corner, language and day/night controls styled as **car-dashboard rocker switches** at the very top, the modern theme's spinning coin logo, sub link and configs below (on phones each config stays on **one line** like the modern theme, with the QR and copy buttons inline), and an **install & setup / app-download section** that auto-detects the visitor's OS, lists that device's apps and still offers a **dropdown** for manual picks (9 apps, always the newest release; v2rayNG includes pre-releases), every menu/gauge/button/box **embossed and 3D**, and **day mode + Persian as the defaults** |
 | `electronics` | “Electronics bench” theme — a **“Clock & date”** module: a seven-segment clock showing Tehran time with the Jalali/Gregorian date and Iranian-calendar occasions beneath it, two **half-round needle multimeter dials** that always sit **side by side** and enlarge on tap: the time dial runs on a **30-day scale** (the needle waits at 30 while more than 30 days are left, then falls back) and the usage dial carries the **remaining quota blinking in red on the dial face with the used percentage printed under it**; below the dials sits **one usage chart whose window the visitor picks from a dropdown** (**hourly / daily / weekly / monthly** — only the chosen range is drawn, so the charts never fill the page; built from samples of the panel counter), renewal warnings appear when under **one day** or **one gigabyte** is left, day/night + language switches at the very top, the same logo / user / service-status card with live online-offline presence, the sub link with QR and copy, configs **one line each** with their QR and copy buttons **stacked in a single column** plus “copy all”, an **install & setup section** that auto-detects the device (same nine apps and the same rules as the two themes above), every panel dressed as **PCB / screwed metal faceplate / LCD hardware** — a **red day mode**, and **day + Persian defaults** |
+| `electronics2` | The electronics bench rebuilt on **Tailwind CSS** — a utility-first layout (Tailwind plus a colour/font config) with a small custom-CSS layer for the hardware parts (dials, seven-segment display, PCB backdrop). Everything the `electronics` theme has: a **seven-segment** Tehran clock with the Jalali date and calendar occasions, two **half-round needle dials** that always stay side by side and enlarge on tap, a **usage chart** whose window comes from a dropdown (hourly/daily/weekly/monthly), renewal warnings under **one day** or **one gigabyte**, the sub link with QR and copy, configs with their QR and copy buttons plus “copy all”, an **install / app-download section** that auto-detects the device, and **day/night** + **fa/en** switches — **day + Persian** defaults |
 | `classic` | **Classic 3D** theme — raised buttons and cards, spinning coin logo, **day + Persian** defaults; day mode with a blue tint and night mode deep brown; account name with active/online status; Tehran clock and calendar occasions that swap to a renewal warning when remaining traffic is under **1 GB** or remaining time is under **one day**; tabs for remaining time (30-day linear bar, green→red, plus expiry date), usage details (remaining-traffic bar + blinking red quota), usage chart, sub link & configs (each config on one line with its copy and QR buttons inline, fullscreen QR), an install/setup section that auto-detects the device and offers the **same nine apps** as the two themes above (always the newest release — v2rayNG and ZedSecure include pre-releases), a tab menu that becomes **two equal columns** on phones (last tab full width) and five columns on desktops — with the active tab's card stretched to the bottom of the page — and a diagonal wave from top-left to bottom-right |
 
 ### Screenshots
@@ -215,6 +227,10 @@ Every theme is screenshotted with sample data — click an image for the full-si
 |:---:|:---:|:---:|:---:|
 | [![modern theme](screenshots/modern-top.png)](screenshots/modern.png) | [![speed theme](screenshots/speed-top.png)](screenshots/speed.png) | [![electronics theme](screenshots/electronics-top.png)](screenshots/electronics.png) | [![classic theme](screenshots/classic-top.png)](screenshots/classic.png) |
 
+| `electronics2` — day (default) |
+|:---:|
+| [![electronics2 theme](screenshots/electronics2-top.png)](screenshots/electronics2.png) |
+
 Those images come straight from the themes: `screenshots/make-screenshots.mjs` fills the Go-template placeholders with sample data — themes that draw history (electronics) also get a seeded sample history, so their chart is never photographed empty — and takes a headless-Chrome screenshot. Re-run it whenever a theme changes and commit the updated files (Chrome or Edge required):
 
 ```bash
@@ -222,6 +238,7 @@ node screenshots/make-screenshots.mjs                 # every theme in pages.txt
 node screenshots/make-screenshots.mjs modern --day    # one theme, day mode
 node screenshots/make-screenshots.mjs speed --night   # one theme, night mode
 node screenshots/make-screenshots.mjs electronics     # electronics theme (day default)
+node screenshots/make-screenshots.mjs electronics2    # electronics2 theme (Tailwind, day default)
 node screenshots/make-screenshots.mjs classic         # classic theme (day default)
 ```
 
