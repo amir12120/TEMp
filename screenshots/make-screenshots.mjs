@@ -99,9 +99,6 @@ const SAMPLE_STATE = {
   })()`,
 };
 
-/* electronics2 keeps the same localStorage keys as electronics, so it shares the seeding script. */
-SAMPLE_STATE.electronics2 = SAMPLE_STATE.electronics;
-
 /* ------------------------------------------------------------------ template → static HTML */
 function renderStatic(tpl, s) {
   let out = tpl.replace(
@@ -390,7 +387,7 @@ const day = flags.day ? true : flags.night ? false : undefined;
    is shorter (electronics = switches + clock + the two dials, classic = top bar
    + account + clock + the tab menu) get a tighter crop so the README thumbnail
    stays readable. */
-const TOP_CLIP = { electronics: 830, speed: 760, classic: 520 };
+const TOP_CLIP = { electronics: 1500, speed: 760, classic: 520 };
 
 let failed = 0;
 for (const theme of themes) {

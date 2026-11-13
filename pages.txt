@@ -1,5 +1,4 @@
 modern
 speed
 electronics
-electronics2
 classic

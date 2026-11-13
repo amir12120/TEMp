@@ -124,7 +124,7 @@ jobs:
           for name in [theme for theme in themes if theme]:
               source = Path(f"pages/{name}/index.html").read_text(encoding="utf-8")
               # every inline script must parse; a theme may also pull in external
-              # scripts (electronics2 loads the Tailwind CDN), so skip those and
+              # scripts (the electronics theme loads the Tailwind CDN), so skip those and
               # check each inline block on its own instead of expecting exactly one
               scripts = re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", source, re.S)
               inline = [body for body in scripts if body.strip()]
