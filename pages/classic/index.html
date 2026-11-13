@@ -142,7 +142,7 @@
       .tab:last-child { grid-column: 1 / -1; }
     }
     /* the visible panel takes every pixel the menu left over */
-    .panels { flex: 1 1 auto; }
+    .panels { display: flex; flex-direction: column; flex: 1 1 auto; }
     .panel { display: none; }
     .panel.on { display: flex; flex: 1 1 auto; flex-direction: column; justify-content: center; min-height: 11rem; }
   </style>
@@ -291,7 +291,7 @@
       <button class="btn3d tab" type="button" id="tab-apps" role="tab" aria-selected="false" aria-controls="panel-apps" data-tab="apps" onclick="showTab('apps')"><span data-i18n="tabApps">📱 نصب و راه اندازی</span></button>
     </div>
 
-    <div class="panels flex flex-col">
+    <div class="panels">
     <section class="card3d panel on" id="panel-time" role="tabpanel" aria-labelledby="tab-time">
       <div class="bar-meta">
         <span data-i18n="remainTime">⏳ زمان باقی‌مانده</span>
