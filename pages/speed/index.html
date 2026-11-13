@@ -10,10 +10,49 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 
+  <!-- Tailwind CSS (Play CDN): the dashboard layout is utility-first -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            ink: "var(--txt)",
+            sub: "var(--muted)",
+            acc: "var(--accent)",
+            acc2: "var(--accent-2)",
+            ok: "var(--ok)",
+            warn: "var(--warn)",
+            bad: "var(--bad)",
+            violet: "var(--violet)",
+            panel: "var(--panel)",
+            panel2: "var(--panel-2)",
+            line: "var(--line)",
+            dial: "var(--dial)",
+            edge: "var(--emboss-lo)"
+          },
+          fontFamily: {
+            sans: ["Inter", "Vazirmatn", "system-ui", "sans-serif"],
+            dig: ["Orbitron", "Inter", "monospace"],
+            read: ["Vazirmatn", "Inter", "system-ui", "sans-serif"]
+          },
+          borderRadius: { card: "22px" },
+          boxShadow: {
+            card: "inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--shadow)",
+            key: "inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(0,0,0,.28), 0 7px 14px rgba(0,0,0,.3)"
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- ============================================================
+       Custom CSS: cockpit theme tokens + the parts Tailwind cannot
+       express (circular SVG dials, clock face, coin, streaks, the
+       gauge zoom stage). Everything else is utilities.
+       ============================================================ -->
   <style>
-    /* ============================================================
-       SPEED — sporty car-dashboard subscription page
-       ============================================================ */
     :root {
       /* night cockpit — deep, almost black asphalt */
       --bg: #01030a;
@@ -33,20 +72,11 @@
       --dial-hi: rgba(28, 44, 70, 0.95);
       --needle: #ff4d5e;
       --shadow: 0 26px 64px rgba(0, 0, 0, 0.7);
-      /* emboss / 3D: top highlight, bottom shade, top gloss */
       --emboss-hi: rgba(255, 255, 255, 0.13);
       --emboss-lo: rgba(0, 0, 0, 0.6);
       --gloss: rgba(255, 255, 255, 0.09);
-      --emboss-drop: 0 16px 30px rgba(0, 0, 0, 0.5);
-      --font-dig: "Orbitron", "Inter", monospace;
-      /* numbers and labels you have to read at a glance: a plain UI face with
-         tabular digits — the wide sci-fi display font is unreadable at 9-13px */
-      --font-read: "Vazirmatn", "Inter", system-ui, sans-serif;
-      /* text on the dial: the neon accents are for strokes and glows, they are
-         too light to carry small text (especially in day mode) */
       --accent-ink: var(--accent);
       --bad-ink: var(--bad);
-      --radius: 22px;
     }
 
     /* day cockpit — cool light blue, like a clear morning drive */
@@ -61,32 +91,17 @@
       --dial: rgba(240, 248, 255, 0.96);
       --dial-hi: #ffffff;
       --shadow: 0 20px 50px rgba(25, 70, 130, 0.2);
-      /* emboss / 3D in daylight: bright top edge, soft blue shade below */
       --emboss-hi: rgba(255, 255, 255, 0.98);
       --emboss-lo: rgba(30, 80, 140, 0.22);
       --gloss: rgba(255, 255, 255, 0.7);
-      --emboss-drop: 0 16px 28px rgba(25, 70, 130, 0.22);
-      /* daylight needs clearly darker ink: cyan/red on a pale blue page drops to
-         ~2:1 contrast, which is what made the dial values hard to read */
       --accent-ink: #0a6a80;
       --bad-ink: #b3152b;
     }
 
-    * { box-sizing: border-box; }
-
     html, body { margin: 0; padding: 0; }
-
-    /* mobile iOS/Android: no tap flash, no double-tap zoom delay */
     html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-    button, a, .btn, .os-select, .gauge-card, .app-download-btn {
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
     body {
       min-height: 100vh;
-      font-family: "Inter", "Vazirmatn", system-ui, -apple-system, sans-serif;
-      color: var(--txt);
       background:
         radial-gradient(1200px 600px at 15% -10%, rgba(34, 211, 238, 0.10), transparent 60%),
         radial-gradient(900px 500px at 100% 0%, rgba(167, 139, 250, 0.10), transparent 55%),
@@ -94,843 +109,503 @@
       overflow-x: hidden;
       transition: background 0.4s ease, color 0.3s ease;
     }
-
-    /* day mode leans blue instead of plain white */
     body.day-mode {
       background:
         radial-gradient(1200px 620px at 12% -10%, rgba(56, 189, 248, 0.30), transparent 62%),
         radial-gradient(900px 540px at 100% 0%, rgba(129, 212, 250, 0.34), transparent 58%),
         linear-gradient(180deg, var(--bg), var(--bg-2));
     }
-
+    button, a, .btn, .os-select, .gauge-card, .app-download-btn {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
     body.lang-en { font-family: "Inter", system-ui, sans-serif; }
 
-    /* carbon-fibre style texture + animated speed streaks */
+    /* carbon-fibre texture + animated speed streaks */
     .background-effects { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
     .background-effects::before {
       content: "";
       position: absolute; inset: -20%;
       background-image:
-        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 2px, transparent 2px 8px),
-        repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 8px);
-      opacity: 0.6;
+        repeating-linear-gradient(45deg, rgba(255,255,255,.02) 0 2px, transparent 2px 8px),
+        repeating-linear-gradient(-45deg, rgba(0,0,0,.12) 0 2px, transparent 2px 8px);
+      opacity: .6;
     }
-    body.day-mode .background-effects::before { opacity: 0.28; }
+    body.day-mode .background-effects::before { opacity: .28; }
     .speed-line {
       position: absolute; top: 0; bottom: 0; width: 2px;
       background: linear-gradient(to bottom, transparent, var(--accent), transparent);
-      opacity: 0.22; animation: streak 3.4s linear infinite;
+      opacity: .22; animation: streak 3.4s linear infinite;
     }
-    .speed-line:nth-child(2) { left: 22%; animation-delay: 0.4s; }
+    .speed-line:nth-child(2) { left: 22%; animation-delay: .4s; }
     .speed-line:nth-child(3) { left: 58%; animation-delay: 1.1s; background: linear-gradient(to bottom, transparent, var(--violet), transparent); }
     .speed-line:nth-child(4) { left: 82%; animation-delay: 1.8s; }
     @keyframes streak { 0% { transform: translateY(-120%); } 100% { transform: translateY(120%); } }
 
-    .container {
-      position: relative; z-index: 1;
-      max-width: 1060px; margin: 0 auto;
-      /* safe-area padding keeps the layout clear of the notch / home bar */
-      padding: calc(0.7rem + env(safe-area-inset-top)) calc(0.6rem + env(safe-area-inset-right)) calc(2.4rem + env(safe-area-inset-bottom)) calc(0.6rem + env(safe-area-inset-left));
-      display: flex; flex-direction: column; gap: 0.85rem;
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+    /* a slow glow, not a strobe: the value must stay readable while it blinks */
+    @keyframes remained-blink { 0%, 100% { opacity: 1; } 50% { opacity: .76; } }
 
-    /* ---------- top bar: spinning coin logo (top-left) + driver HUD (corner) ---------- */
-    .topbar {
-      position: relative;
-      display: flex; align-items: flex-start;
-      padding-left: 76px;   /* keep the corner clear for the coin logo */
-      min-height: 66px;
-    }
-
-    /* spinning coin logo — same artwork as the modern theme */
+    /* ---------- spinning coin logo (same artwork as the modern theme) ---------- */
     .coin-logo {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 62px;
-      height: 62px;
-      border-radius: 50%;
-      perspective: 160px;
-      transform: rotateY(0deg);
-      transform-style: preserve-3d;
-      isolation: isolate;
+      position: absolute; top: 0; left: 0;
+      width: 62px; height: 62px; border-radius: 50%;
+      perspective: 160px; transform-style: preserve-3d; isolation: isolate;
       will-change: transform;
       animation: coin-spin 12s ease-in-out infinite;
-      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.28));
+      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, .28));
       border: 1px solid #a8323d;
-      box-shadow:
-        0 0 0 1px rgba(255, 112, 122, 0.38),
-        0 8px 22px rgba(0, 0, 0, 0.4),
-        0 0 22px rgba(168, 50, 61, 0.32);
-      transition: border-color 0.6s ease, box-shadow 0.6s ease;
+      box-shadow: 0 0 0 1px rgba(255,112,122,.38), 0 8px 22px rgba(0,0,0,.4), 0 0 22px rgba(168,50,61,.32);
+      transition: border-color .6s ease, box-shadow .6s ease;
     }
-
     .coin-face {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
+      position: absolute; inset: 0; border-radius: 50%;
       border: 1px solid #a8323d;
       background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
-      box-shadow: inset 0 0 10px rgba(255, 112, 122, 0.28), inset 0 -3px 4px rgba(80, 12, 20, 0.4);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
+      box-shadow: inset 0 0 10px rgba(255,112,122,.28), inset 0 -3px 4px rgba(80,12,20,.4);
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
     }
-
     .coin-face.front { transform: translateZ(4px); }
-
     .coin-face.back { transform: rotateY(180deg) translateZ(4px); }
-
-    /* steady light sheen on the coin (does not spin, keeps the lighting feel) */
     .coin-logo::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: linear-gradient(120deg, rgba(255, 255, 255, 0.48), transparent 30%, transparent 58%, rgba(255, 255, 255, 0.08));
+      content: ""; position: absolute; inset: 0; border-radius: 50%;
+      background: linear-gradient(120deg, rgba(255,255,255,.48), transparent 30%, transparent 58%, rgba(255,255,255,.08));
       transform: translateZ(9px);
       animation: coin-shine 12s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 1;
+      pointer-events: none; z-index: 1;
     }
-
     @keyframes coin-spin {
-      0%, 100% {
-        transform: rotateX(0deg) rotateY(0deg) scale(1);
-        box-shadow: 0 0 0 1px rgba(255, 112, 122, 0.38), 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 22px rgba(168, 50, 61, 0.32);
-      }
-      25% {
-        transform: rotateX(8deg) rotateY(90deg) scale(1.035);
-        box-shadow: 0 0 0 1px rgba(255, 155, 163, 0.58), 10px 10px 25px rgba(0, 0, 0, 0.42), 0 0 34px rgba(168, 50, 61, 0.48);
-      }
-      50% {
-        transform: rotateX(0deg) rotateY(180deg) scale(1);
-        box-shadow: 0 0 0 1px rgba(255, 112, 122, 0.38), 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 22px rgba(168, 50, 61, 0.32);
-      }
-      75% {
-        transform: rotateX(-8deg) rotateY(270deg) scale(1.035);
-        box-shadow: 0 0 0 1px rgba(255, 155, 163, 0.58), -10px 10px 25px rgba(0, 0, 0, 0.42), 0 0 34px rgba(168, 50, 61, 0.48);
-      }
+      0%, 100% { transform: rotateX(0deg) rotateY(0deg) scale(1); box-shadow: 0 0 0 1px rgba(255,112,122,.38), 0 8px 22px rgba(0,0,0,.4), 0 0 22px rgba(168,50,61,.32); }
+      25% { transform: rotateX(8deg) rotateY(90deg) scale(1.035); box-shadow: 0 0 0 1px rgba(255,155,163,.58), 10px 10px 25px rgba(0,0,0,.42), 0 0 34px rgba(168,50,61,.48); }
+      50% { transform: rotateX(0deg) rotateY(180deg) scale(1); box-shadow: 0 0 0 1px rgba(255,112,122,.38), 0 8px 22px rgba(0,0,0,.4), 0 0 22px rgba(168,50,61,.32); }
+      75% { transform: rotateX(-8deg) rotateY(270deg) scale(1.035); box-shadow: 0 0 0 1px rgba(255,155,163,.58), -10px 10px 25px rgba(0,0,0,.42), 0 0 34px rgba(168,50,61,.48); }
     }
-
     @keyframes coin-shine {
-      0%, 100% { opacity: 0.72; transform: translateZ(9px) rotate(0deg); }
-      50% { opacity: 0.34; transform: translateZ(9px) rotate(18deg); }
+      0%, 100% { opacity: .72; transform: translateZ(9px) rotate(0deg); }
+      50% { opacity: .34; transform: translateZ(9px) rotate(18deg); }
     }
+    html.day-mode .coin-logo { box-shadow: 0 0 0 1px rgba(255,112,122,.45), 0 6px 18px rgba(80,12,20,.28); }
 
-    html.day-mode .coin-logo {
-      box-shadow:
-        0 0 0 1px rgba(255, 112, 122, 0.45),
-        0 6px 18px rgba(80, 12, 20, 0.28);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .coin-logo, .coin-logo::after { animation: none; }
-      .gauge-remained { animation: none; }
-    }
-
-    .hud {
-      margin-left: auto;
-      max-width: min(100%, 380px);
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-      padding: 0.7rem 0.9rem;
-      display: flex; flex-direction: column; gap: 0.5rem;
-      animation: fadeUp 0.6s ease both;
-    }
-    .hud-user { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-    .hud-label {
-      font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--muted); font-weight: 700;
-    }
-    .hud-email {
-      font-family: var(--font-dig); font-size: 0.86rem; font-weight: 700;
-      color: var(--txt); word-break: break-all; direction: ltr;
-    }
-    .hud-status { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
-
-    .status-badge, .presence {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      font-size: 0.74rem; font-weight: 700;
-      padding: 0.3rem 0.66rem; border-radius: 999px;
-      border: 1px solid var(--line); white-space: nowrap;
-    }
-    .status-badge.badge-active { color: var(--ok); background: rgba(52, 211, 153, 0.12); border-color: rgba(52, 211, 153, 0.4); }
-    .status-badge.badge-inactive { color: var(--bad); background: rgba(255, 77, 94, 0.12); border-color: rgba(255, 77, 94, 0.4); }
-    .status-badge.badge-pending { color: var(--warn); background: rgba(245, 181, 68, 0.12); border-color: rgba(245, 181, 68, 0.4); }
-    .presence { color: var(--muted); }
-    .presence.online { color: var(--ok); border-color: rgba(52, 211, 153, 0.35); }
-    .presence.offline { color: var(--muted); }
-    .presence-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-    .presence.online .presence-dot { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18); animation: pulse 1.8s ease infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    /* a slow glow, not a strobe: the old 0.35 opacity + shrink made the value
-       disappear for half of every 1.25s cycle, which is what read as "unclear" */
-    @keyframes remained-blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.76; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .gauge-remained { animation: none; }
-      .speed-line { animation: none; }
-    }
-
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-
-    /* ---------- dashboard control switches (language + day/night) ---------- */
-    .controls {
-      display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;
-      padding: 0.4rem;
-      border-radius: 18px;
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.6), rgba(10, 16, 27, 0.6));
-      border: 1px solid var(--line);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 26px rgba(0, 0, 0, 0.35);
-    }
-    html.day-mode .controls {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(226, 234, 245, 0.95));
-      box-shadow: inset 0 1px 0 #fff, 0 10px 24px rgba(30, 60, 110, 0.14);
-    }
-
-    /* every control looks like a physical dashboard rocker switch */
-    .ctrl-btn {
-      position: relative;
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      font: inherit; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.05em;
-      color: var(--txt); cursor: pointer; user-select: none;
-      padding: 0.5rem 0.7rem;
-      border-radius: 13px;
-      border: 1px solid rgba(140, 170, 220, 0.22);
-      background: linear-gradient(180deg, #1e2a3d, #0c1420);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.09),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
-        0 4px 0 rgba(0, 0, 0, 0.35),
-        0 8px 14px rgba(0, 0, 0, 0.4);
-      transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.12s ease;
-    }
-    html.day-mode .ctrl-btn {
-      background: linear-gradient(180deg, #ffffff, #d9e3f0);
-      border-color: rgba(20, 45, 90, 0.16);
-      box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(30, 60, 110, 0.12), 0 4px 0 rgba(30, 60, 110, 0.16), 0 8px 14px rgba(30, 60, 110, 0.14);
-    }
-    .ctrl-btn:active { transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45); }
-    .ctrl-btn.active-glow {
-      border-color: rgba(34, 211, 238, 0.65);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
-        0 0 16px rgba(34, 211, 238, 0.35);
-    }
-    .ctrl-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    /* tell-tale indicator light */
-    .ctrl-led {
-      width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto;
-      background: #2a3446; box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.8);
-      transition: background 0.25s ease, box-shadow 0.25s ease;
-    }
-    .ctrl-btn.active-glow .ctrl-led {
-      background: var(--accent);
-      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.9), 0 0 10px var(--accent);
-    }
-    .ctrl-label { display: inline-flex; align-items: center; gap: 0.32rem; }
-    .ctrl-icon { font-size: 0.9rem; line-height: 1; }
-
-    /* rocker knob */
+    /* ---------- rocker switches (language + day/night) ---------- */
     .ctrl-switch {
       position: relative; width: 34px; height: 18px; border-radius: 999px; flex: 0 0 auto;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(140, 170, 220, 0.2);
-      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.7);
+      background: rgba(0,0,0,.5);
+      border: 1px solid rgba(140,170,220,.2);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,.7);
     }
-    html.day-mode .ctrl-switch {
-      background: rgba(30, 60, 110, 0.14);
-      box-shadow: inset 0 2px 4px rgba(30, 60, 110, 0.2);
-    }
+    html.day-mode .ctrl-switch { background: rgba(30,60,110,.14); box-shadow: inset 0 2px 4px rgba(30,60,110,.2); }
     .ctrl-knob {
       position: absolute; top: 1.5px; left: 2px;
       width: 13px; height: 13px; border-radius: 50%;
       background: linear-gradient(180deg, #eaf3ff, #8ea3bf);
-      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
-      transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.2, 1), background 0.25s ease;
+      box-shadow: 0 2px 3px rgba(0,0,0,.55);
+      transition: transform .25s cubic-bezier(.2,.9,.2,1), background .25s ease;
     }
     .ctrl-btn.active-glow .ctrl-knob {
       transform: translateX(16px);
       background: linear-gradient(180deg, #cdf6ff, var(--accent));
     }
+    .ctrl-led {
+      width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto;
+      background: #2a3446; box-shadow: inset 0 0 3px rgba(0,0,0,.8);
+      transition: background .25s ease, box-shadow .25s ease;
+    }
+    .ctrl-btn.active-glow .ctrl-led { background: var(--accent); box-shadow: inset 0 0 2px rgba(255,255,255,.9), 0 0 10px var(--accent); }
 
-    /* ---------- alerts (dashboard warning lights) ---------- */
-    .alert {
-      display: none; align-items: center; gap: 0.6rem;
-      padding: 0.6rem 0.8rem; border-radius: 14px;
-      font-size: clamp(0.7rem, 2.8vw, 0.85rem); font-weight: 600;
-      border: 1px solid rgba(255, 77, 94, 0.45);
-      background: linear-gradient(180deg, var(--gloss), transparent 55%), linear-gradient(90deg, rgba(255, 77, 94, 0.22), rgba(255, 77, 94, 0.08));
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 8px 18px rgba(0, 0, 0, 0.28);
-      color: #ffd9de;
-    }
-    html.day-mode .alert { color: #8a1120; }
-    .alert.show { display: flex; animation: fadeUp 0.4s ease both; }
-    .alert-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    /* ---------- gauge cluster ---------- */
-    /* the two gauges always sit side by side — on phones too. Tap one to
-       blow it up for reading, tap again to put it back in its place. */
-    .cluster {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.5rem;
-      align-items: start;
-    }
-    @media (min-width: 760px) { .cluster { gap: 0.8rem; } }
-    /* the two dials stay side by side at every width: every label is measured
-       against its card, so a narrow card shrinks as a whole instead of spilling
-       over the dial — phones only lose a little of the gutter */
-    @media (max-width: 560px) { .cluster { gap: 0.4rem; } }
-
-    .gauge-card {
-      position: relative;
-      min-width: 0;
-      /* every label inside the card sizes itself from the card width, so a
-         narrow phone card shrinks as a whole instead of overlapping */
-      container: gauge-card / inline-size;
-      /* raised dashboard housing: gloss on top, highlight inside, shade below */
-      background: linear-gradient(180deg, var(--gloss), transparent 42%), var(--panel);
-      background-clip: padding-box;
-      border: 1px solid var(--line);
-      border-top-color: var(--emboss-hi);
-      border-radius: var(--radius);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--shadow);
-      backdrop-filter: blur(12px);
-      padding: 0.6rem 0.5rem 0.75rem;
-      overflow: hidden;
-      cursor: pointer;
-      touch-action: manipulation;
-      display: flex; flex-direction: column;
-      animation: fadeUp 0.6s ease both;
-      transition: border-color 0.2s ease, box-shadow 0.25s ease;
-    }
-    @media (min-width: 760px) { .gauge-card { padding: 0.9rem 0.9rem 1rem; } }
-    .gauge-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-    /* the card keeps its own grid cell while it is open in the zoom stage */
-    .gauge-card.zoomed {
-      cursor: zoom-out;
-      border-color: rgba(34, 211, 238, 0.45);
-      box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25), var(--shadow);
-    }
-
-    /* once a card has been lifted into the zoom stage its entry animation must
-       not replay on the way back (it would re-offset the card for a moment) */
-    .gauge-card.anim-off { animation: none; }
-
-    /* invisible stand-in that holds the empty grid cell — nothing else moves */
-    .gauge-placeholder {
-      border-radius: var(--radius);
-      border: 1px dashed var(--line);
-      background: rgba(127, 160, 210, 0.05);
-    }
-
-    .zoom-hint {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 22px; height: 22px; border-radius: 7px;
-      border: 1px solid var(--line); color: var(--muted);
-      background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), 0 3px 7px rgba(0, 0, 0, 0.3);
-      font-size: 0.72rem; line-height: 1;
-      transition: transform 0.25s ease, color 0.2s ease, border-color 0.2s ease;
-    }
-    .gauge-card.zoomed .zoom-hint {
-      transform: rotate(180deg); color: var(--accent); border-color: var(--accent);
-    }
-    .gauge-card::after {
-      content: ""; position: absolute; inset: 0; pointer-events: none;
-      background: radial-gradient(circle at 50% 18%, rgba(34, 211, 238, 0.14), transparent 62%);
-    }
-    .card-head {
-      position: relative; z-index: 2;
-      display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
-      font-size: clamp(0.72rem, 3.1vw, 0.84rem);
-      font-size: clamp(0.68rem, 3.4cqw, 0.86rem); font-weight: 800; letter-spacing: 0.03em;
-      color: var(--muted); text-transform: uppercase;
-      margin-bottom: 0.4rem;
-      line-height: 1.25;
-    }
-    .gauge-card.zoomed .card-head { font-size: 0.82rem; }
-
-    /* the dial centres in the free space and the footer sticks to the bottom,
-       so the two cards stay balanced at equal height */
-    /* the dial hugs the top of the free space instead of centring in it: the two
-       cards have different footers (the time card carries the clock strip), so
-       centring put one dial below the other — both now start on the same line */
-    /* the single track is pinned to the wrap width: without it the clock strip's
-       longest line widened the column and the dial spilled out of the card on a
-       320px screen */
-    .gauge-wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); place-items: start center; flex: 1 1 auto; }
-
+    /* ---------- circular dial ---------- */
     .gauge { position: relative; width: min(100%, 320px); aspect-ratio: 1 / 1; container: dial / size; }
     .gauge-card.zoomed .gauge { width: min(100%, 460px); }
-
-    /* embossed instrument dial behind the SVG (rim light + deep inner shade) */
     .gauge::before {
       content: ""; position: absolute; inset: 2%; border-radius: 50%; z-index: 0;
-      background:
-        radial-gradient(circle at 50% 26%, var(--dial-hi), var(--dial) 72%),
-        var(--dial);
+      background: radial-gradient(circle at 50% 26%, var(--dial-hi), var(--dial) 72%), var(--dial);
       box-shadow:
-        inset 0 8px 20px rgba(255, 255, 255, 0.10),
+        inset 0 8px 20px rgba(255,255,255,.10),
         inset 0 -14px 26px var(--emboss-lo),
         inset 0 0 0 1px var(--line),
-        0 14px 28px rgba(0, 0, 0, 0.45),
+        0 14px 28px rgba(0,0,0,.45),
         0 2px 0 var(--emboss-hi);
     }
     .gauge-svg { position: relative; z-index: 1; width: 100%; height: 100%; overflow: visible; }
     .gauge-track { fill: none; stroke: var(--line); stroke-width: 12; stroke-linecap: round; }
-    .gauge-value { fill: none; stroke: var(--ok); stroke-width: 12; stroke-linecap: round; transition: d 0.5s ease; filter: drop-shadow(0 0 8px currentColor); }
+    .gauge-value { fill: none; stroke: var(--ok); stroke-width: 12; stroke-linecap: round; transition: d .5s ease; filter: drop-shadow(0 0 8px currentColor); }
     .gauge[data-level="ok"] .gauge-value { stroke: var(--accent); color: var(--accent); }
     .gauge[data-level="warn"] .gauge-value { stroke: var(--warn); color: var(--warn); }
     .gauge[data-level="bad"] .gauge-value { stroke: var(--bad); color: var(--bad); }
-
-    .tick { stroke: var(--muted); stroke-width: 1.4; opacity: 0.35; }
-    .tick.major { stroke: var(--txt); stroke-width: 2.6; opacity: 0.75; }
-
-    .needle-body { fill: var(--needle); filter: drop-shadow(0 0 6px rgba(255, 77, 94, 0.75)); transition: all 0.6s cubic-bezier(0.2, 0.9, 0.2, 1); }
-    .gauge[data-level="ok"] .needle-body { fill: var(--accent); filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.7)); }
-    .gauge[data-level="warn"] .needle-body { fill: var(--warn); filter: drop-shadow(0 0 6px rgba(245, 181, 68, 0.7)); }
+    .tick { stroke: var(--muted); stroke-width: 1.4; opacity: .35; }
+    .tick.major { stroke: var(--txt); stroke-width: 2.6; opacity: .75; }
+    .needle-body { fill: var(--needle); filter: drop-shadow(0 0 6px rgba(255,77,94,.75)); transition: all .6s cubic-bezier(.2,.9,.2,1); }
+    .gauge[data-level="ok"] .needle-body { fill: var(--accent); filter: drop-shadow(0 0 6px rgba(34,211,238,.7)); }
+    .gauge[data-level="warn"] .needle-body { fill: var(--warn); filter: drop-shadow(0 0 6px rgba(245,181,68,.7)); }
     .needle-base { fill: #0b1220; stroke: var(--txt); stroke-width: 2; }
 
+    /* readout printed on the dial: sizes follow the dial (cqw) so a narrow card
+       shrinks as a whole instead of spilling over the frame */
     .gauge-readout {
       position: absolute; z-index: 2; left: 50%; top: 57%; transform: translate(-50%, 0);
-      display: flex; flex-direction: column; align-items: center; gap: 0.05rem;
+      display: flex; flex-direction: column; align-items: center; gap: .05rem;
       text-align: center; pointer-events: none; width: 78%;
     }
     .readout-big {
-      /* the vw line is the fallback for browsers without container queries */
-      font-size: clamp(1rem, 6vw, 2.3rem);
-      font-family: var(--font-read); font-size: clamp(0.95rem, 12.5cqw, 3.2rem);
-      font-weight: 800; line-height: 1.05; letter-spacing: 0;
-      color: var(--txt);
-      /* tabular digits stop the countdown from jittering every second */
+      font-family: "Vazirmatn", "Inter", system-ui, sans-serif;
+      font-size: clamp(.95rem, 12.5cqw, 3.2rem);
+      font-weight: 800; line-height: 1.05; color: var(--txt);
       font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
-      /* a tight halo only — a wide blur eats the glyph edges and blurs them */
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .readout-unit {
-      font-size: clamp(0.6rem, 2.6vw, 0.78rem);
-      font-size: clamp(0.62rem, 5.4cqw, 0.8rem); font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.2;
+      font-size: clamp(.62rem, 5.4cqw, .8rem); font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .04em; line-height: 1.2;
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .readout-sub {
-      font-size: clamp(0.72rem, 3.4vw, 1rem);
-      font-family: var(--font-read); font-size: clamp(0.68rem, 6.6cqw, 1.02rem);
-      font-weight: 700; color: var(--accent-ink); margin-top: 0.2rem;
-      font-variant-numeric: tabular-nums; letter-spacing: 0.02em; line-height: 1.2;
+      font-family: "Vazirmatn", "Inter", system-ui, sans-serif;
+      font-size: clamp(.68rem, 6.6cqw, 1.02rem);
+      font-weight: 700; color: var(--accent-ink); margin-top: .2rem;
+      font-variant-numeric: tabular-nums; letter-spacing: .02em; line-height: 1.2;
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
-
-    /* the readout scales up when the gauge is blown up — still measured against
-       the dial, so the blown-up card is the only thing that gets bigger */
     .gauge-card.zoomed .readout-big { font-size: clamp(2rem, 12.5cqw, 3.4rem); }
-    .gauge-card.zoomed .readout-unit { font-size: clamp(0.7rem, 5.4cqw, 1rem); }
-    .gauge-card.zoomed .readout-sub { font-size: clamp(0.8rem, 6.6cqw, 1.35rem); }
+    .gauge-card.zoomed .readout-unit { font-size: clamp(.7rem, 5.4cqw, 1rem); }
+    .gauge-card.zoomed .readout-sub { font-size: clamp(.8rem, 6.6cqw, 1.35rem); }
 
-    /* حجم باقی‌مانده روی صفحهٔ گیج: برچسب «باقی‌مانده» + مقدار قرمز با درخشش
-       آرام، وسط نیمهٔ بالایی دایره — هم‌فاصله از مرکز دایره و نشانگرِ ۱۲ ساعت */
+    /* remaining quota printed in the middle of the upper half of the dial */
     .gauge-remained-wrap {
       position: absolute; z-index: 2; left: 50%; top: 28%; transform: translate(-50%, -50%);
-      display: flex; flex-direction: column; align-items: center; gap: 0.14rem;
+      display: flex; flex-direction: column; align-items: center; gap: .1rem;
       text-align: center; white-space: nowrap; pointer-events: none;
     }
     .gauge-remained-cap {
-      font-size: clamp(0.5rem, 2vw, 0.65rem);
-      font-size: clamp(0.5rem, 4cqw, 0.65rem); font-weight: 700; letter-spacing: 0.02em;
+      font-size: clamp(.5rem, 4cqw, .65rem); font-weight: 700; letter-spacing: .02em;
       color: var(--muted);
       text-shadow: 0 0 2px var(--bg), 0 0 4px var(--bg);
     }
     .gauge-remained {
       direction: ltr;
-      font-size: clamp(0.6rem, 3vw, 0.9rem);
-      font-family: var(--font-read); font-size: clamp(0.6rem, 5.6cqw, 1.1rem);
+      font-family: "Vazirmatn", "Inter", system-ui, sans-serif;
+      font-size: clamp(.6rem, 5.6cqw, 1.1rem);
       font-weight: 800; color: var(--bad-ink); line-height: 1.15;
-      font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
-      text-shadow: 0 0 2px var(--bg), 0 0 6px rgba(255, 77, 94, 0.32);
+      font-variant-numeric: tabular-nums; letter-spacing: .01em;
+      text-shadow: 0 0 2px var(--bg), 0 0 6px rgba(255,77,94,.32);
       animation: remained-blink 2.4s ease-in-out infinite;
     }
     .gauge-card.zoomed .gauge-remained { font-size: 1.12rem; }
-    .gauge-card.zoomed .gauge-remained-cap { font-size: 0.75rem; }
+    .gauge-card.zoomed .gauge-remained-cap { font-size: .75rem; }
 
-    .gauge-foot {
-      position: relative; z-index: 2;
-      margin-top: auto; padding-top: 0.4rem; text-align: center;
-      font-size: clamp(0.68rem, 2.9vw, 0.8rem);
-      font-size: clamp(0.62rem, 3.1cqw, 0.8rem); color: var(--muted); line-height: 1.4;
+    /* five figures over six tracks: two rows of 3, then two half-width cells */
+    .usage-details { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .usage-details .ud { grid-column: span 2; }
+    .usage-details .ud:nth-child(4), .usage-details .ud:nth-child(5) { grid-column: span 3; }
+    @container gauge-card (max-width: 260px) {
+      .usage-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .usage-details .ud, .usage-details .ud:nth-child(4), .usage-details .ud:nth-child(5) { grid-column: span 1; }
     }
-    .gauge-card.zoomed .gauge-foot { font-size: 0.92rem; padding-top: 0.7rem; }
-    .gauge-foot strong { color: var(--txt); font-weight: 700; }
 
-    /* ---------- round Tehran clock (corner of the time gauge) ---------- */
-    .clock-badge {
-      position: absolute; top: 0; inset-inline-end: 0;
-      width: 116px;
-      background: linear-gradient(180deg, var(--gloss), transparent 45%), var(--dial);
-      border: 1px solid var(--line); border-top-color: var(--emboss-hi);
-      border-radius: 18px;
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 10px 24px rgba(0, 0, 0, 0.4);
-      padding: 0.4rem 0.4rem 0.5rem;
-      display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
-      z-index: 3;
-      animation: fadeUp 0.7s ease both;
-    }
+    /* ---------- round Tehran clock ---------- */
     .clock-face { width: 74px; height: 74px; }
     .clock-rim { fill: none; stroke: var(--line); stroke-width: 2.5; }
-    .ctick { stroke: var(--muted); stroke-width: 1; opacity: 0.4; }
-    .ctick.major { stroke: var(--txt); stroke-width: 2; opacity: 0.8; }
+    .ctick { stroke: var(--muted); stroke-width: 1; opacity: .4; }
+    .ctick.major { stroke: var(--txt); stroke-width: 2; opacity: .8; }
     .clock-hand { stroke: var(--txt); stroke-linecap: round; }
     .clock-hand.hour { stroke-width: 4; }
     .clock-hand.minute { stroke-width: 2.6; }
     .clock-hand.second { stroke: var(--accent); stroke-width: 1.4; }
     .clock-hub { fill: var(--accent); }
-    .clock-digital { font-family: var(--font-read); font-size: 1rem; font-weight: 800; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
-    .clock-date { font-size: 0.7rem; color: var(--muted); text-align: center; line-height: 1.4; }
-    .clock-event {
-      font-size: 0.6rem; color: var(--warn); text-align: center; line-height: 1.35;
-      border-top: 1px dashed var(--line); padding-top: 0.2rem; margin-top: 0.1rem;
-    }
-    .clock-info { display: flex; flex-direction: column; align-items: center; gap: 0.12rem; min-width: 0; }
-
-    /* narrow cards (phones): the clock drops under the dial so it stays readable */
+    /* the badge sits in the corner of the dial on wide screens, and turns into a
+       wide strip under the dial on phones so the clock stays readable */
+    .clock-badge { position: absolute; top: 0; inset-inline-end: 0; width: 116px; z-index: 3; }
     @media (max-width: 720px) {
-      /* the badge leaves the dial corner and becomes a wide strip under it, so
-         the clock, the time and the date sit on one line instead of a tall box */
-      .clock-badge {
-        position: static; width: 100%; margin-top: 0.5rem;
-        padding: 0.45rem 0.6rem; border-radius: 14px;
-        flex-direction: row; align-items: center; justify-content: center; gap: 0.7rem;
-      }
-      .clock-face { width: 48px; height: 48px; flex: 0 0 auto; }
-      .clock-info { align-items: flex-start; gap: 0.08rem; }
-      .clock-digital { font-size: 1rem; }
-      .clock-date { font-size: 0.74rem; text-align: start; }
-      .clock-event {
-        font-size: 0.68rem; text-align: start;
-        border-top: none; padding-top: 0; margin-top: 0;
-      }
+      .clock-badge { position: static; width: 100%; margin-top: .5rem; flex-direction: row; align-items: center; justify-content: center; gap: .7rem; }
+      .clock-badge .clock-face { width: 48px; height: 48px; flex: 0 0 auto; }
+      .clock-info { align-items: flex-start; gap: .08rem; }
+      .clock-date { text-align: start; }
+      .clock-event { text-align: start; border-top: none; padding-top: 0; margin-top: 0; }
     }
-    /* a 320px phone leaves the card ~138px: the face and the digital clock no
-       longer fit on one row and the digits ran over the dial, so the face
-       shrinks and the type steps down */
+    /* a 320px phone leaves the card ~138px: shrink the face and step down */
     @container gauge-card (max-width: 150px) {
-      .clock-badge { gap: 0.4rem; padding: 0.4rem 0.45rem; }
-      .clock-face { width: 34px; height: 34px; }
-      .clock-digital { font-size: 0.9rem; }
-      .clock-date { font-size: 0.66rem; }
+      .clock-badge { gap: .4rem; padding: .4rem .45rem; }
+      .clock-badge .clock-face { width: 34px; height: 34px; }
+      .clock-digital { font-size: .9rem; }
+      .clock-date { font-size: .66rem; }
     }
-
-    /* zoomed gauge: clock off — the expiry date under the dial says it all */
+    /* zoomed gauge: the clock steps aside, the expiry date under the dial says it */
     .gauge-card.zoomed .clock-badge { display: none; }
 
-    /* ---------- usage detail grid ---------- */
-    .usage-details {
-      position: relative; z-index: 2;
-      margin-top: 0.6rem;
-      display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.45rem;
-    }
-    /* five figures over six tracks: two rows of 3, then two half-width cells
-       instead of a lopsided row with an empty hole */
-    .ud { grid-column: span 2; }
-    .ud:nth-child(4), .ud:nth-child(5) { grid-column: span 3; }
-    @media (max-width: 560px) { .usage-details { gap: 0.35rem; } }
-    /* a phone card is ~160px wide: three figures per row leave ~42px each and
-       the values spill out of their cells, so narrow cards show two per row */
-    @container gauge-card (max-width: 260px) {
-      .usage-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .ud, .ud:nth-child(4), .ud:nth-child(5) { grid-column: span 1; }
-    }
-    .ud {
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 5px 11px rgba(0, 0, 0, 0.26);
-      border-radius: 12px; padding: 0.4rem 0.35rem;
-      display: flex; flex-direction: column; gap: 0.12rem; text-align: center; min-width: 0;
-    }
-    .ud span { font-size: clamp(0.64rem, 2.7vw, 0.75rem); font-size: clamp(0.64rem, 3.3cqw, 0.76rem); font-weight: 700; color: var(--muted); line-height: 1.35; }
-    .ud b {
-      font-family: var(--font-read); font-size: clamp(0.74rem, 3.1vw, 0.94rem);
-      font-size: clamp(0.72rem, 4.1cqw, 0.96rem);
-      font-weight: 800; color: var(--txt); line-height: 1.3;
-      font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
-      /* the value is a unit token: never split "12.50 GB" in two */
-      white-space: nowrap;
-    }
-    .gauge-card.zoomed .ud span { font-size: 0.8rem; }
-    .gauge-card.zoomed .ud b { font-size: 1.05rem; }
-
-    /* ---------- generic panels ---------- */
-    .panel {
-      background: linear-gradient(180deg, var(--gloss), transparent 34%), var(--panel);
-      background-clip: padding-box;
-      border: 1px solid var(--line); border-top-color: var(--emboss-hi);
-      border-radius: var(--radius);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--emboss-drop), var(--shadow);
-      backdrop-filter: blur(12px); padding: 0.85rem;
-      animation: fadeUp 0.6s ease both;
-    }
-    @media (min-width: 760px) { .panel { padding: 1rem; } }
-    .panel-title {
-      display: flex; align-items: center; gap: 0.5rem;
-      font-size: 0.82rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
-    }
-
-    .sub-link-box { margin-top: 0.8rem; }
-    .sub-link-wrapper { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-    .sub-link-text {
-      flex: 1 1 240px; font-family: var(--font-dig); font-size: 0.78rem;
-      /* recessed slot: the link sits inside the dashboard, not on it */
-      background: rgba(0, 0, 0, 0.28); border: 1px solid var(--line);
-      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.55), inset 0 -1px 0 var(--emboss-hi);
-      border-radius: 12px; padding: 0.7rem 0.8rem;
-      word-break: break-all; direction: ltr; text-align: left;
-    }
-    html.day-mode .sub-link-text {
-      background: rgba(210, 228, 248, 0.9);
-      box-shadow: inset 0 3px 8px rgba(30, 80, 140, 0.2), inset 0 -1px 0 #fff;
-    }
-    .btn-group { display: flex; gap: 0.4rem; }
-
-    .btn {
-      font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
-      border-radius: 12px; padding: 0.62rem 0.95rem;
-      border: 1px solid var(--line); background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2); color: var(--txt);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(0, 0, 0, 0.28), 0 7px 14px rgba(0, 0, 0, 0.3);
-      transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.12s ease;
-    }
-    html.day-mode .btn { box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(30, 80, 140, 0.18), 0 7px 14px rgba(25, 70, 130, 0.18); }
-    .btn:active { transform: translateY(2px); box-shadow: inset 0 2px 4px var(--emboss-lo); }
-    .btn-primary {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 55%), linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #04121a; border-color: transparent;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(0, 0, 0, 0.25), 0 3px 0 rgba(6, 60, 84, 0.55), 0 8px 16px rgba(0, 0, 0, 0.32);
-    }
-    .btn-primary:active { transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.32), 0 1px 0 rgba(6, 60, 84, 0.5); }
-    @media (hover: hover) {
-      .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
-      .app-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-    }
-    .btn-success { background: linear-gradient(135deg, var(--ok), #22c55e) !important; color: #04210f !important; }
-
-    .soft-hr { border: none; border-top: 1px solid var(--line); margin: 1rem 0; box-shadow: 0 1px 0 var(--emboss-hi); }
-
-    .config-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.2rem; }
-
-    #configList { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 0.8rem; }
-    .config-item {
-      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 5px 12px rgba(0, 0, 0, 0.28);
-      border-radius: 12px; padding: 0.6rem 0.7rem;
-    }
-    .config-text {
-      flex: 1 1 180px; min-width: 0; font-family: var(--font-dig); font-size: 0.72rem;
-      color: var(--muted); word-break: break-all; direction: ltr; text-align: left;
-    }
-    .config-actions { display: flex; gap: 0.4rem; flex: 0 0 auto; }
-    .badge-group { display: flex; gap: 0.3rem; }
-
-    /* موبایل: هر کانفیگ در یک خط مثل تمپلیت modern — متن کوتاه می‌شود و
-       کلیدهای QR و کپی کنار هم در انتهای همان خط می‌مانند */
-    @media (max-width: 560px) {
-      .config-item { flex-wrap: nowrap; gap: 0.35rem; padding: 0.5rem 0.55rem; }
-      .config-item .badge-group { display: none; }
-      .config-item .config-text {
-        flex: 1 1 auto; min-width: 0; word-break: normal;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        font-size: 0.64rem;
-      }
-      .config-item .config-actions { flex: 0 0 auto; gap: 0.3rem; }
-      .config-item .config-actions .btn { padding: 0.36rem 0.5rem; font-size: 0.66rem; }
-      .config-item .config-actions .btn-qr { padding: 0.3rem 0.42rem; font-size: 0.64rem; }
-    }
-    .badge {
-      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em;
-      padding: 0.2rem 0.45rem; border-radius: 6px; color: #06121c;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -2px 0 rgba(0, 0, 0, 0.32), 0 3px 6px rgba(0, 0, 0, 0.32);
-    }
-    .btn-qr {
-      font: inherit; font-size: 0.74rem; font-weight: 700; cursor: pointer;
-      padding: 0.45rem 0.6rem; border-radius: 9px;
-      border: 1px solid var(--line); background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2); color: var(--txt);
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(0, 0, 0, 0.26), 0 6px 12px rgba(0, 0, 0, 0.26);
-      transition: transform 0.12s ease, border-color 0.2s ease, box-shadow 0.12s ease;
-    }
-    .btn-qr:active { transform: translateY(2px); box-shadow: inset 0 2px 4px var(--emboss-lo); }
-    .btn-qr:hover { border-color: var(--accent); }
-
-    /* ---------- نصب و راه‌اندازی: منوی کشویی سیستم‌عامل ---------- */
-    .apps-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
-
-    .os-chip {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      font-size: 0.7rem; font-weight: 700; color: var(--txt);
-      padding: 0.28rem 0.6rem; border-radius: 999px;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, var(--gloss), transparent), var(--panel-2);
-    }
-    .os-chip[hidden] { display: none; }
-    .os-chip-icon { font-size: 0.9rem; line-height: 1; }
-
-    .os-picker { margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; }
-    .os-picker-title {
-      font-size: 0.72rem; font-weight: 700; color: var(--muted);
-      display: flex; align-items: center; gap: 0.35rem;
-    }
-    .os-picker-title::before { content: ""; width: 4px; height: 0.9rem; border-radius: 2px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
-    .os-select-wrap { position: relative; display: block; }
-    .os-select {
-      -webkit-appearance: none; appearance: none;
-      width: 100%; font: inherit; font-size: 0.86rem; font-weight: 700; cursor: pointer;
-      color: var(--txt); padding: 0.72rem 2.2rem 0.72rem 0.9rem;
-      border-radius: 14px; border: 1px solid var(--line);
-      background: linear-gradient(180deg, var(--panel-2), var(--panel));
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 5px 12px rgba(0, 0, 0, 0.32);
-    }
-    html.day-mode .os-select {
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 5px 12px rgba(25, 70, 130, 0.18);
-    }
-    .os-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .os-caret {
-      position: absolute; top: 50%; inset-inline-end: 0.85rem;
-      width: 0.5rem; height: 0.5rem; margin-top: -0.32rem; pointer-events: none;
-      border-right: 2px solid var(--accent-2); border-bottom: 2px solid var(--accent-2);
-      transform: rotate(45deg);
-    }
-
-    .apps-lead {
-      margin: 0.85rem 0 0; font-size: clamp(0.72rem, 3vw, 0.84rem);
-      font-weight: 700; line-height: 1.6; color: var(--txt);
-      display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
-    }
-    .apps-lead .lead-os {
-      display: inline-flex; align-items: center; gap: 0.3rem;
-      padding: 0.18rem 0.55rem; border-radius: 999px;
-      color: #04121a; background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 6px rgba(0, 0, 0, 0.3);
-      font-weight: 800;
-    }
-
-    .apps-grid {
-      margin-top: 0.9rem;
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr)); gap: 0.6rem;
-    }
-    .app-card {
-      background: linear-gradient(180deg, var(--gloss), transparent 55%), var(--panel-2);
-      border: 1px solid var(--line);
-      border-radius: 16px; padding: 0.7rem 0.55rem;
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 8px 18px rgba(0, 0, 0, 0.34);
-      display: flex; flex-direction: column; align-items: center; gap: 0.45rem; text-align: center;
-      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    html.day-mode .app-card { box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 8px 16px rgba(25, 70, 130, 0.2); }
-    .app-card:active { transform: translateY(1px); }
-    .app-icon {
-      width: 46px; height: 46px; border-radius: 12px; object-fit: cover;
-      background: rgba(255, 255, 255, 0.06);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 14px rgba(0, 0, 0, 0.4);
-    }
-    .app-name { font-size: 0.78rem; font-weight: 700; }
-    .app-download-btn {
-      font: inherit; font-size: 0.72rem; font-weight: 700; cursor: pointer;
-      width: 100%; padding: 0.42rem 0.5rem; border-radius: 10px;
-      border: 1px solid transparent; color: #04121a;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 0 rgba(0, 0, 0, 0.28), 0 4px 0 rgba(6, 60, 84, 0.55), 0 8px 14px rgba(0, 0, 0, 0.32);
-      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.15s ease;
-    }
-    .app-download-btn:hover { filter: brightness(1.08); }
-    .app-download-btn:active {
-      transform: translateY(3px);
-      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(6, 60, 84, 0.5);
-    }
-    .download-note { margin-top: 0.8rem; font-size: 0.72rem; color: var(--muted); text-align: center; }
-
-    /* ---------- modals ---------- */
-    .qr-overlay {
-      position: fixed; inset: 0; z-index: 50; display: none;
-      align-items: center; justify-content: center; padding: 1rem;
-      background: rgba(3, 6, 12, 0.78); backdrop-filter: blur(6px);
-    }
+    /* ---------- modals + zoom stage ---------- */
+    .qr-overlay { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(3,6,12,.78); backdrop-filter: blur(6px); }
     .qr-overlay.open { display: flex; }
-    .qr-box {
-      position: relative;
-      background: linear-gradient(180deg, var(--gloss), transparent 40%), var(--panel);
-      border: 1px solid var(--line); border-top-color: var(--emboss-hi);
-      border-radius: 20px; padding: 1.2rem;
-      box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 12px var(--emboss-lo), var(--emboss-drop), var(--shadow);
-      max-width: min(92vw, 380px); text-align: center;
-    }
-    .qr-label { font-size: 0.82rem; font-weight: 700; margin-bottom: 0.7rem; }
-    .qr-close {
-      position: absolute; top: 0.4rem; inset-inline-end: 0.6rem;
-      border: none; background: transparent; color: var(--muted);
-      font-size: 1.5rem; line-height: 1; cursor: pointer;
-    }
-    .qr-box img {
-      width: min(70vw, 260px); height: auto; border-radius: 12px; background: #fff; padding: 0.4rem;
-      box-shadow: inset 0 0 0 1px var(--line), 0 8px 18px rgba(0, 0, 0, 0.35);
-    }
-    .qr-url { margin-top: 0.7rem; font-family: var(--font-dig); font-size: 0.68rem; color: var(--muted); word-break: break-all; direction: ltr; }
-
-    /* ---------- gauge zoom stage ----------
-       The tapped card is lifted into this overlay, so it grows in place and the
-       dashboard behind it never reflows. */
-    /* the page behind stays scrollable on purpose: locking it would drop the
-       scrollbar and shift the whole dashboard sideways */
+    .qr-close { position: absolute; top: .4rem; inset-inline-end: .6rem; border: none; background: transparent; color: var(--muted); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+    .qr-box img { width: min(70vw, 260px); height: auto; border-radius: 12px; background: #fff; padding: .4rem; box-shadow: inset 0 0 0 1px var(--line), 0 8px 18px rgba(0,0,0,.35); }
     body.zoom-open .zoom-backdrop { touch-action: none; }
-
     .zoom-stage {
       position: fixed; inset: 0; z-index: 60;
       display: flex; align-items: center; justify-content: center;
-      padding: calc(0.8rem + env(safe-area-inset-top)) calc(0.8rem + env(safe-area-inset-right)) calc(0.8rem + env(safe-area-inset-bottom)) calc(0.8rem + env(safe-area-inset-left));
+      padding: calc(.8rem + env(safe-area-inset-top)) calc(.8rem + env(safe-area-inset-right)) calc(.8rem + env(safe-area-inset-bottom)) calc(.8rem + env(safe-area-inset-left));
     }
     .zoom-stage[hidden] { display: none; }
-
-    .zoom-backdrop {
-      position: absolute; inset: 0;
-      background: rgba(1, 3, 9, 0.78);
-      backdrop-filter: blur(5px);
-      animation: fadeIn 0.2s ease both;
-    }
-    body.day-mode .zoom-backdrop { background: rgba(150, 190, 230, 0.62); }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
-
-    .zoom-panel {
-      position: relative; z-index: 1;
-      width: min(94vw, 520px);
-      max-height: 94vh;
-      overflow: auto;
-      border-radius: calc(var(--radius) + 2px);
-      animation: zoomIn 0.26s cubic-bezier(0.2, 0.9, 0.2, 1) both;
-    }
-
-    .zoom-panel .gauge-card {
-      padding: 1rem 1rem 1.15rem;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-    }
+    .zoom-backdrop { position: absolute; inset: 0; background: rgba(1,3,9,.78); backdrop-filter: blur(5px); animation: fadeIn .2s ease both; }
+    body.day-mode .zoom-backdrop { background: rgba(150,190,230,.62); }
+    .zoom-panel { position: relative; z-index: 1; width: min(94vw, 520px); max-height: 94vh; overflow: auto; border-radius: 24px; animation: zoomIn .26s cubic-bezier(.2,.9,.2,1) both; }
+    .zoom-panel .gauge-card { padding: 1rem 1rem 1.15rem; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
     .zoom-panel .gauge-card .gauge { width: min(100%, 430px); }
-    /* readout sizes are intentionally not overridden here: they follow the dial
-       (cqw) and grow on their own inside the zoom stage */
-    .zoom-panel .gauge-card .card-head { font-size: 0.84rem; }
-    .zoom-panel .gauge-card .gauge-foot { font-size: 1rem; padding-top: 0.9rem; }
-    .zoom-panel .gauge-card .ud span { font-size: 0.66rem; }
-    .zoom-panel .gauge-card .ud b { font-size: 0.98rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .coin-logo, .coin-logo::after, .speed-line, .gauge-remained { animation: none; }
+    }
+  </style>
+
+  <!-- Component classes live in Tailwind's @apply layer, so markup stays utility-first -->
+  <style type="text/tailwindcss">
+    @layer components {
+      .container {
+        @apply relative z-[1] mx-auto flex w-full max-w-[1060px] flex-col gap-[0.85rem];
+        padding: calc(0.7rem + env(safe-area-inset-top)) calc(0.6rem + env(safe-area-inset-right)) calc(2.4rem + env(safe-area-inset-bottom)) calc(0.6rem + env(safe-area-inset-left));
+      }
+      .topbar { @apply relative flex min-h-[66px] items-start pl-[76px]; }
+      .controls {
+        @apply flex flex-wrap justify-center gap-2 rounded-[18px] border border-line p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,.06),0_10px_26px_rgba(0,0,0,.35)];
+        background: linear-gradient(180deg, rgba(30,41,59,.6), rgba(10,16,27,.6));
+      }
+      html.day-mode .controls { background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(226,234,245,.95)); box-shadow: inset 0 1px 0 #fff, 0 10px 24px rgba(30,60,110,.14); }
+      .ctrl-btn {
+        @apply relative inline-flex select-none items-center gap-2 rounded-[13px] border px-2.5 py-2 text-[0.78rem] font-extrabold tracking-[0.05em] text-ink;
+        border-color: rgba(140,170,220,.22);
+        background: linear-gradient(180deg, #1e2a3d, #0c1420);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.09), inset 0 -2px 4px rgba(0,0,0,.5), 0 4px 0 rgba(0,0,0,.35), 0 8px 14px rgba(0,0,0,.4);
+        transition: border-color .2s ease, box-shadow .25s ease, transform .12s ease;
+      }
+      html.day-mode .ctrl-btn {
+        background: linear-gradient(180deg, #ffffff, #d9e3f0);
+        border-color: rgba(20,45,90,.16);
+        box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(30,60,110,.12), 0 4px 0 rgba(30,60,110,.16), 0 8px 14px rgba(30,60,110,.14);
+      }
+      .ctrl-btn:active { @apply translate-y-[2px]; box-shadow: inset 0 2px 5px rgba(0,0,0,.45); }
+      .ctrl-btn.active-glow { border-color: rgba(34,211,238,.65); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 -2px 4px rgba(0,0,0,.5), 0 0 16px rgba(34,211,238,.35); }
+      .ctrl-btn:focus-visible { @apply outline outline-2 outline-offset-2 outline-acc; }
+      .ctrl-label { @apply inline-flex items-center gap-[0.32rem]; }
+      .ctrl-icon { @apply text-[0.9rem] leading-none; }
+
+      .hud {
+        @apply ml-auto flex max-w-[380px] flex-col gap-2 rounded-[18px] border border-line px-3.5 py-3 shadow-card backdrop-blur-md;
+        background: var(--panel);
+        animation: fadeUp .6s ease both;
+      }
+      .hud-user { @apply flex flex-wrap items-center gap-2; }
+      .hud-label { @apply text-[0.68rem] font-bold uppercase tracking-[0.14em] text-sub; }
+      .hud-email { @apply break-all font-dig text-[0.86rem] font-bold text-ink; direction: ltr; }
+      .hud-status { @apply flex flex-wrap items-center gap-[0.45rem]; }
+      .status-badge, .presence { @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-line px-2.5 py-1 text-[0.74rem] font-bold; }
+      .status-badge.badge-active { @apply text-ok; background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.4); }
+      .status-badge.badge-inactive { @apply text-bad; background: rgba(255,77,94,.12); border-color: rgba(255,77,94,.4); }
+      .status-badge.badge-pending { @apply text-warn; background: rgba(245,181,68,.12); border-color: rgba(245,181,68,.4); }
+      .presence { @apply text-sub; }
+      .presence.online { @apply text-ok; border-color: rgba(52,211,153,.35); }
+      .presence.offline { @apply text-sub; }
+      .presence-dot { @apply h-2 w-2 rounded-full; background: currentColor; }
+      .presence.online .presence-dot { box-shadow: 0 0 0 4px rgba(52,211,153,.18); animation: pulse 1.8s ease infinite; }
+
+      .alert {
+        @apply hidden items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-[clamp(0.7rem,2.8vw,0.85rem)] font-semibold text-[#ffd9de];
+        border: 1px solid rgba(255,77,94,.45);
+        background: linear-gradient(180deg, var(--gloss), transparent 55%), linear-gradient(90deg, rgba(255,77,94,.22), rgba(255,77,94,.08));
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 8px 18px rgba(0,0,0,.28);
+      }
+      html.day-mode .alert { color: #8a1120; }
+      .alert.show { @apply flex; animation: fadeUp .4s ease both; }
+      .alert-text { @apply overflow-hidden text-ellipsis whitespace-nowrap; }
+
+      /* the two dials stay side by side at every width (see the CI guard) */
+      .cluster { @apply grid items-start gap-2; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      @media (min-width: 760px) { .cluster { @apply gap-[0.8rem]; } }
+      @media (max-width: 560px) { .cluster { @apply gap-[0.4rem]; } }
+
+      .gauge-card {
+        @apply relative flex min-w-0 flex-col overflow-hidden rounded-card border border-line px-2 pb-3 pt-2.5;
+        container: gauge-card / inline-size;
+        border-top-color: var(--emboss-hi);
+        background: linear-gradient(180deg, var(--gloss), transparent 42%), var(--panel);
+        background-clip: padding-box;
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 10px var(--emboss-lo), var(--shadow);
+        backdrop-filter: blur(12px);
+        cursor: pointer;
+        animation: fadeUp .6s ease both;
+        transition: border-color .2s ease, box-shadow .25s ease;
+      }
+      @media (min-width: 760px) { .gauge-card { @apply px-[0.9rem] pb-4 pt-[0.9rem]; } }
+      .gauge-card::after {
+        content: ""; @apply pointer-events-none absolute inset-0;
+        background: radial-gradient(circle at 50% 18%, rgba(34,211,238,.14), transparent 62%);
+      }
+      .gauge-card:focus-visible { @apply outline outline-2 outline-offset-[3px] outline-acc; }
+      .gauge-card.zoomed { @apply cursor-zoom-out; border-color: rgba(34,211,238,.45); box-shadow: 0 0 0 1px rgba(34,211,238,.25), var(--shadow); }
+      /* once a card has been lifted into the stage its entry animation must not replay */
+      .gauge-card.anim-off { animation: none; }
+      .gauge-placeholder { @apply rounded-card border border-dashed border-line; background: rgba(127,160,210,.05); }
+      .zoom-hint {
+        @apply inline-flex h-[22px] w-[22px] items-center justify-center rounded-[7px] border border-line text-[0.72rem] leading-none text-sub;
+        background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+        box-shadow: inset 0 1px 0 var(--emboss-hi), 0 3px 7px rgba(0,0,0,.3);
+        transition: transform .25s ease, color .2s ease, border-color .2s ease;
+      }
+      .gauge-card.zoomed .zoom-hint { @apply rotate-180 border-acc text-acc; }
+      .card-head {
+        @apply relative z-[2] mb-1.5 flex items-center justify-between gap-1.5 font-extrabold uppercase leading-tight tracking-[0.03em] text-sub;
+        font-size: clamp(0.68rem, 3.4cqw, 0.86rem);
+      }
+      .gauge-card.zoomed .card-head { @apply text-[0.82rem]; }
+      .gauge-wrap { @apply relative grid flex-auto grid-cols-[minmax(0,1fr)] place-items-start justify-center; }
+      .gauge-foot {
+        @apply relative z-[2] mt-auto pt-1.5 text-center leading-[1.4] text-sub;
+        font-size: clamp(0.62rem, 3.1cqw, 0.8rem);
+      }
+      .gauge-foot strong { @apply font-bold text-ink; }
+      .gauge-card.zoomed .gauge-foot { @apply pt-[0.7rem] text-[0.92rem]; }
+
+      .clock-badge {
+        @apply flex flex-col items-center gap-1.5 rounded-[18px] border border-line px-1.5 pb-2 pt-1.5;
+        border-top-color: var(--emboss-hi);
+        background: linear-gradient(180deg, var(--gloss), transparent 45%), var(--dial);
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 8px var(--emboss-lo), 0 10px 24px rgba(0,0,0,.4);
+        animation: fadeUp .7s ease both;
+      }
+      .clock-info { @apply flex min-w-0 flex-col items-center gap-[0.12rem]; }
+      .clock-digital { @apply font-read text-base font-extrabold tracking-[0.02em]; font-variant-numeric: tabular-nums; }
+      .clock-date { @apply text-center text-[0.7rem] leading-[1.4] text-sub; }
+      .clock-event { @apply mt-[0.1rem] border-t border-dashed border-line pt-[0.2rem] text-center text-[0.6rem] leading-[1.35] text-warn; }
+      .clock-event[hidden] { @apply hidden; }
+
+      .usage-details { @apply relative z-[2] mt-2.5 grid gap-[0.45rem]; }
+      @media (max-width: 560px) { .usage-details { @apply gap-[0.35rem]; } }
+      .ud {
+        @apply flex min-w-0 flex-col gap-[0.12rem] rounded-xl border border-line px-1.5 py-1.5 text-center;
+        background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 5px 11px rgba(0,0,0,.26);
+      }
+      .ud span { @apply font-bold leading-[1.35] text-sub; font-size: clamp(0.64rem, 3.3cqw, 0.76rem); }
+      .ud b { @apply whitespace-nowrap font-read font-extrabold leading-[1.3] text-ink; font-size: clamp(0.72rem, 4.1cqw, 0.96rem); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+      .gauge-card.zoomed .ud span { @apply text-[0.66rem]; }
+      .gauge-card.zoomed .ud b { @apply text-[0.98rem]; }
+
+      .panel {
+        @apply rounded-card border border-line p-3.5 shadow-card backdrop-blur-md;
+        border-top-color: var(--emboss-hi);
+        background: linear-gradient(180deg, var(--gloss), transparent 34%), var(--panel);
+        background-clip: padding-box;
+        animation: fadeUp .6s ease both;
+      }
+      @media (min-width: 760px) { .panel { @apply p-4; } }
+      .panel-title { @apply flex items-center gap-2 text-[0.82rem] font-extrabold uppercase tracking-[0.06em] text-sub; }
+      .sub-link-box { @apply mt-3; }
+      .sub-link-text {
+        @apply flex-[1_1_240px] rounded-xl border border-line px-3 py-2.5 font-dig text-[0.78rem] text-ink;
+        background: rgba(0,0,0,.28);
+        box-shadow: inset 0 3px 8px rgba(0,0,0,.55), inset 0 -1px 0 var(--emboss-hi);
+        word-break: break-all; direction: ltr; text-align: left;
+      }
+      html.day-mode .sub-link-text { background: rgba(210,228,248,.9); box-shadow: inset 0 3px 8px rgba(30,80,140,.2), inset 0 -1px 0 #fff; }
+      .btn-group { @apply flex gap-[0.4rem]; }
+      .btn {
+        @apply inline-flex cursor-pointer items-center justify-center rounded-xl border border-line px-3.5 py-2.5 text-[0.8rem] font-bold text-ink shadow-key;
+        background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+        transition: transform .12s ease, border-color .2s ease, background .2s ease, box-shadow .12s ease;
+      }
+      .btn:active { @apply translate-y-[2px]; box-shadow: inset 0 2px 4px var(--emboss-lo); }
+      .btn-primary {
+        @apply border-transparent text-[#04121a];
+        background: linear-gradient(180deg, rgba(255,255,255,.42), transparent 55%), linear-gradient(135deg, var(--accent), var(--accent-2));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 0 rgba(0,0,0,.25), 0 3px 0 rgba(6,60,84,.55), 0 8px 16px rgba(0,0,0,.32);
+      }
+      .btn-primary:active { @apply translate-y-[2px]; box-shadow: inset 0 2px 5px rgba(0,0,0,.32), 0 1px 0 rgba(6,60,84,.5); }
+      .btn-success { background: linear-gradient(135deg, var(--ok), #22c55e); color: #04210f; }
+      @media (hover: hover) { .btn:hover { @apply -translate-y-px border-acc; } .app-card:hover { @apply -translate-y-0.5 border-acc; } }
+      .soft-hr { @apply my-4 h-0 border-0 border-t border-line; box-shadow: 0 1px 0 var(--emboss-hi); }
+      .config-header { @apply mt-1 flex flex-wrap items-center justify-between gap-2; }
+      #configList { @apply mt-3 flex flex-col gap-[0.55rem]; }
+      .config-item {
+        @apply flex flex-wrap items-center gap-2 rounded-xl border border-line px-2.5 py-2.5;
+        background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 5px 12px rgba(0,0,0,.28);
+      }
+      .config-text { @apply min-w-0 flex-[1_1_180px] font-dig text-[0.72rem] text-sub; word-break: break-all; direction: ltr; text-align: left; }
+      .config-actions { @apply flex flex-none gap-[0.4rem]; }
+      .badge-group { @apply flex gap-[0.3rem]; }
+      /* phones: each config stays on one line, the keys sit at its end */
+      @media (max-width: 560px) {
+        .config-item { @apply flex-nowrap gap-[0.35rem] px-[0.55rem] py-2; }
+        .config-item .badge-group { @apply hidden; }
+        .config-item .config-text { @apply flex-auto whitespace-nowrap text-[0.64rem]; overflow: hidden; text-overflow: ellipsis; word-break: normal; }
+        .config-item .config-actions { @apply flex-none gap-[0.3rem]; }
+        .config-item .config-actions .btn { @apply px-2 py-1.5 text-[0.66rem]; }
+      }
+      .badge {
+        @apply rounded-[6px] px-[0.45rem] py-[0.2rem] text-[0.6rem] font-extrabold tracking-[0.05em] text-[#06121c];
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.75), inset 0 -2px 0 rgba(0,0,0,.32), 0 3px 6px rgba(0,0,0,.32);
+      }
+      .btn-qr {
+        @apply cursor-pointer rounded-[9px] border border-line px-2.5 py-2 text-[0.74rem] font-bold text-ink;
+        background: linear-gradient(180deg, var(--gloss), transparent 60%), var(--panel-2);
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -2px 0 var(--emboss-lo), 0 3px 0 rgba(0,0,0,.26), 0 6px 12px rgba(0,0,0,.26);
+        transition: transform .12s ease, border-color .2s ease, box-shadow .12s ease;
+      }
+      .btn-qr:active { @apply translate-y-[2px]; box-shadow: inset 0 2px 4px var(--emboss-lo); }
+      .btn-qr:hover { @apply border-acc; }
+
+      .apps-head { @apply flex flex-wrap items-center justify-between gap-2.5; }
+      .os-chip { @apply inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[0.7rem] font-bold text-ink; background: linear-gradient(180deg, var(--gloss), transparent), var(--panel-2); }
+      .os-chip[hidden] { @apply hidden; }
+      .os-chip-icon { @apply text-[0.9rem] leading-none; }
+      .os-picker { @apply mt-3.5 flex flex-col gap-[0.4rem]; }
+      .os-picker-title { @apply flex items-center gap-1.5 text-[0.72rem] font-bold text-sub; }
+      .os-picker-title::before { content: ""; @apply h-[0.9rem] w-1 rounded-[2px]; background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+      .os-select-wrap { @apply relative block; }
+      .os-select {
+        @apply w-full cursor-pointer appearance-none rounded-[14px] border border-line py-3 pl-3.5 pr-9 text-[0.86rem] font-bold text-ink shadow-key;
+        background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      }
+      .os-select:focus-visible { @apply outline outline-2 outline-offset-2 outline-acc; }
+      .os-caret { @apply pointer-events-none absolute right-[0.85rem] top-1/2 -mt-1 h-2 w-2 rotate-45 border-b-2 border-r-2 border-acc2; }
+      .apps-lead { @apply mt-3.5 flex flex-wrap items-center gap-[0.45rem] font-bold leading-relaxed text-ink; font-size: clamp(0.72rem, 3vw, 0.84rem); }
+      .apps-lead .lead-os {
+        @apply inline-flex items-center gap-1 rounded-full px-[0.55rem] py-[0.18rem] font-extrabold text-[#04121a];
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 6px rgba(0,0,0,.3);
+      }
+      .apps-grid { @apply mt-3.5 grid gap-2.5; grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr)); }
+      .app-card {
+        @apply flex flex-col items-center gap-[0.45rem] rounded-2xl border border-line px-2 py-3 text-center;
+        background: linear-gradient(180deg, var(--gloss), transparent 55%), var(--panel-2);
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -3px 7px var(--emboss-lo), 0 8px 18px rgba(0,0,0,.34);
+        transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+      }
+      .app-card:active { @apply translate-y-px; }
+      .app-icon { @apply h-[46px] w-[46px] rounded-xl object-cover; background: rgba(255,255,255,.06); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 6px 14px rgba(0,0,0,.4); }
+      .app-name { @apply text-[0.78rem] font-bold; }
+      .app-download-btn {
+        @apply w-full cursor-pointer rounded-[10px] border border-transparent px-2 py-[0.42rem] text-[0.72rem] font-bold text-[#04121a];
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.28), 0 4px 0 rgba(6,60,84,.55), 0 8px 14px rgba(0,0,0,.32);
+        transition: transform .12s ease, box-shadow .12s ease, filter .15s ease;
+      }
+      .app-download-btn:hover { filter: brightness(1.08); }
+      .app-download-btn:active { @apply translate-y-[3px]; box-shadow: inset 0 2px 5px rgba(0,0,0,.35), 0 1px 0 rgba(6,60,84,.5); }
+      .download-note { @apply mt-3 text-center text-[0.72rem] text-sub; }
+
+      .qr-box {
+        @apply relative max-w-[min(92vw,380px)] rounded-[20px] border border-line p-5 text-center;
+        border-top-color: var(--emboss-hi);
+        background: linear-gradient(180deg, var(--gloss), transparent 40%), var(--panel);
+        box-shadow: inset 0 1px 0 var(--emboss-hi), inset 0 -4px 12px var(--emboss-lo), var(--shadow);
+      }
+      .qr-label { @apply mb-2.5 text-[0.82rem] font-bold; }
+      .qr-url { @apply mt-3 break-all font-dig text-[0.68rem] text-sub; direction: ltr; }
+    }
   </style>
 </head>
 
-<body class="day-mode">
+<body class="day-mode font-sans">
+  <!-- carbon-fibre texture + animated speed streaks -->
   <div class="background-effects" aria-hidden="true">
     <span class="speed-line"></span>
     <span class="speed-line"></span>
@@ -982,7 +657,7 @@
       <span class="alert-text" data-i18n="alertVol">کمتر از یک گیگ تا پایان اشتراک شما باقی مانده است لطفا جهت تمدید اقدام کنید</span>
     </div>
 
-    <!-- gauge cluster -->
+    <!-- gauge cluster: the two dials stay side by side, tap to read one closely -->
     <section class="cluster">
       <div class="gauge-card" id="timeCard" role="button" tabindex="0" aria-pressed="false"
            onclick="toggleGaugeZoom('time', event)" onkeydown="gaugeCardKey(event, 'time')">
@@ -1078,7 +753,7 @@
       <div class="panel-title" data-i18n="subLinkTitle">🔗 لینک سابسکریپشن</div>
 
       <div class="sub-link-box">
-        <div class="sub-link-wrapper">
+        <div class="flex flex-wrap items-center gap-2">
           <div class="sub-link-text" id="subLinkDisplay">{{ .subUrl }}</div>
           <div class="btn-group">
             <button class="btn btn-primary" type="button" data-copy="{{ .subUrl }}" onclick="copyFromButton(this)">
@@ -1156,7 +831,7 @@
     <div class="zoom-panel" id="zoomPanel"></div>
   </div>
 
-  <script>
+<script>
     /* ============================================================
        1. i18n dictionary
        ============================================================ */

@@ -8,6 +8,37 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS (Play CDN): the classic panels are utility-first -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            text1: "var(--text)",
+            muted1: "var(--muted)",
+            accent1: "var(--accent)",
+            accent12: "var(--accent-2)",
+            edge1: "var(--edge)",
+            hi1: "var(--hi)",
+            card1: "var(--card)",
+            good1: "var(--good)",
+            bad1: "var(--bad)",
+            bg12: "var(--bg-2)"
+          },
+          fontFamily: { sans: ["Vazirmatn", "Inter", "sans-serif"] }
+        }
+      }
+    };
+  </script>
+
+  <!-- ============================================================
+       Custom CSS: classic theme tokens + the pieces Tailwind cannot
+       express (the 3D hard-shadow buttons, the sweeping wave, the
+       coin logo). Everything else is utilities / @apply components.
+       ============================================================ -->
   <style>
     :root {
       --bg: #0a0705;
@@ -42,14 +73,13 @@
       --inset: inset 0 2px 0 #fff, inset 0 -4px 8px rgba(47,111,173,.18);
       --wave: rgba(47,111,173,.18);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+    * { box-sizing: border-box; }
+    html, body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; margin: 0; padding: 0; }
     body { padding: 1rem; overflow-x: hidden; transition: background .4s, color .4s; }
     body.lang-en { font-family: Inter, Vazirmatn, sans-serif; }
 
-    .wave {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
-    }
+    /* diagonal wave sweeping from the top-left corner */
+    .wave { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
     .wave::before {
       content: "";
       position: absolute; width: 180%; height: 80px;
@@ -62,89 +92,7 @@
       0% { transform: rotate(28deg) translate(-20%, -40%); }
       100% { transform: rotate(28deg) translate(40%, 220%); }
     }
-
-    .wrap {
-      position: relative; z-index: 1; max-width: 920px; margin: 0 auto;
-      /* fill the screen so a short panel never leaves a half-empty page */
-      display: flex; flex-direction: column; min-height: calc(100dvh - 2rem);
-    }
-
-    .btn3d {
-      display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
-      border: 2px solid var(--edge);
-      background: linear-gradient(180deg, var(--hi) 0%, var(--card) 55%, color-mix(in srgb, var(--edge) 35%, var(--card)) 100%);
-      color: var(--text); border-radius: 12px; padding: .4rem .7rem; cursor: pointer;
-      font-family: inherit; font-weight: 700;
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.28),
-        inset 0 -5px 10px rgba(0,0,0,.28),
-        0 3px 0 var(--edge),
-        5px 8px 0 color-mix(in srgb, var(--edge) 85%, #000),
-        8px 14px 18px rgba(0,0,0,.38);
-      transform: translateY(-3px);
-      transition: transform .12s, box-shadow .12s;
-    }
-    .btn3d:hover {
-      transform: translateY(-5px);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.32),
-        inset 0 -5px 10px rgba(0,0,0,.28),
-        0 3px 0 var(--edge),
-        7px 11px 0 color-mix(in srgb, var(--edge) 85%, #000),
-        10px 18px 22px rgba(0,0,0,.42);
-    }
-    .btn3d:active {
-      transform: translateY(2px);
-      box-shadow:
-        inset 0 4px 8px rgba(0,0,0,.35),
-        1px 2px 0 var(--edge),
-        2px 3px 6px rgba(0,0,0,.3);
-    }
-    .btn3d.active { outline: 2px solid var(--accent-2); }
-
-    .card3d {
-      background: linear-gradient(180deg, var(--hi), var(--card));
-      border: 2px solid var(--edge); border-radius: 18px;
-      box-shadow: var(--shadow), var(--inset);
-      padding: .9rem 1rem; margin-bottom: .9rem;
-    }
-
-    .top-row {
-      display: flex; align-items: center; justify-content: space-between; gap: .8rem;
-      flex-wrap: nowrap; overflow: visible; position: relative;
-    }
-    .top-btns { display: flex; gap: .45rem; flex-shrink: 0; }
-
-    .coin-logo {
-      flex: 0 0 60px;
-      width: 60px; height: 60px;
-      border-radius: 50%;
-      perspective: 160px;
-      transform-style: preserve-3d;
-      isolation: isolate;
-      will-change: transform;
-      animation: coin-spin 12s ease-in-out infinite;
-      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.28));
-      border: 2px solid var(--accent-2);
-      box-shadow: 0 6px 0 var(--edge), 0 0 18px color-mix(in srgb, var(--accent-2) 40%, transparent);
-      position: relative;
-    }
-    .coin-face {
-      position: absolute; inset: 0; border-radius: 50%;
-      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-    .coin-face.front { transform: translateZ(4px); }
-    .coin-face.back { transform: rotateY(180deg) translateZ(4px); }
-    .coin-logo::after {
-      content: "";
-      position: absolute; inset: 0; border-radius: 50%;
-      background: linear-gradient(120deg, rgba(255,255,255,.48), transparent 30%, transparent 58%, rgba(255,255,255,.08));
-      transform: translateZ(9px);
-      animation: coin-shine 12s ease-in-out infinite;
-      pointer-events: none; z-index: 1;
-    }
+    @keyframes pulse { 50% { opacity: .55; } }
     @keyframes coin-spin {
       0%, 100% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
       25% { transform: rotateX(8deg) rotateY(90deg) scale(1.04); }
@@ -155,145 +103,150 @@
       0%, 100% { opacity: .72; transform: translateZ(9px) rotate(0deg); }
       50% { opacity: .34; transform: translateZ(9px) rotate(18deg); }
     }
-    @media (max-width: 600px) {
-      .coin-logo { flex-basis: 48px; width: 48px; height: 48px; }
-    }
+    @media (prefers-reduced-motion: reduce) { .coin-logo, .coin-logo::after, .wave::before { animation: none; } }
 
-    .user-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
-    .user-name { font-weight: 800; font-size: 1.05rem; }
-    .pills { display: flex; gap: .4rem; flex-wrap: wrap; }
-    .pill {
-      border: 2px solid var(--edge); border-radius: 999px; padding: .15rem .6rem;
-      font-size: .78rem; font-weight: 700; box-shadow: 3px 4px 0 var(--edge);
+    /* ---------- spinning coin logo ---------- */
+    .coin-logo {
+      position: relative;
+      flex: 0 0 60px; width: 60px; height: 60px;
+      border-radius: 50%;
+      perspective: 160px; transform-style: preserve-3d; isolation: isolate;
+      will-change: transform;
+      animation: coin-spin 12s ease-in-out infinite;
+      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, .28));
+      border: 2px solid var(--accent-2);
+      box-shadow: 0 6px 0 var(--edge), 0 0 18px color-mix(in srgb, var(--accent-2) 40%, transparent);
     }
-    .pill.ok { background: color-mix(in srgb, var(--good) 22%, var(--card)); }
-    .pill.bad { background: color-mix(in srgb, var(--bad) 22%, var(--card)); }
-    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-inline-end: .25rem; }
-    .online .dot { background: var(--good); box-shadow: 0 0 8px var(--good); }
-    .offline .dot { background: var(--bad); }
+    .coin-face {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: url("https://s33.picofile.com/file/8483706450/jalaliiiii.jpg") center / cover no-repeat;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    }
+    .coin-face.front { transform: translateZ(4px); }
+    .coin-face.back { transform: rotateY(180deg) translateZ(4px); }
+    .coin-logo::after {
+      content: ""; position: absolute; inset: 0; border-radius: 50%;
+      background: linear-gradient(120deg, rgba(255,255,255,.48), transparent 30%, transparent 58%, rgba(255,255,255,.08));
+      transform: translateZ(9px);
+      animation: coin-shine 12s ease-in-out infinite;
+      pointer-events: none; z-index: 1;
+    }
+    @media (max-width: 600px) { .coin-logo { flex-basis: 48px; width: 48px; height: 48px; } }
 
-    .clock-box { text-align: center; }
-    .clock-time { font-size: 1.7rem; font-weight: 800; letter-spacing: .04em; }
-    .clock-date { color: var(--muted); margin-top: .15rem; }
-    .clock-event { margin-top: .35rem; font-weight: 700; color: var(--accent-2); }
-
-    .alert-box {
-      display: none; text-align: center; font-weight: 800; color: var(--bad);
-      padding: .8rem; border: 2px dashed var(--bad); border-radius: 14px;
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-    .alert-box.show { display: block; }
-    @keyframes pulse { 50% { opacity: .55; } }
-
-    .tabs {
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: .6rem; margin-bottom: .9rem;
-    }
-    /* the menu keeps the 3D look, but with one tidy set of shadows so a button
-       never spills over its neighbour and the whole row stays aligned */
-    .tab {
-      min-height: 46px; font-size: .82rem; line-height: 1.25; padding: .4rem .45rem;
-      text-align: center; transform: none;
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.3),
-        inset 0 -4px 8px rgba(0,0,0,.22),
-        0 3px 0 var(--edge),
-        3px 5px 0 color-mix(in srgb, var(--edge) 80%, #000);
-    }
-    .tab:hover {
-      transform: translateY(-2px);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.34),
-        inset 0 -4px 8px rgba(0,0,0,.22),
-        0 3px 0 var(--edge),
-        5px 8px 0 color-mix(in srgb, var(--edge) 80%, #000);
-    }
-    .tab:active {
-      transform: translateY(1px);
-      box-shadow: inset 0 4px 8px rgba(0,0,0,.35), 1px 2px 0 var(--edge);
-    }
-    .tab.on { background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: #fff; }
-    /* phones: two equal columns and the last tab spanning the width, so the menu
-       is a balanced block instead of a stretched, ragged pile of buttons */
+    /* the tab menu: five columns on desktops, two equal columns on phones with
+       the last tab spanning the width */
+    .tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .6rem; }
     @media (max-width: 620px) {
       .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .tab { font-size: .78rem; }
       .tab:last-child { grid-column: 1 / -1; }
     }
-
     /* the visible panel takes every pixel the menu left over */
-    .panels { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+    .panels { flex: 1 1 auto; }
     .panel { display: none; }
-    .panel.on {
-      display: flex; flex: 1 1 auto; flex-direction: column; justify-content: center;
-      min-height: 11rem;
-    }
+    .panel.on { display: flex; flex: 1 1 auto; flex-direction: column; justify-content: center; min-height: 11rem; }
+  </style>
 
-    .bar-track {
-      height: 22px; border-radius: 999px; border: 2px solid var(--edge);
-      background: var(--bg-2); overflow: hidden; box-shadow: inset 0 4px 8px rgba(0,0,0,.25);
-    }
-    .bar-fill { height: 100%; width: 0; border-radius: inherit; transition: width .5s ease; }
-    .bar-meta { display: flex; justify-content: space-between; margin: .5rem 0 .35rem; font-weight: 700; }
-    .expire { margin-top: .7rem; color: var(--muted); }
-    .blink-big {
-      text-align: center; font-size: 1.8rem; font-weight: 900; color: var(--bad);
-      margin-top: .8rem; animation: pulse .9s ease-in-out infinite;
-    }
+  <!-- Component classes: Tailwind's @apply. The script rewrites some of these
+       elements' class names wholesale (`pill ok`, `lead-os`, `panel on`), so each
+       one has to carry its full look on its own. -->
+  <style type="text/tailwindcss">
+    @layer components {
+      .wrap { @apply relative z-[1] mx-auto flex min-h-[calc(100dvh-2rem)] max-w-[920px] flex-col; }
 
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .5rem; }
-    .stat {
-      border: 2px solid var(--edge); border-radius: 12px; padding: .6rem;
-      box-shadow: 4px 5px 0 var(--edge); background: var(--card);
-    }
-    .stat b { display: block; font-size: 1.05rem; margin-top: .2rem; }
+      .card3d {
+        @apply mb-[0.9rem] rounded-[18px] border-2 border-edge1 px-4 py-[0.9rem];
+        background: linear-gradient(180deg, var(--hi), var(--card));
+        box-shadow: var(--shadow), var(--inset);
+      }
+      .top-row { @apply relative flex flex-nowrap items-center justify-between gap-[0.8rem]; }
+      .top-btns { @apply flex flex-shrink-0 gap-[0.45rem]; }
 
-    .row-line {
-      display: flex; align-items: center; gap: .4rem; margin-bottom: .55rem;
-    }
-    .link-text {
-      flex: 1; min-width: 0; direction: ltr; text-align: left;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      font-size: .78rem; padding: .4rem .5rem; border-radius: 10px;
-      border: 2px solid var(--edge); background: var(--bg-2);
-    }
-    .cfg-list { display: flex; flex-direction: column; gap: .45rem; }
-    .cfg-item .row-line { margin-bottom: 0; }
-    .sep-line {
-      height: 0; border: 0; border-top: 2px dashed var(--edge);
-      margin: .85rem 0 .75rem;
-    }
-    .sec-title { font-weight: 800; margin-bottom: .55rem; }
-    /* aligned with the section title instead of floating at the far edge */
-    .copy-all-row { display: flex; justify-content: flex-start; margin: 0 0 .55rem; }
+      .btn3d {
+        @apply inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border-2 border-edge1 px-[0.7rem] py-[0.4rem] font-bold text-text1;
+        background: linear-gradient(180deg, var(--hi) 0%, var(--card) 55%, color-mix(in srgb, var(--edge) 35%, var(--card)) 100%);
+        box-shadow: inset 0 2px 0 rgba(255,255,255,.28), inset 0 -5px 10px rgba(0,0,0,.28), 0 3px 0 var(--edge), 5px 8px 0 color-mix(in srgb, var(--edge) 85%, #000), 8px 14px 18px rgba(0,0,0,.38);
+        transform: translateY(-3px);
+        transition: transform .12s, box-shadow .12s;
+      }
+      .btn3d:hover { @apply -translate-y-[5px]; box-shadow: inset 0 2px 0 rgba(255,255,255,.32), inset 0 -5px 10px rgba(0,0,0,.28), 0 3px 0 var(--edge), 7px 11px 0 color-mix(in srgb, var(--edge) 85%, #000), 10px 18px 22px rgba(0,0,0,.42); }
+      .btn3d:active { @apply translate-y-[2px]; box-shadow: inset 0 4px 8px rgba(0,0,0,.35), 1px 2px 0 var(--edge), 2px 3px 6px rgba(0,0,0,.3); }
+      .btn3d.active { @apply outline outline-2 outline-accent12; }
 
-    .qr-overlay {
-      position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.86);
-      display: none; align-items: center; justify-content: center; cursor: pointer;
-    }
-    .qr-overlay.open { display: flex; }
-    .qr-overlay img {
-      width: min(86vw, 86vh); height: min(86vw, 86vh);
-      box-sizing: border-box;
-      padding: 2.2rem;
-      background: #fff;
-      object-fit: contain;
-      border-radius: 16px;
-    }
+      .user-row { @apply flex flex-wrap items-center justify-between gap-[0.6rem]; }
+      .user-name { @apply text-[1.05rem] font-extrabold; }
+      .pills { @apply flex flex-wrap gap-[0.4rem]; }
+      .pill {
+        @apply inline-block rounded-full border-2 border-edge1 px-[0.6rem] py-[0.15rem] text-[0.78rem] font-bold text-text1;
+        background: var(--card);
+        box-shadow: 3px 4px 0 var(--edge);
+      }
+      .pill.ok { background: color-mix(in srgb, var(--good) 22%, var(--card)); }
+      .pill.bad { background: color-mix(in srgb, var(--bad) 22%, var(--card)); }
+      .pill .dot { @apply me-1 inline-block h-2 w-2 rounded-full; }
+      .pill.online .dot { background: var(--good); box-shadow: 0 0 8px var(--good); }
+      .pill.offline .dot { background: var(--bad); }
 
-    .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .55rem; }
-    .app-card { text-align: center; padding: .6rem; }
-    .app-card img { width: 48px; height: 48px; border-radius: 12px; }
-    .app-name { display: block; font-size: .8rem; font-weight: 700; margin: .35rem 0; }
-    .os-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .7rem; }
-    .lead-os {
-      display: inline-block; margin-inline-start: .4rem; padding: .05rem .5rem;
-      border: 2px solid var(--edge); border-radius: 999px; background: var(--card);
-      font-size: .72rem; font-weight: 700; box-shadow: 2px 3px 0 var(--edge);
-    }
-    select.os {
-      font-family: inherit; font-weight: 700; padding: .35rem .5rem; border-radius: 10px;
-      border: 2px solid var(--edge); background: var(--card); color: var(--text);
+      .clock-box { @apply text-center; }
+      .clock-time { @apply text-[1.7rem] font-extrabold tracking-[0.04em]; }
+      .clock-date { @apply mt-[0.15rem] text-muted1; }
+      .clock-event { @apply mt-[0.35rem] font-bold text-accent12; }
+      .clock-event[hidden] { @apply hidden; }
+
+      .alert-box {
+        @apply hidden rounded-[14px] border-2 border-dashed border-bad1 p-[0.8rem] text-center font-extrabold text-bad1;
+        animation: pulse 1.2s ease-in-out infinite;
+      }
+      .alert-box.show { @apply block; }
+
+      .tabs { @apply mb-[0.9rem] grid gap-[0.6rem]; }
+      /* one tidy set of shadows so a tab never spills over its neighbour */
+      .tab {
+        @apply min-h-[46px] px-[0.45rem] py-[0.4rem] text-center text-[0.82rem] leading-[1.25];
+        transform: none;
+        box-shadow: inset 0 2px 0 rgba(255,255,255,.3), inset 0 -4px 8px rgba(0,0,0,.22), 0 3px 0 var(--edge), 3px 5px 0 color-mix(in srgb, var(--edge) 80%, #000);
+      }
+      .tab:hover { @apply -translate-y-0.5; box-shadow: inset 0 2px 0 rgba(255,255,255,.34), inset 0 -4px 8px rgba(0,0,0,.22), 0 3px 0 var(--edge), 5px 8px 0 color-mix(in srgb, var(--edge) 80%, #000); }
+      .tab:active { @apply translate-y-px; box-shadow: inset 0 4px 8px rgba(0,0,0,.35), 1px 2px 0 var(--edge); }
+      .tab.on { color: #fff; background: linear-gradient(180deg, var(--accent-2), var(--accent)); }
+
+      .bar-track { @apply h-[22px] overflow-hidden rounded-full border-2 border-edge1; background: var(--bg-2); box-shadow: inset 0 4px 8px rgba(0,0,0,.25); }
+      .bar-fill { @apply h-full w-0 rounded-[inherit]; transition: width .5s ease; }
+      .bar-meta { @apply my-[0.35rem] flex justify-between font-bold; }
+      .expire { @apply mt-[0.7rem] text-muted1; }
+      .blink-big { @apply mt-[0.8rem] text-center text-[1.8rem] font-black text-bad1; animation: pulse .9s ease-in-out infinite; }
+
+      .stat-grid { @apply grid gap-2; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+      .stat { @apply rounded-xl border-2 border-edge1 p-[0.6rem]; background: var(--card); box-shadow: 4px 5px 0 var(--edge); }
+      .stat b { @apply mt-[0.2rem] block text-[1.05rem]; }
+
+      .row-line { @apply mb-[0.55rem] flex items-center gap-[0.4rem]; }
+      .link-text {
+        @apply min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-[10px] border-2 border-edge1 px-2 py-[0.4rem] text-[0.78rem];
+        background: var(--bg-2); direction: ltr; text-align: left;
+      }
+      .cfg-list { @apply flex flex-col gap-[0.45rem]; }
+      .cfg-item .row-line { @apply mb-0; }
+      .sep-line { @apply my-3 h-0 border-0 border-t-2 border-dashed border-edge1; }
+      .sec-title { @apply mb-[0.55rem] font-extrabold; }
+      .copy-all-row { @apply mb-[0.55rem] flex justify-start; }
+
+      .qr-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.86); display: none; align-items: center; justify-content: center; cursor: pointer; }
+      .qr-overlay.open { display: flex; }
+      .qr-overlay img { width: min(86vw, 86vh); height: min(86vw, 86vh); box-sizing: border-box; padding: 2.2rem; background: #fff; object-fit: contain; border-radius: 16px; }
+
+      .apps-grid { @apply grid gap-[0.55rem]; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+      .app-card { @apply p-[0.6rem] text-center; }
+      .app-card img { @apply h-12 w-12 rounded-xl; }
+      .app-name { @apply my-[0.35rem] block text-[0.8rem] font-bold; }
+      .os-row { @apply mb-[0.7rem] flex flex-wrap items-center gap-2; }
+      .lead-os {
+        @apply ms-[0.4rem] inline-block rounded-full border-2 border-edge1 px-2 py-[0.05rem] text-[0.72rem] font-bold;
+        background: var(--card);
+        box-shadow: 2px 3px 0 var(--edge);
+      }
+      .lead-os[hidden] { @apply hidden; }
+      select.os { @apply rounded-[10px] border-2 border-edge1 px-2 py-[0.35rem] font-bold text-text1; background: var(--card); font-family: inherit; }
     }
   </style>
 </head>
@@ -334,11 +287,11 @@
       <button class="btn3d tab on" type="button" id="tab-time" role="tab" aria-selected="true" aria-controls="panel-time" data-tab="time" onclick="showTab('time')"><span data-i18n="tabTime">⏳ زمان باقیمانده</span></button>
       <button class="btn3d tab" type="button" id="tab-usage" role="tab" aria-selected="false" aria-controls="panel-usage" data-tab="usage" onclick="showTab('usage')"><span data-i18n="tabUsage">📊 جزییات مصرف</span></button>
       <button class="btn3d tab" type="button" id="tab-chart" role="tab" aria-selected="false" aria-controls="panel-chart" data-tab="chart" onclick="showTab('chart')"><span data-i18n="tabChart">📈 نمودار مصرف</span></button>
-      <button class="btn3d tab" type="button" id="tab-links" role="tab" aria-selected="false" aria-controls="panel-links" data-tab="links" onclick="showTab('links')"><span data-i18n="tabLinks">🔗 لینک ساب و کانفیگها</span></button>
+      <button class="btn3d tab" type="button" id="tab-links" role="tab" aria-selected="false" aria-controls="panel-links" data-tab="links" onclick="showTab('links')"><span data-i18n="tabLinks">🔗 لینک ساب و کانفیگ‌ها</span></button>
       <button class="btn3d tab" type="button" id="tab-apps" role="tab" aria-selected="false" aria-controls="panel-apps" data-tab="apps" onclick="showTab('apps')"><span data-i18n="tabApps">📱 نصب و راه اندازی</span></button>
     </div>
 
-    <div class="panels">
+    <div class="panels flex flex-col">
     <section class="card3d panel on" id="panel-time" role="tabpanel" aria-labelledby="tab-time">
       <div class="bar-meta">
         <span data-i18n="remainTime">⏳ زمان باقی‌مانده</span>
@@ -346,7 +299,7 @@
       </div>
       <div class="bar-track"><div class="bar-fill" id="timeBar"></div></div>
       <div class="expire"><span data-i18n="expireDate">📆 تاریخ انقضا:</span> <strong id="expireDateText">—</strong></div>
-      <div id="timeRemainLabel" style="margin-top:.5rem;font-weight:800"></div>
+      <div id="timeRemainLabel" class="mt-2 font-extrabold"></div>
     </section>
 
     <section class="card3d panel" id="panel-usage" role="tabpanel" aria-labelledby="tab-usage">
@@ -382,7 +335,7 @@
       </div>
       <div class="cfg-list">
         {{ range $index, $link := .links }}
-        <div class="cfg-item card3d" data-link="{{ $link }}" style="margin:0;padding:.55rem">
+        <div class="cfg-item card3d m-0 p-[0.55rem]" data-link="{{ $link }}">
           <div class="row-line">
             <div class="link-text">{{ $link }}</div>
             <button class="btn3d" type="button" data-copy="{{ $link }}" onclick="copyFromButton(this)"><span data-i18n="copy">📋 کپی</span></button>
@@ -403,7 +356,7 @@
         </select>
         <span id="osChip" hidden></span>
       </div>
-      <div id="appsLead" style="margin-bottom:.6rem;color:var(--muted)"></div>
+      <div id="appsLead" class="mb-[0.6rem] text-muted1"></div>
       <div class="apps-grid" id="appsGrid"></div>
     </section>
     </div>
@@ -413,7 +366,7 @@
     <img id="qrImg" alt="QR">
   </div>
 
-  <script>
+<script>
     const I18N = {
       fa: {
         dir: "rtl", title: "اشتراک کلاسیک",
