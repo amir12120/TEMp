@@ -1669,7 +1669,13 @@
         platforms: {
           android: "https://play.google.com/store/apps/details?id=com.happproxy",
           ios: "https://apps.apple.com/us/app/happ-proxy-utility/id6504287215",
-          windows: "https://www.happ.su/main"
+          windows: { repo: "Happ-proxy/happ-desktop", directAsset: () => "setup-Happ.x64.exe" }
+        },
+        directApk: {
+          repo: "Happ-proxy/happ-android",
+          arch: false,
+          includePrerelease: true,
+          fileName: () => "Happ.apk"
         }
       }
     ];
@@ -1757,11 +1763,9 @@
     }
 
     /* ---------- newest release at runtime (includePrerelease => newest, even pre-release) ---------- */
-    const directApkFallback = (repo, includePrerelease) =>
-      `https://github.com/${repo}/releases${includePrerelease ? "" : "/latest"}`;
-    const directApkCache = {};
+    const directApkCache = {};   // cacheKey -> resolved direct download URL
     const directApkPromises = {};
-    const versionCache = {};
+    const releaseCache = {};     // repo -> { list, at }
     const VERSION_CACHE_TTL = 10 * 60 * 1000;
 
     function stripV(version) {
@@ -1784,41 +1788,71 @@
       return String((release && release.tag_name) || "").trim();
     }
 
-    // includePrerelease=true => always the newest release, even one flagged pre-release.
-    // v2rayNG needs it: its 2.3.x tags are pre-releases, so /releases/latest returns 2.2.6.
-    async function resolveLatestVersion(repo, includePrerelease) {
-      const cacheKey = includePrerelease ? repo + "#prerelease" : repo;
-      const cached = versionCache[cacheKey];
-      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.info;
+    // every number in a tag, so "android-v4.0.0", "v5.9.2" and "2.4.0-P72" sort sanely
+    function versionScore(tag) {
+      const parts = String(tag || "").match(/\d+/g);
+      return parts ? parts.map(n => Number(n)) : [];
+    }
 
-      const latest = () => fetchJson(`https://api.github.com/repos/${repo}/releases/latest`)
-        .then(j => ({ ver: normalizeReleaseVersion(j.tag_name), tag: releaseTag(j) }));
-
-      const sources = includePrerelease
-        ? [
-            // the releases list is newest-first; the first published release may be a pre-release
-            () => fetchJson(`https://api.github.com/repos/${repo}/releases?per_page=10`)
-              .then(list => {
-                const first = (Array.isArray(list) ? list : []).find(x => x && !x.draft && releaseTag(x));
-                return first ? { ver: normalizeReleaseVersion(first.tag_name), tag: releaseTag(first) } : null;
-              }),
-            latest
-          ]
-        : [latest];
-
-      sources.push(() => fetchJson(`https://img.shields.io/github/v/release/${repo}.json`)
-        .then(j => ({ ver: normalizeReleaseVersion(j.value), tag: "" })));
-
-      for (const src of sources) {
-        try {
-          const info = await src();
-          if (info && /^[0-9]/.test(info.ver) && !/\s|\//.test(info.ver)) {
-            versionCache[cacheKey] = { info, at: Date.now() };
-            return info;
-          }
-        } catch (e) { /* next source */ }
+    function compareVersions(a, b) {
+      const left = versionScore(a);
+      const right = versionScore(b);
+      const len = Math.max(left.length, right.length);
+      for (let i = 0; i < len; i++) {
+        const x = left[i] || 0;
+        const y = right[i] || 0;
+        if (x !== y) return x - y;
       }
-      return null;
+      return 0;
+    }
+
+    // one request per repo per page visit; releases are cached for a few minutes
+    async function loadReleases(repo) {
+      const cached = releaseCache[repo];
+      if (cached && Date.now() - cached.at < VERSION_CACHE_TTL) return cached.list;
+      const list = await fetchJson(`https://api.github.com/repos/${repo}/releases?per_page=30`);
+      const safe = (Array.isArray(list) ? list : [])
+        .filter(r => r && !r.draft && Array.isArray(r.assets));
+      releaseCache[repo] = { list: safe, at: Date.now() };
+      return safe;
+    }
+
+    // newest published release (pre-releases included on purpose: "latest even if unstable")
+    async function resolveLatestVersion(repo) {
+      const list = await loadReleases(repo);
+      const sorted = list.slice().sort((a, b) => compareVersions(releaseTag(b), releaseTag(a)));
+      const first = sorted[0];
+      if (!first) return null;
+      return { ver: normalizeReleaseVersion(first.tag_name), tag: releaseTag(first) };
+    }
+
+    function isInstallerAsset(name, kind) {
+      const file = String(name || "");
+      if (!file || /\.(sig|asc|sha256|sha256sums|txt|blockmap|yml|yaml|json|aab)$/i.test(file)) return false;
+      if (kind === "apk") return /\.apk$/i.test(file);
+      return /\.(exe|msi)$/i.test(file);
+    }
+
+    // universal builds install on every phone; desktops prefer a setup installer for x64
+    function assetScore(name, kind) {
+      const file = String(name || "").toLowerCase();
+      let score = 0;
+      if (kind === "apk") {
+        if (/universal/.test(file)) score += 60;
+        else if (/arm64|aarch64/.test(file)) score += 50;
+        else if (/armeabi|armv7/.test(file)) score += 40;
+        else if (/x86_64|x64/.test(file)) score += 30;
+        else if (/x86/.test(file)) score += 20;
+        if (/fdroid/.test(file)) score += 2;
+        if (/beta|alpha|nightly/.test(file)) score -= 15;
+      } else {
+        if (/setup|install/.test(file)) score += 50;
+        if (/x64|x86_64|amd64/.test(file)) score += 20;
+        if (/\.msi$/.test(file)) score += 10;
+        if (/portable/.test(file)) score -= 20;
+        if (/arm64|aarch64/.test(file)) score -= 30;
+      }
+      return score;
     }
 
     function preferredApkArch() {
@@ -1827,39 +1861,61 @@
       return "arm64-v8a";
     }
 
-    async function getDirectApkUrl(app, fileOf) {
+    // pick the real file of the newest release that actually ships this platform's installer
+    async function getDirectApkUrl(app, target) {
       const cfg = app.directApk;
       if (!cfg) return null;
-      const cacheKey = fileOf ? app.id + ":" + fileOf("", "") : app.id;
+      const repo = (target && typeof target === "object" && target.repo) || cfg.repo;
+      const kind = (target && typeof target === "object") || typeof target === "function" ? "desktop" : "apk";
+      const cacheKey = repo + ":" + kind;
       if (directApkCache[cacheKey]) return directApkCache[cacheKey];
       if (directApkPromises[cacheKey]) return directApkPromises[cacheKey];
 
       directApkPromises[cacheKey] = (async () => {
-        const info = await resolveLatestVersion(cfg.repo, cfg.includePrerelease);
-        if (info) {
-          const arch = cfg.arch ? preferredApkArch() : null;
-          const file = fileOf ? fileOf(info.ver, arch) : cfg.fileName(info.ver, arch);
-          const tag = info.tag || (cfg.tagPrefix || "") + info.ver;
-          return `https://github.com/${cfg.repo}/releases/download/${tag}/${file}`;
-        }
-        return directApkFallback(cfg.repo, cfg.includePrerelease);
+        try {
+          const list = await loadReleases(repo);
+          const usable = list
+            .map(release => {
+              const assets = release.assets
+                .filter(asset => isInstallerAsset(asset.name, kind))
+                .sort((a, b) => assetScore(b.name, kind) - assetScore(a.name, kind));
+              return assets.length ? { release, asset: assets[0] } : null;
+            })
+            .filter(Boolean)
+            .sort((a, b) => compareVersions(releaseTag(b.release), releaseTag(a.release)));
+          if (usable.length) {
+            const best = usable[0];
+            return best.asset.browser_download_url ||
+              `https://github.com/${repo}/releases/download/${releaseTag(best.release)}/${best.asset.name}`;
+          }
+        } catch (e) { /* offline or rate-limited: fall through to the releases page */ }
+        return `https://github.com/${repo}/releases`;
       })();
 
       const result = await directApkPromises[cacheKey];
-      if (result.includes("/releases/download/")) directApkCache[cacheKey] = result;
+      if (result.indexOf("/releases/download/") !== -1) directApkCache[cacheKey] = result;
       delete directApkPromises[cacheKey];
       return result;
     }
 
-    function openDirectApk(app, fileOf) {
-      getDirectApkUrl(app, fileOf)
+    function openDirectApk(app, target) {
+      const cfg = app.directApk;
+      if (!cfg) return;
+      const repo = (target && typeof target === "object" && target.repo) || cfg.repo;
+      getDirectApkUrl(app, target)
         .then(url => window.open(url, "_blank", "noopener"))
-        .catch(() => window.open(directApkFallback(app.directApk.repo, app.directApk.includePrerelease), "_blank", "noopener"));
+        .catch(() => window.open(`https://github.com/${repo}/releases`, "_blank", "noopener"));
     }
 
+    // warm the links in the background so the first click never waits
     setTimeout(() => {
-      APPS.filter(a => a.directApk).forEach(a => getDirectApkUrl(a).catch(() => {}));
-    }, 1500);
+      const platform = detectOS();
+      APPS.filter(a => a.directApk).forEach(a => {
+        getDirectApkUrl(a).catch(() => {});
+        const target = platform && a.platforms ? a.platforms[platform] : null;
+        if (target && typeof target === "object") getDirectApkUrl(a, target).catch(() => {});
+      });
+    }, 1200);
 
     function startDownload(appId, platform) {
       const app = APPS.find(a => a.id === appId);
@@ -1873,7 +1929,7 @@
       const target = app.platforms[platform];
 
       if (target && typeof target === "object" && app.directApk) {
-        openDirectApk(app, target.directAsset);
+        openDirectApk(app, target);
         return;
       }
 
